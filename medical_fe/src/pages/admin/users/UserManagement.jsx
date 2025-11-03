@@ -90,6 +90,12 @@ const UserManagement = () => {
         // }
         handleClose();
     };
+    /////////////////////CALL API SERVICE HERE /////////////////////
+    // import userService from "../services/userService";
+
+    // useEffect(() => {
+    //   userService.getAll().then(setUsers);
+    // }, []);
 
     // ✅ Xóa user
     const handleDelete = (user_id) => {
