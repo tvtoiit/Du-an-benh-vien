@@ -4,7 +4,6 @@ import com.nhom2.qnu.config.filter.JwtAuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -63,11 +62,12 @@ public class SecurityConfig {
         http.cors();
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(UN_SECURED_URLs).permitAll()
-                .antMatchers(HttpMethod.GET, HTTP_METHOD_GET_UN_SECURED_URLs).permitAll()
-                .antMatchers(HttpMethod.POST, HTTP_METHOD_POST_UN_SECURED_URLs).permitAll()
-                .antMatchers(HttpMethod.PUT, HTTP_METHOD_PUT_UN_SECURED_URLs).permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/**").permitAll()
+                // .antMatchers(UN_SECURED_URLs).permitAll()
+                // .antMatchers(HttpMethod.GET, HTTP_METHOD_GET_UN_SECURED_URLs).permitAll()
+                // .antMatchers(HttpMethod.POST, HTTP_METHOD_POST_UN_SECURED_URLs).permitAll()
+                // .antMatchers(HttpMethod.PUT, HTTP_METHOD_PUT_UN_SECURED_URLs).permitAll()
+                // .anyRequest().authenticated()
                 .and()
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthTokenFilter(), UsernamePasswordAuthenticationFilter.class)

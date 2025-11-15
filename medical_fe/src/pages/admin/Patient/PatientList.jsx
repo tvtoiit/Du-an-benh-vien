@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
 import {
     Box,
@@ -14,47 +15,59 @@ import {
     Stack,
     IconButton,
     Tooltip,
+    CircularProgress,
 } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
-
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RegisterModal from "../../user/RegisterModal";
 
 const PatientList = () => {
-    const [patients, setPatients] = useState([
-        { id: 1, name: "Nguyễn Văn A", age: 30, gender: "Nam", address: "TP.HCM" },
-        { id: 2, name: "Trần Thị B", age: 27, gender: "Nữ", address: "Hà Nội" },
-    ]);
-
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            try {
+                const response = await parentService.getAll();
+                setPatients(response);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPatients();
+    }, []);
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
 
-    // 🔹 Các hàm xử lý hành động
     const handleView = (patient) => {
         alert(`Xem chi tiết bệnh nhân: ${patient.name}`);
     };
 
+    const calculateAge = (dob) => {
+        const birthDate = new Date(dob);
+        const diff = new Date() - birthDate;
+        return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+    };
+
     const handleEdit = (patient) => {
-        alert(`Chỉnh sửa thông tin: ${patient.name}`);
+        // Chỉnh sủa bệnh nhân
     };
 
     const handleDelete = (patientId) => {
-        if (window.confirm("Bạn có chắc muốn xóa bệnh nhân này không?")) {
-            setPatients(patients.filter((p) => p.id !== patientId));
-        }
+        // Xóa bệnh nhân
     };
+
+    if (loading) return <CircularProgress sx={{ m: 4 }} />;
+    if (error) return <Typography color="error">{error}</Typography>;
 
     return (
         <Box sx={{ p: 4 }}>
-            <Typography variant="h5" fontWeight="bold" mb={3}>
-                Danh sách bệnh nhân
-            </Typography>
-
-            {/* Thanh công cụ */}
             <Paper sx={{ p: 2, mb: 3, display: "flex", justifyContent: "space-between" }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     Quản lý danh sách bệnh nhân
@@ -69,7 +82,6 @@ const PatientList = () => {
                 </Button>
             </Paper>
 
-            {/* Bảng dữ liệu bệnh nhân */}
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -77,18 +89,16 @@ const PatientList = () => {
                             <TableCell>Mã BN</TableCell>
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Tuổi</TableCell>
-                            <TableCell>Giới tính</TableCell>
                             <TableCell>Địa chỉ</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {patients.map((p) => (
-                            <TableRow key={p.id} hover>
-                                <TableCell>{p.id}</TableCell>
-                                <TableCell>{p.name}</TableCell>
-                                <TableCell>{p.age}</TableCell>
-                                <TableCell>{p.gender}</TableCell>
+                            <TableRow key={p.patientId} hover>
+                                <TableCell>{p.patientId}</TableCell>
+                                <TableCell>{p.fullName}</TableCell>
+                                <TableCell>{calculateAge(p.dateOfBirth)}</TableCell>
                                 <TableCell>{p.address}</TableCell>
                                 <TableCell align="center">
                                     <Stack direction="row" spacing={1} justifyContent="center">
@@ -103,7 +113,7 @@ const PatientList = () => {
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title="Xóa bệnh nhân">
-                                            <IconButton color="error" onClick={() => handleDelete(p.id)}>
+                                            <IconButton color="error" onClick={() => handleDelete(p.patientId)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>

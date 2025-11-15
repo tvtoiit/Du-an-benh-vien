@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.payload.response.RoleResponse;
-import com.nhom2.qnu.repository.Rolerepository;
+import com.nhom2.qnu.repository.RoleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class RoleServicesImp implements RoleServices {
     @Autowired
-    private Rolerepository roleRepositories;
+    private RoleRepository roleRepositories;
 
     @Override
     public List<RoleResponse> getRoles() {

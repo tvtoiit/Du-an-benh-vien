@@ -5,22 +5,24 @@ import PrivateRoute from "./components/PrivateRoute";
 // pages
 import Home from "./pages/user/Home";
 import MedicalDashboard from "./pages/admin/MedicalDashboard";
-import Login from "./pages/user/Login";
+import Login from "./pages/user/login/Login";
+import Register from "./pages/user/register/Register";
 
 function App() {
   return (
     <Routes>
-      {/* Public route */}
       <Route path="/" element={
-        // <Home />
+        <Home />
+      } />
+      <Route path="/admin" element={
         <MedicalDashboard />
       } />
       <Route path="/login" element={
         <Login />
       } />
-
-      {/* User routes */}
-
+      <Route path="/register" element={
+        <Register />
+      } />
     </Routes>
   );
 }

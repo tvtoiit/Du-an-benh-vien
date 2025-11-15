@@ -12,7 +12,7 @@ import com.nhom2.qnu.payload.request.login_signup.SignupRequest;
 import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.JwtResponse;
 import com.nhom2.qnu.repository.AccountRepository;
-import com.nhom2.qnu.repository.Rolerepository;
+import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.repository.TokenRepository;
 import com.nhom2.qnu.repository.UserRepository;
 import com.nhom2.qnu.service.AuthService;
@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private TokenRepository tokenRepository;
 
     @Autowired
-    private Rolerepository roleRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

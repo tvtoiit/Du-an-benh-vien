@@ -17,7 +17,6 @@ import {
     DialogActions,
 } from "@mui/material";
 import { Delete, Edit, Add } from "@mui/icons-material";
-// import { v4 as uuidv4 } from "uuid";
 
 const UserManagement = () => {
     // Fake data ban đầu
@@ -97,11 +96,8 @@ const UserManagement = () => {
     //   userService.getAll().then(setUsers);
     // }, []);
 
-    // ✅ Xóa user
     const handleDelete = (user_id) => {
-        if (window.confirm("Bạn có chắc muốn xóa người dùng này không?")) {
-            setUsers((prev) => prev.filter((u) => u.user_id !== user_id));
-        }
+
     };
 
     return (

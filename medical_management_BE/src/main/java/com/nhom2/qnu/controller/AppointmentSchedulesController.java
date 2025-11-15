@@ -1,9 +1,6 @@
 package com.nhom2.qnu.controller;
 
-import com.nhom2.qnu.model.AppointmentSchedules;
 import com.nhom2.qnu.payload.request.AppointmentSchedulesRequest;
-import com.nhom2.qnu.payload.request.DoctorRequest;
-import com.nhom2.qnu.payload.request.EHealthRecordsRequest;
 import com.nhom2.qnu.payload.response.AppointmentSchedulesResponse;
 import com.nhom2.qnu.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;

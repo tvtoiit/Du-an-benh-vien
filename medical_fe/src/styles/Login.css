@@ -1,0 +1,154 @@
+/* Background full page */
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card */
+.login-card {
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    width: 350px;
+    max-width: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.login-card h2 {
+    margin-bottom: 25px;
+    color: #0072ff;
+}
+
+/* Form */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: border 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0072ff;
+}
+
+/* Login Button */
+.btn-login {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    border-radius: 6px;
+    background-color: #0072ff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-login:hover {
+    background-color: #0056b3;
+}
+
+/* Footer links */
+.login-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.register-link,
+.forgot-link {
+    cursor: pointer;
+    color: #0072ff;
+    transition: color 0.2s;
+}
+
+.register-link:hover,
+.forgot-link:hover {
+    color: #0056b3;
+}
+
+.login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.login-card {
+    background: #fff;
+    padding: 30px 35px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* nút close */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* style link đăng kí */
+.go-register {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.go-register a {
+    color: #0072ff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.go-register a:hover {
+    text-decoration: underline;
+}
