@@ -5,16 +5,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentDetailsRequest {
+public class AdvancePaymentRequest {
     @NotBlank(message = "patientId is required")
     private String patientId;
 
-    // prescriptionId có thể null nếu bạn muốn chỉ tính dịch vụ của bệnh nhân
-    private String prescriptionId;
+    @NotNull(message = "amount is required")
+    @Min(value = 0, message = "amount must be >= 0")
+    private Double amount;
+
+    private String note;
+    private String createdBy;
 }

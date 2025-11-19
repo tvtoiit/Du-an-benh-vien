@@ -36,4 +36,5 @@ public class PaymentDetails implements Serializable {
 
     @Column(name = "total_amount", nullable = false, length = 18)
     private BigDecimal total_amount;
+
 }
