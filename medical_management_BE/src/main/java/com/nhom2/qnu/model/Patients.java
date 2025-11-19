@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -31,27 +33,34 @@ public class Patients implements Serializable {
     @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
 
+    @Column(name = "gender", length = 10, nullable = true)
+    private String gender;
+
     @Column(name = "other_info", nullable = false)
     private String otherInfo;
 
-    @OneToMany(mappedBy = "patients")
-    public Set<AppointmentSchedules> appointmentSchedules = new HashSet<>();
+    @OneToMany(mappedBy = "patients", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<AppointmentSchedules> appointmentSchedules = new HashSet<>();
 
-    @OneToMany(mappedBy = "patient")
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<PrescriptionHistory> prescriptionHistory = new HashSet<>();
 
-    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private EHealthRecords eHealthRecords;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "patient")
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<PaymentDetails> paymentDetails = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(name = "tbl_patient_service", joinColumns = @JoinColumn(name = "patient_id", referencedColumnName = "patient_id"), inverseJoinColumns = @JoinColumn(name = "service_id", referencedColumnName = "service_id"))
+    @JsonIgnore
     private Set<Services> services = new HashSet<>();
-
 }

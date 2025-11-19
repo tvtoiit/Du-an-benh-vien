@@ -22,6 +22,11 @@ import java.util.List;
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
+    // Định nghĩa các status dùng chung
+    private static final String STATUS_WAITING = "waiting for censorship";
+    private static final String STATUS_FAILED = "Failed";
+    private static final String STATUS_SUCCESS = "Successful";
+
     @Autowired
     private AppointmentRepository appointmentRepository;
 
@@ -36,6 +41,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Patients patients = patientsRepository.findByPatientId(patientId)
                 .orElseThrow(() -> new DataNotFoundException("Patients does not exist"));
+
         List<AppointmentSchedules> appointmentSchedules = appointmentRepository.findAllByPatients(patients);
         List<AppointmentSchedulesResponse> responses = new ArrayList<>();
         for (AppointmentSchedules item : appointmentSchedules) {
@@ -49,6 +55,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DataNotFoundException("Doctor does not exist"));
+
         List<AppointmentSchedules> appointmentSchedules = appointmentRepository.findAllByDoctor(doctor);
         List<AppointmentSchedulesResponse> responses = new ArrayList<>();
         for (AppointmentSchedules item : appointmentSchedules) {
@@ -57,9 +64,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         return responses;
     }
 
+    /**
+     * BƯỚC 0 – DS bệnh nhân chờ khám
+     * Chỉ trả về các lịch có status = waiting for censorship
+     */
     @Override
     public List<AppointmentSchedulesResponse> getAllAppointmentSchedules() {
-        List<AppointmentSchedules> appointmentSchedules = appointmentRepository.findAll();
+        // CHỈ lấy các appointment đang ở trạng thái chờ khám
+        List<AppointmentSchedules> appointmentSchedules = appointmentRepository.findAllByStatus(STATUS_WAITING);
+
         List<AppointmentSchedulesResponse> responses = new ArrayList<>();
         for (AppointmentSchedules item : appointmentSchedules) {
             responses.add(setupResponse(item));
@@ -72,45 +85,58 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new DataNotFoundException("Doctor does not exist"));
-        Patients patients = patientsRepository.findByPatientId(request.getPatientsId())
-                .orElseThrow(() -> new DataNotFoundException("Doctor does not exist"));
 
+        Patients patients = patientsRepository.findByPatientId(request.getPatientId())
+                .orElseThrow(() -> new DataNotFoundException("Patient does not exist"));
+
+        // Kiểm tra lịch khám đã tồn tại chưa (trùng giờ với cùng bệnh nhân)
         if (checkAppointmentExists(patients, request.getAppointmentDatetime())) {
             return null;
         }
+
+        // Tạo đối tượng mới
         AppointmentSchedules appointmentSchedules = new AppointmentSchedules();
         appointmentSchedules.setAppointmentDatetime(request.getAppointmentDatetime());
         appointmentSchedules.setDoctor(doctor);
         appointmentSchedules.setPatients(patients);
-        appointmentSchedules.setStatus("waiting for censorship");
 
+        // set status mặc định là đang chờ khám
+        appointmentSchedules.setStatus(STATUS_WAITING);
+
+        // Set thêm 2 field mới
+        appointmentSchedules.setRoom(request.getRoom());
+        appointmentSchedules.setNote(request.getNote());
+
+        // Lưu vào DB
         AppointmentSchedules newAppointmentSchedules = appointmentRepository.save(appointmentSchedules);
 
         return setupResponse(newAppointmentSchedules);
     }
 
     @Override
-    public AppointmentSchedulesResponse updateAppointmentSchedules(AppointmentSchedulesRequest request,
+    public AppointmentSchedulesResponse updateAppointmentSchedules(
+            AppointmentSchedulesRequest request,
             String appointmentSchedulesId) {
 
         AppointmentSchedules appointmentSchedules = appointmentRepository.findById(appointmentSchedulesId)
                 .orElseThrow(() -> new DataNotFoundException("Appointment Schedules does not exist"));
+
+        // Kiểm tra trùng lịch cho bệnh nhân
         if (checkAppointmentExists(appointmentSchedules.getPatients(), request.getAppointmentDatetime())) {
             return null;
         }
 
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new DataNotFoundException("Doctor does not exist"));
-        Patients patients = patientsRepository.findByPatientId(request.getPatientsId())
-                .orElseThrow(() -> new DataNotFoundException("Doctor does not exist"));
+
+        Patients patients = patientsRepository.findByPatientId(request.getPatientId())
+                .orElseThrow(() -> new DataNotFoundException("Patient does not exist"));
 
         appointmentSchedules.setAppointmentDatetime(request.getAppointmentDatetime());
         appointmentSchedules.setDoctor(doctor);
         appointmentSchedules.setPatients(patients);
-
-        if (checkAppointmentExists(appointmentSchedules.getPatients(), request.getAppointmentDatetime())) {
-            return null;
-        }
+        appointmentSchedules.setRoom(request.getRoom());
+        appointmentSchedules.setNote(request.getNote());
 
         AppointmentSchedules updateAppointmentSchedules = appointmentRepository.save(appointmentSchedules);
 
@@ -118,28 +144,35 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentSchedulesResponse updateStatusFailed(String AppointmentSchedulesId) {
+    public AppointmentSchedulesResponse updateStatusFailed(String appointmentSchedulesId) {
 
-        AppointmentSchedules appointmentSchedules = appointmentRepository.findById(AppointmentSchedulesId)
+        AppointmentSchedules appointmentSchedules = appointmentRepository.findById(appointmentSchedulesId)
                 .orElseThrow(() -> new DataNotFoundException("Appointment Schedules does not exist"));
-        appointmentSchedules.setStatus("Failed");
+
+        appointmentSchedules.setStatus(STATUS_FAILED);
         AppointmentSchedules updateAppointmentSchedules = appointmentRepository.save(appointmentSchedules);
 
         return setupResponse(updateAppointmentSchedules);
     }
 
     @Override
-    public AppointmentSchedulesResponse updateStatusSuccessful(String AppointmentSchedulesId) {
-        AppointmentSchedules appointmentSchedules = appointmentRepository.findById(AppointmentSchedulesId)
+    public AppointmentSchedulesResponse updateStatusSuccessful(String appointmentSchedulesId) {
+
+        AppointmentSchedules appointmentSchedules = appointmentRepository.findById(appointmentSchedulesId)
                 .orElseThrow(() -> new DataNotFoundException("Appointment Schedules does not exist"));
+
+        // Optional: nếu muốn check bác sĩ không bị trùng giờ:
         if (checkAppointmentExists(appointmentSchedules.getDoctor(), appointmentSchedules.getAppointmentDatetime())) {
             return null;
         }
-        appointmentSchedules.setStatus("Successful");
+
+        appointmentSchedules.setStatus(STATUS_SUCCESS);
         AppointmentSchedules updateAppointmentSchedules = appointmentRepository.save(appointmentSchedules);
 
         return setupResponse(updateAppointmentSchedules);
     }
+
+    // ================== HÀM SUPPORT ==================
 
     public boolean checkAppointmentExists(Patients patient, LocalDateTime appointmentDatetime) {
         return appointmentRepository.existsByPatientsAndAppointmentDatetime(patient, appointmentDatetime);
@@ -154,6 +187,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         AppointmentSchedulesResponse appointmentSchedulesResponse = new AppointmentSchedulesResponse();
         appointmentSchedulesResponse.setAppointmentScheduleId(item.getAppointmentScheduleId());
 
+        // Patient info
         PatientResponse patientResponse = new PatientResponse();
         patientResponse.setPatientId(item.getPatients().getPatientId());
         patientResponse.setFullName(item.getPatients().getUser().getFullName());
@@ -165,10 +199,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentSchedulesResponse.setPatient(patientResponse);
 
+        // Doctor info
         DoctorResponse doctorResponse = new DoctorResponse();
         doctorResponse.setDoctorId(item.getDoctor().getDoctorId());
         doctorResponse.setDoctorName(item.getDoctor().getUser().getFullName());
-        doctorResponse.setSpecialization(item.getDoctor().getSpecialization());
+        doctorResponse.setExperience(item.getDoctor().getExperience());
         doctorResponse.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
         doctorResponse.setEmail(item.getDoctor().getUser().getEmail());
 

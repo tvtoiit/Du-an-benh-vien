@@ -15,11 +15,18 @@ import java.util.List;
 public interface AppointmentRepository extends JpaRepository<AppointmentSchedules, String> {
 
     List<AppointmentSchedules> findAllByPatients(Patients patients);
+
     List<AppointmentSchedules> findAllByDoctor(Doctor doctor);
 
+    List<AppointmentSchedules> findAllByStatus(String status);
+
+    List<AppointmentSchedules> findAllByDoctorAndStatus(Doctor doctor, String status);
+
     @Query("SELECT COUNT(a) > 0 FROM AppointmentSchedules a WHERE a.patients = :patient AND a.appointmentDatetime = :appointmentDatetime")
-    boolean existsByPatientsAndAppointmentDatetime(@Param("patient") Patients patient, @Param("appointmentDatetime") LocalDateTime appointmentDatetime);
+    boolean existsByPatientsAndAppointmentDatetime(@Param("patient") Patients patient,
+            @Param("appointmentDatetime") LocalDateTime appointmentDatetime);
 
     @Query("SELECT COUNT(a) > 0 FROM AppointmentSchedules a WHERE a.doctor = :doctor AND a.appointmentDatetime = :appointmentDatetime AND a.status ='Successful'")
-    boolean existsByDoctorAndAppointmentDatetime(@Param("doctor") Doctor doctor, @Param("appointmentDatetime") LocalDateTime appointmentDatetime);
+    boolean existsByDoctorAndAppointmentDatetime(@Param("doctor") Doctor doctor,
+            @Param("appointmentDatetime") LocalDateTime appointmentDatetime);
 }

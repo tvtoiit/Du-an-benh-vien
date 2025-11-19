@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nhom2.qnu.payload.request.PatientRequest;
 import com.nhom2.qnu.payload.response.PatientResponse;
+import com.nhom2.qnu.payload.response.PatientServiceResponse;
 import com.nhom2.qnu.service.PatientsService;
 
 @RestController
@@ -49,5 +50,11 @@ public class PatientsController {
   @GetMapping("/get_All")
   public List<PatientResponse> getAllPatients() {
     return patientsService.findAllPatients();
+  }
+
+  @GetMapping("/services")
+  public ResponseEntity<List<PatientServiceResponse>> getAllPatientsWithServices() {
+    List<PatientServiceResponse> response = patientsService.getAllPatientsWithServices();
+    return ResponseEntity.ok(response);
   }
 }

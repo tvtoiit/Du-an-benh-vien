@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.nhom2.qnu.model.Account;
+import com.nhom2.qnu.model.Doctor;
 import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.RequestUpdateUser;
 import com.nhom2.qnu.payload.request.UserAdminRequest;
 import com.nhom2.qnu.payload.response.UserAdminResponse;
 import com.nhom2.qnu.repository.AccountRepository;
+import com.nhom2.qnu.repository.DoctorRepository;
 import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.repository.UserRepositories;
 import com.nhom2.qnu.service.UserAdminService;
@@ -34,6 +36,9 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Autowired
   private JwtProviderUtils jwtProviderUtils;
+
+  @Autowired
+  private DoctorRepository doctorRepository;
 
   @Override
   public ResponseEntity<Object> getAllUSerAdmin() {
@@ -63,11 +68,25 @@ public class UserAdminServiceImpl implements UserAdminService {
   @Override
   public ResponseEntity<Object> getUSerAdminByToken(String token) {
     User user = getUserOfSocket(token);
+
+    // Mặc định không có doctorId
+    String doctorId = null;
+
+    // Nếu role là DOCTOR thì mới cố lấy doctor
+    String roleName = user.getAccount().getRole().getName();
+    if ("ROLE_BACSI".equalsIgnoreCase(roleName)) {
+      doctorId = doctorRepository
+          .findByUser_UserId(user.getUserId())
+          .map(Doctor::getDoctorId)
+          .orElse(null);
+    }
+
     UserAdminResponse response = UserAdminResponse
         .builder()
         .userId(user.getUserId())
         .accountId(user.getAccount().getAccountId())
-        .role(user.getAccount().getRole().getName())
+        .role(roleName)
+        .doctorId(doctorId) // <- THÊM DÒNG NÀY
         .address(user.getAddress())
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())
@@ -76,6 +95,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         .status(user.getStatus())
         .phoneNumber(user.getPhoneNumber())
         .build();
+
     return ResponseEntity.ok().body(response);
   }
 

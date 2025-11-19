@@ -1,16 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-    Box,
-    Typography,
-    TextField,
-    Paper,
-    Grid,
-    Button,
-    MenuItem,
-    Divider,
+    Box, Typography, TextField, Paper, Grid, Button,
+    MenuItem, Divider
 } from "@mui/material";
 
-const CanLamSangForm = () => {
+import serviceResult from "../../../services/serviceResult";
+
+const CanLamSangForm = ({ patient, onBack }) => {
     const [selectedTest, setSelectedTest] = useState("");
     const [formData, setFormData] = useState({
         result: "",
@@ -19,13 +15,16 @@ const CanLamSangForm = () => {
         file: null,
     });
 
-    const labTests = [
-        "Xét nghiệm máu",
-        "Xét nghiệm nước tiểu",
-        "Siêu âm ổ bụng",
-        "X-quang phổi",
-        "Điện tâm đồ",
-    ];
+    // Chọn dịch vụ mặc định khi load form
+    // useEffect(() => {
+    //     if (patient?.services?.length > 0) {
+    //         setSelectedTest(patient.services[0].serviceId);
+    //     }
+    // }, [patient]);
+
+
+    // Lấy danh sách dịch vụ bác sĩ chỉ định
+    const labTests = patient.services;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -36,58 +35,82 @@ const CanLamSangForm = () => {
         setFormData({ ...formData, file: e.target.files[0] });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert("Đã lưu kết quả cho: " + selectedTest);
-        console.log(formData);
+
+        const selectedService = labTests.find(s => s.serviceId === selectedTest);
+        if (!selectedService) return alert("Chọn dịch vụ");
+
+        const data = new FormData();
+        data.append("patientId", patient.patientId);
+        data.append("serviceId", selectedService.serviceId);
+        data.append("doctorId", patient.doctorId || "");
+        data.append("appointmentScheduleId", patient.appointmentScheduleId || "");
+        data.append("medicalHistoryId", patient.medicalHistoryId || "");
+        data.append("resultData", formData.result);
+        data.append("note", formData.note);
+        data.append("status", formData.status);
+
+        if (formData.file) data.append("imageFile", formData.file);
+
+        try {
+            const response = await serviceResult.create(data);
+            alert("Lưu thành công: " + selectedService.serviceName);
+            console.log("Kết quả lưu:", response.data);
+            setFormData({ result: "", note: "", status: "Chưa làm", file: null });
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi khi lưu kết quả");
+        }
     };
 
     return (
         <Box sx={{ p: 4 }}>
-            <Typography
-                variant="h5"
-                fontWeight="bold"
-                textAlign="center"
-                mb={3}
-                color="primary"
-            >
+            <Typography variant="h5" textAlign="center" mb={3} fontWeight="bold">
                 Cận lâm sàng
             </Typography>
 
             <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, maxWidth: 900, mx: "auto" }}>
+
                 {/* Thông tin bệnh nhân */}
-                <Typography variant="h6" color="secondary" gutterBottom>
+                <Typography variant="h6" gutterBottom>
                     Thông tin bệnh nhân
                 </Typography>
+
                 <Grid container spacing={2} mb={2}>
                     <Grid item xs={6}>
-                        <TextField label="Họ và tên" value="Nguyễn Văn A" fullWidth disabled />
+                        <TextField label="Họ và tên" value={patient.fullName} fullWidth disabled />
                     </Grid>
                     <Grid item xs={3}>
-                        <TextField label="Giới tính" value="Nam" fullWidth disabled />
+                        <TextField label="Giới tính" value={patient.gender || ''} fullWidth disabled />
                     </Grid>
                     <Grid item xs={3}>
-                        <TextField label="Ngày sinh" value="12/03/1988" fullWidth disabled />
+                        <TextField
+                            label="Ngày sinh"
+                            value={patient.services[0].dateOfBirth?.split("T")[0] || ""}
+                            fullWidth
+                            disabled
+                        />
                     </Grid>
                 </Grid>
 
                 <Divider sx={{ my: 2 }} />
 
-                {/* Chỉ định */}
-                <Typography variant="h6" color="secondary" gutterBottom>
+                <Typography variant="h6" gutterBottom>
                     Chỉ định cần thực hiện
                 </Typography>
+
                 <TextField
                     select
-                    label="Chọn loại chỉ định"
-                    fullWidth
+                    label="Chọn dịch vụ"
                     value={selectedTest}
                     onChange={(e) => setSelectedTest(e.target.value)}
+                    fullWidth
                     sx={{ mb: 3 }}
                 >
-                    {labTests.map((test) => (
-                        <MenuItem key={test} value={test}>
-                            {test}
+                    {labTests.map((s) => (
+                        <MenuItem key={s.serviceId} value={s.serviceId}>
+                            {s.serviceName}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -95,10 +118,9 @@ const CanLamSangForm = () => {
                 {selectedTest && (
                     <>
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                            Kết quả cho: {selectedTest}
+                            Kết quả cho: {labTests.find(s => s.serviceId === selectedTest).serviceName}
                         </Typography>
 
-                        {/* Form nhập kết quả */}
                         <TextField
                             label="Kết quả chi tiết"
                             name="result"
@@ -109,6 +131,7 @@ const CanLamSangForm = () => {
                             rows={3}
                             sx={{ mb: 2 }}
                         />
+
                         <TextField
                             label="Ghi chú"
                             name="note"
@@ -120,18 +143,13 @@ const CanLamSangForm = () => {
                             sx={{ mb: 2 }}
                         />
 
-                        {/* Upload file */}
                         <Button variant="outlined" component="label" sx={{ mb: 2 }}>
                             Tải lên kết quả hình ảnh
                             <input type="file" hidden onChange={handleFileChange} />
                         </Button>
-                        {formData.file && (
-                            <Typography variant="body2" color="text.secondary">
-                                📄 {formData.file.name}
-                            </Typography>
-                        )}
 
-                        {/* Trạng thái */}
+                        {formData.file && <Typography>{formData.file.name}</Typography>}
+
                         <TextField
                             select
                             label="Trạng thái"
@@ -146,14 +164,9 @@ const CanLamSangForm = () => {
                             <MenuItem value="Hoàn thành">Hoàn thành</MenuItem>
                         </TextField>
 
-                        {/* Nút thao tác */}
                         <Box display="flex" justifyContent="flex-end" gap={2}>
-                            <Button variant="outlined" color="secondary">
-                                Quay lại
-                            </Button>
-                            <Button variant="contained" color="primary" onClick={handleSubmit}>
-                                Lưu kết quả
-                            </Button>
+                            <Button variant="outlined" onClick={onBack}>Quay lại</Button>
+                            <Button variant="contained" onClick={handleSubmit}>Lưu kết quả</Button>
                         </Box>
                     </>
                 )}

@@ -30,4 +30,6 @@ public class UserAdminResponse {
   private String accountId;
 
   private String role;
+
+  private String doctorId;
 }

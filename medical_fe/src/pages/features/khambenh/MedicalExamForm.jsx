@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -10,29 +10,44 @@ import {
     Checkbox,
     FormControlLabel,
 } from "@mui/material";
+import serviceService from "../../../services/servicesServices";
+import parentService from "../../../services/parentService";
+import medicalHistoryService from "../../../services/medicalHistoryService";
 
-const MedicalExamForm = ({ patient, onBack }) => {
+const MedicalExamForm = ({ appointment, onBack }) => {
+    const patient = appointment.patient;
     const [formData, setFormData] = useState({
         symptom: "",
         result: "",
         diagnosis: "",
         secondaryDiagnosis: "",
-        services: {
-            xetNghiem: false,
-            sieuAm: false,
-            xquang: false,
-            dienTamDo: false,
-        },
+        servicesSelected: {},
         note: "",
     });
+
+    const [services, setServices] = useState([]);
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const res = await serviceService.getAll();
+                const list = Array.isArray(res) ? res : res.data ?? [];
+                setServices(list);
+            } catch (error) {
+                console.error("Lỗi tải danh sách dịch vụ:", error);
+                setServices([]);
+            }
+        };
+        fetchServices();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         if (type === "checkbox") {
             setFormData({
                 ...formData,
-                services: {
-                    ...formData.services,
+                servicesSelected: {
+                    ...formData.servicesSelected,
                     [name]: checked,
                 },
             });
@@ -41,22 +56,57 @@ const MedicalExamForm = ({ patient, onBack }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert(`Đã lưu phiếu khám cho bệnh nhân: ${patient.name}`);
-        console.log({ ...formData, patient });
+
+        const selectedServices = Object.keys(formData.servicesSelected).filter(
+            (id) => formData.servicesSelected[id]
+        );
+
+        if (selectedServices.length === 0) {
+            const confirmNoServices = window.confirm(
+                "Chưa chọn dịch vụ cận lâm sàng nào. Bạn vẫn muốn lưu phiếu khám?"
+            );
+            if (!confirmNoServices) return;
+        }
+
+        try {
+            const doctorId = localStorage.getItem("doctorId");
+
+            if (!doctorId) {
+                alert("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
+                return;
+            }
+
+            // 1. Gửi thông tin khám lâm sàng -> tạo MedicalHistory
+            const historyPayload = {
+                symptom: formData.symptom,
+                result: formData.result,
+                diagnosis: formData.diagnosis,
+                secondaryDiagnosis: formData.secondaryDiagnosis,
+                note: formData.note,
+                // có thể để backend tự set testResults, nên không cần truyền
+                // testResults: "",
+
+                patientId: patient.patientId,
+                doctorId: doctorId,
+            };
+
+            await medicalHistoryService.create(historyPayload);
+
+            // 2. Gán các dịch vụ cận lâm sàng cho bệnh nhân (API của bạn)
+            await parentService.addServicesForPatient(patient.patientId, selectedServices);
+
+            alert(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
+        } catch (error) {
+            console.error("Lỗi lưu phiếu khám:", error);
+            alert("Lưu phiếu khám thất bại, vui lòng thử lại!");
+        }
     };
 
     return (
         <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-
-            <Typography
-                variant="h5"
-                fontWeight="bold"
-                mb={3}
-                color="primary"
-                textAlign="center"
-            >
+            <Typography variant="h5" fontWeight="bold" mb={3} color="primary" textAlign="center">
                 Phiếu khám bệnh
             </Typography>
 
@@ -66,13 +116,13 @@ const MedicalExamForm = ({ patient, onBack }) => {
             </Typography>
             <Grid container spacing={2} mb={2}>
                 <Grid item xs={6}>
-                    <TextField label="Họ và tên" value={patient.name} fullWidth disabled />
+                    <TextField label="Họ và tên" value={patient.fullName} fullWidth disabled />
                 </Grid>
                 <Grid item xs={3}>
                     <TextField label="Giới tính" value={patient.gender} fullWidth disabled />
                 </Grid>
                 <Grid item xs={3}>
-                    <TextField label="Ngày sinh" value={patient.birth} fullWidth disabled />
+                    <TextField label="Ngày sinh" value={patient.dateOfBirth} fullWidth disabled />
                 </Grid>
             </Grid>
 
@@ -129,39 +179,21 @@ const MedicalExamForm = ({ patient, onBack }) => {
                 Chỉ định cận lâm sàng
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 3 }}>
-                {[
-                    ["xetNghiem", "Xét nghiệm"],
-                    ["sieuAm", "Siêu âm"],
-                    ["xquang", "X-quang"],
-                    ["dienTamDo", "Điện tâm đồ"],
-                ].map(([key, label]) => (
+                {services.map((s) => (
                     <FormControlLabel
-                        key={key}
+                        key={s.serviceId}
                         control={
                             <Checkbox
-                                checked={formData.services[key]}
+                                checked={!!formData.servicesSelected[s.serviceId]}
                                 onChange={handleChange}
-                                name={key}
+                                name={s.serviceId}
                             />
                         }
-                        label={label}
+                        label={s.serviceName}
                     />
                 ))}
             </Box>
 
-            {/* Ghi chú */}
-            <TextField
-                label="Ghi chú thêm"
-                name="note"
-                value={formData.note}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                rows={2}
-                sx={{ mb: 3 }}
-            />
-
-            {/* Nút thao tác */}
             <Box display="flex" justifyContent="flex-end" gap={2}>
                 <Button variant="outlined" color="secondary">
                     In phiếu

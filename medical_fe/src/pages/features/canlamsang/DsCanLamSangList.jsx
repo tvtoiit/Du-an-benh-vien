@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -10,42 +10,27 @@ import {
     TableHead,
     TableRow,
     Button,
+    Chip,
 } from "@mui/material";
 import CanLamSangForm from "../canlamsang/CanLamSangForm";
+import parentService from "../../../services/parentService";
 
-const LabList = () => {
+const DsCanLamSangList = () => {
+    const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
 
-    // Danh sách bệnh nhân giả lập
-    const patients = [
-        {
-            id: 1,
-            name: "Nguyễn Văn A",
-            gender: "Nam",
-            birth: "1988-03-12",
-            department: "Nội tổng hợp",
-            test: "Xét nghiệm máu",
-            status: "Chưa làm",
-        },
-        {
-            id: 2,
-            name: "Trần Thị B",
-            gender: "Nữ",
-            birth: "1992-07-22",
-            department: "Da liễu",
-            test: "Xét nghiệm nước tiểu",
-            status: "Đang làm",
-        },
-        {
-            id: 3,
-            name: "Lê Văn C",
-            gender: "Nam",
-            birth: "1979-10-05",
-            department: "Ngoại tổng quát",
-            test: "X-quang phổi",
-            status: "Hoàn thành",
-        },
-    ];
+    useEffect(() => {
+        const fetchPatients = async () => {
+            try {
+                const res = await parentService.getPatientsWithServices();
+                setPatients(res);
+            } catch (error) {
+                console.error("Lỗi tải bệnh nhân cận lâm sàng:", error);
+            }
+        };
+
+        fetchPatients();
+    }, []);
 
     return (
         <Box sx={{ p: 4 }}>
@@ -67,23 +52,36 @@ const LabList = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell><b>Họ và tên</b></TableCell>
-                                        <TableCell><b>Giới tính</b></TableCell>
                                         <TableCell><b>Ngày sinh</b></TableCell>
-                                        <TableCell><b>Khoa chỉ định</b></TableCell>
-                                        <TableCell><b>Chỉ định</b></TableCell>
-                                        <TableCell><b>Trạng thái</b></TableCell>
+                                        <TableCell><b>SĐT</b></TableCell>
+                                        <TableCell><b>Dịch vụ chỉ định</b></TableCell>
                                         <TableCell align="center"><b>Thao tác</b></TableCell>
                                     </TableRow>
                                 </TableHead>
+
                                 <TableBody>
                                     {patients.map((p) => (
-                                        <TableRow key={p.id}>
-                                            <TableCell>{p.name}</TableCell>
-                                            <TableCell>{p.gender}</TableCell>
-                                            <TableCell>{p.birth}</TableCell>
-                                            <TableCell>{p.department}</TableCell>
-                                            <TableCell>{p.test}</TableCell>
-                                            <TableCell>{p.status}</TableCell>
+                                        <TableRow key={p.patientId}>
+                                            <TableCell>{p.fullName}</TableCell>
+
+                                            <TableCell>
+                                                {p.services[0]?.dateOfBirth?.split("T")[0]}
+                                            </TableCell>
+
+                                            <TableCell>{p.services[0]?.contactNumber}</TableCell>
+
+                                            <TableCell>
+                                                {p.services.map((s) => (
+                                                    <Chip
+                                                        key={s.serviceId}
+                                                        label={s.serviceName}
+                                                        color="info"
+                                                        size="small"
+                                                        sx={{ mr: 1, mb: 1 }}
+                                                    />
+                                                ))}
+                                            </TableCell>
+
                                             <TableCell align="center">
                                                 <Button
                                                     variant="contained"
@@ -110,4 +108,4 @@ const LabList = () => {
     );
 };
 
-export default LabList;
+export default DsCanLamSangList;

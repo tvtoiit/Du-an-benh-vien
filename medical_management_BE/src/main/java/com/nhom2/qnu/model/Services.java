@@ -13,6 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,5 +52,6 @@ public class Services implements Serializable {
   private String type;
 
   @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
+  @JsonIgnore
   private Set<Patients> patients = new HashSet<>();
 }

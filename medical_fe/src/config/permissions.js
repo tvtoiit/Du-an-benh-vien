@@ -17,7 +17,7 @@ export const permissions = {
         baoCao: true
     },
 
-    ROLE_CANLAMSAN: {
+    ROLE_CANLAMSANG: {
         tiepNhan: false,
         thanhToan: false,
         chiDinhKham: true,

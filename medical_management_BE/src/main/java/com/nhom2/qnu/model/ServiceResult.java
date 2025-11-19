@@ -18,20 +18,16 @@ import java.time.LocalDateTime;
 @Table(name = "tbl_service_results")
 public class ServiceResult implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "result_id", length = 36, nullable = false)
     private String resultId;
 
-    // Bệnh nhân
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patients patient;
 
-    // Dịch vụ (xét nghiệm, siêu âm, X-quang...)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
     private Services service;
@@ -44,15 +40,37 @@ public class ServiceResult implements Serializable {
     @JoinColumn(name = "medical_history_id")
     private MedicalHistories medicalHistory;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_schedule_id")
+    private AppointmentSchedules appointmentSchedule;
+
     @Column(name = "result_data", columnDefinition = "TEXT")
     private String resultData;
 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "status", length = 50)
+    private String status;
+
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

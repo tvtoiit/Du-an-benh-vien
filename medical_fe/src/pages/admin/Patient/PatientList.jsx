@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
+import { useNavigate } from "react-router-dom";
+import TiepNhan from "../../features/Appointments/TiepNhan";
 import {
     Box,
     Typography,
@@ -23,7 +25,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RegisterModal from "../../user/RegisterModal";
 
-const PatientList = () => {
+const PatientList = ({ onSelectPatient }) => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -102,6 +104,16 @@ const PatientList = () => {
                                 <TableCell>{p.address}</TableCell>
                                 <TableCell align="center">
                                     <Stack direction="row" spacing={1} justifyContent="center">
+                                        <Tooltip title="Tiếp nhận">
+                                            <Button
+                                                variant="contained"
+                                                color="success"
+                                                size="small"
+                                            >
+                                                Tiếp nhận
+                                            </Button>
+                                        </Tooltip>
+
                                         <Tooltip title="Xem chi tiết">
                                             <IconButton color="primary" onClick={() => handleView(p)}>
                                                 <VisibilityIcon />

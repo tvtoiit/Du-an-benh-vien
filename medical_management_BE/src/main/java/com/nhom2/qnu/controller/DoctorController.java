@@ -29,18 +29,23 @@ public class DoctorController {
         return new ResponseEntity<>(doctorService.updateDoctors(request, id), HttpStatus.CREATED);
     }
 
-    @PostMapping("")
+    @PostMapping("/create")
     public ResponseEntity<?> createDoctor(@RequestBody DoctorRequest request) {
-      return new ResponseEntity<>(doctorService.createDoctors(request), HttpStatus.CREATED);
+        return new ResponseEntity<>(doctorService.createDoctors(request), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPatient(@PathVariable(value = "id") String id) {
-        return ResponseEntity.ok(doctorService.finđDoctorServiceImpl(id));
+        return ResponseEntity.ok(doctorService.findDoctorServiceImpl(id));
     }
 
     @GetMapping("/get_All")
     public List<DoctorResponse> getAllPatients() {
         return doctorService.findAllDoctors();
+    }
+
+    @GetMapping("/by-department/{departmentId}")
+    public List<DoctorResponse> getDoctorsByDepartment(@PathVariable String departmentId) {
+        return doctorService.findByDepartmentId(departmentId);
     }
 }

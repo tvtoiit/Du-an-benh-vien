@@ -39,4 +39,10 @@ public class AppointmentSchedules implements Serializable {
 
     @Column(name = "status", nullable = false, length = 50)
     private String status;
+
+    @Column(name = "room", length = 50)
+    private String room;
+
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
 }

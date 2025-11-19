@@ -101,7 +101,7 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
                 DoctorResponse doctorResponse = new DoctorResponse();
                 doctorResponse.setDoctorId(item.getDoctorId());
                 doctorResponse.setDoctorName(item.getUser().getFullName());
-                doctorResponse.setSpecialization(item.getSpecialization());
+                doctorResponse.setExperience(item.getExperience());
                 doctorResponse.setContactNumber(item.getUser().getPhoneNumber());
                 doctorResponse.setEmail(item.getUser().getEmail());
 
@@ -120,7 +120,7 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
                 DoctorResponse doctorResponse = new DoctorResponse();
                 doctorResponse.setDoctorId(item.getDoctor().getDoctorId());
                 doctorResponse.setDoctorName(item.getDoctor().getUser().getFullName());
-                doctorResponse.setSpecialization(item.getDoctor().getSpecialization());
+                doctorResponse.setExperience(item.getDoctor().getExperience());
                 doctorResponse.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
                 doctorResponse.setEmail(item.getDoctor().getUser().getEmail());
 

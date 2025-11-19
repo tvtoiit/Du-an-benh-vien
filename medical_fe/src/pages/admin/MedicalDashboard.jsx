@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "../../styles/MedicalDash.css";
 import PatientList from './Patient/PatientList';
+import BacSi from './bacsi/BacSiList';
 import ExamDashboard from '../features/Dashboard/ExamDashboard';
 import UserManagement from '../admin/users/UserManagement';
 import permissions from '../../config/permissions';
@@ -20,9 +21,7 @@ const MedicalDashboard = () => {
             try {
                 const userlogin = await loginService.loginCheckUser(getlocalStorage);
 
-                if (!userlogin) {
-                    console.log("Role user null");
-                } else {
+                if (userlogin) {
                     const roleResult = userlogin.role;
                     // Lấy quyền theo vai trò
                     const userPermission = permissions[roleResult];
@@ -49,7 +48,15 @@ const MedicalDashboard = () => {
         return userPermissions && userPermissions[permissionKey];
     };
 
-
+    const roleDisplayMap = {
+        "ROLE_LETAN": "Lễ tân",
+        "ROLE_BACSI": "Bác sĩ",
+        "ROLE_CANLAMSANG": "Cận lâm sàng",
+        "ROLE_NHATHUOC": "Nhà thuốc",
+        "ROLE_THUNGAN": "Thu ngân",
+        "ROLE_ADMIN": "Quản trị viên",
+        "ROLE_USER": "Người dùng"
+    };
     // Một hàm để xác định nội dung chính dựa trên vai trò đang hoạt động
     const renderMainContent = () => {
         switch (activeRole) {
@@ -67,6 +74,14 @@ const MedicalDashboard = () => {
                 return (
                     <div className="main-content-box">
                         <PatientList />
+                    </div>
+                );
+
+            case 'Bác Sĩ':
+                if (!can("quanLyBacSi")) return <p>Bạn không có quyền truy cập Quản lý bệnh nhân.</p>;
+                return (
+                    <div className="main-content-box">
+                        <BacSi />
                     </div>
                 );
 
@@ -128,7 +143,7 @@ const MedicalDashboard = () => {
 
             <div className="main-layout">
                 <aside className="sidebar-menu">
-                    <h2>Sidebar Menu (vai trò)</h2>
+                    <h2>({roleDisplayMap[role] || role})</h2>
                     <ul>
                         {can("quanLyUser") && (
                             <li className={activeRole === 'Người dùng' ? 'active' : ''} onClick={() => setActiveRole('Người dùng')}>
@@ -138,6 +153,11 @@ const MedicalDashboard = () => {
                         {can("quanLyBenhNhan") && (
                             <li className={activeRole === 'Bệnh nhân' ? 'active' : ''} onClick={() => setActiveRole('Bệnh nhân')}>
                                 [Quản lí bệnh nhân]
+                            </li>
+                        )}
+                        {can("quanLyBacSi") && (
+                            <li className={activeRole === 'Bác Sĩ' ? 'active' : ''} onClick={() => setActiveRole('Bác Sĩ')}>
+                                [Quản lí bác sĩ]
                             </li>
                         )}
                         {can("chiDinhKham") && (

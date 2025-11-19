@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -13,35 +13,55 @@ import {
     Chip,
 } from "@mui/material";
 import MedicalExamForm from "./MedicalExamForm";
-
-// Danh sách giả lập bệnh nhân cần khám
-const mockPatients = [
-    { id: 1, name: "Nguyễn Văn A", gender: "Nam", birth: "1988-03-12", status: "Chờ khám" },
-    { id: 2, name: "Trần Thị B", gender: "Nữ", birth: "1995-06-22", status: "Đang khám" },
-    { id: 3, name: "Lê Văn C", gender: "Nam", birth: "2000-01-10", status: "Đã khám" },
-];
+import appointmentService from "../../../services/appointmentService";
 
 const DsBenhNhanKham = () => {
-    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [patients, setPatients] = useState([]);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
 
-    if (selectedPatient) {
-        // Khi chọn 1 bệnh nhân → hiển thị form khám
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            try {
+
+                const res = await appointmentService.getAll();
+
+                const doctorId = localStorage.getItem("doctorId");
+
+
+                // Tùy backend của bạn, giả sử status dùng:
+                // "waiting for censorship" / "approved" / "done"
+                const waiting = res.filter(
+                    (item) =>
+                    (item.status === "waiting for censorship" ||
+                        item.status === "approved")
+                );
+
+
+                setPatients(waiting);
+            } catch (error) {
+                console.error("Failed to fetch appointments", error);
+            }
+        };
+
+        fetchAppointments();
+    }, []);
+
+    if (selectedAppointment) {
         return (
             <MedicalExamForm
-                patient={selectedPatient}
-                onBack={() => setSelectedPatient(null)}
+                appointment={selectedAppointment}
+                onBack={() => setSelectedAppointment(null)}
             />
         );
     }
 
-    // Hàm đổi màu chip theo trạng thái
     const getStatusColor = (status) => {
         switch (status) {
-            case "Chờ khám":
+            case "waiting for censorship":
                 return "warning";
-            case "Đang khám":
+            case "approved":
                 return "info";
-            case "Đã khám":
+            case "done":
                 return "success";
             default:
                 return "default";
@@ -54,44 +74,57 @@ const DsBenhNhanKham = () => {
                 Danh sách bệnh nhân chờ khám
             </Typography>
 
-            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3, maxWidth: 900, mx: "auto" }}>
+            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
                 <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ fontWeight: "bold" }}>STT</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>Họ và tên</TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>Giới tính</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>Ngày sinh</TableCell>
+                            <TableCell sx={{ fontWeight: "bold" }}>SĐT</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
-                            <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+                            <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>
+                                Thao tác
+                            </TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
-                        {mockPatients.map((p, index) => (
-                            <TableRow key={p.id} hover>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>{p.name}</TableCell>
-                                <TableCell>{p.gender}</TableCell>
-                                <TableCell>{p.birth}</TableCell>
-                                <TableCell>
-                                    <Chip
-                                        label={p.status}
-                                        color={getStatusColor(p.status)}
-                                        size="small"
-                                    />
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => setSelectedPatient(p)}
-                                    >
-                                        {p.status === "Đã khám" ? "Xem phiếu" : "Khám"}
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {patients.map((item, index) => {
+                            const p = item.patient;
+
+                            return (
+                                <TableRow key={item.appointmentScheduleId} hover>
+                                    <TableCell>{index + 1}</TableCell>
+
+                                    <TableCell>{p.fullName}</TableCell>
+
+                                    <TableCell>
+                                        {p.dateOfBirth?.split("T")[0] ?? "—"}
+                                    </TableCell>
+
+                                    <TableCell>{p.contactNumber ?? "—"}</TableCell>
+
+                                    <TableCell>
+                                        <Chip
+                                            label={item.status}
+                                            color={getStatusColor(item.status)}
+                                            size="small"
+                                        />
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => setSelectedAppointment(item)}
+                                        >
+                                            Khám
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>

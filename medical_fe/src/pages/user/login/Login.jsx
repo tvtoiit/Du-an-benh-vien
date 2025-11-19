@@ -24,6 +24,9 @@ export default function Login() {
             // Kiểm tra vài trò của người dùng
             // Get api user / admin
             const userlogin = await loginService.loginCheckUser(res.accessToken);
+            if (userlogin.doctorId) {
+                localStorage.setItem("doctorId", userlogin.doctorId);
+            }
             if (userlogin.role === "ROLE_USER") {
                 navigate("/");
             } else {

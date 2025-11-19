@@ -27,8 +27,8 @@ public class Doctor implements Serializable {
     @Column(name = "doctor_id", length = 36, nullable = false)
     private String doctorId;
 
-    @Column(name = "specialization", length = 50, nullable = false)
-    private String specialization;
+    @Column(name = "experience", nullable = false)
+    private int experience;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -39,4 +39,8 @@ public class Doctor implements Serializable {
 
     @ManyToMany(mappedBy = "doctors", fetch = FetchType.LAZY)
     private Set<EHealthRecords> eHealthRecords = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 }
