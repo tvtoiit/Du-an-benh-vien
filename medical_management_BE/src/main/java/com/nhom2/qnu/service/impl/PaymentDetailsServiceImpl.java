@@ -225,7 +225,6 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
         BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, prescriptionId);
         return result != null ? result : BigDecimal.ZERO;
     }
-
     @Override
     public List<PaymentSummaryResponse> getWaitingPayments() {
         // ví dụ: tạm thời lấy tất cả bệnh nhân rồi map sang summary
