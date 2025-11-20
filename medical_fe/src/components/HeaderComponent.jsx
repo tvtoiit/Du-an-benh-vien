@@ -1,13 +1,54 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import "../styles/style.css";
+import loginService from ".././services/loginService";
+import ".././styles/header.css";
 
 export default function Header({ menuItems, activeMenu, setActiveMenu, onRegisterClick }) {
     const navigate = useNavigate();
+    const [checkUser, setCheckUser] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+
     const headerButtons = [
         { text: 'HỎI BÁC SĨ BỆNH VIỆN', className: 'btn btn-yellow' },
         { text: 'ĐĂNG KÝ KHÁM', className: 'btn btn-blue', onClick: onRegisterClick },
     ];
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) return;
+
+        setCheckUser(true);
+
+        // GỌI API LẤY THÔNG TIN USER
+        loginService.loginCheckUser(token)
+            .then(res => {
+                setUserInfo(res);
+            })
+            .catch(err => {
+                console.error("Lỗi load user:", err);
+            });
+    }, []);
+
+    // Đóng dropdown khi click ra ngoài
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setShowDropdown(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        setCheckUser(false);
+        setUserInfo(null);
+        navigate("/");
+    };
+
 
     return (
         <>
@@ -32,9 +73,29 @@ export default function Header({ menuItems, activeMenu, setActiveMenu, onRegiste
                     ))}
 
                     <button className="btn invoice-btn">🔍 Tra hóa đơn</button>
-                    <button onClick={() => navigate("/login")} className="btn notify-btn">
-                        Đăng Nhập
-                    </button>
+
+                    {/* Nếu chưa login */}
+                    {!checkUser && (
+                        <button onClick={() => navigate("/login")} className="btn notify-btn">
+                            Đăng Nhập
+                        </button>
+                    )}
+
+                    {checkUser && userInfo && (
+                        <div className="user-box">
+                            <div className="user-avatar">
+                                {userInfo.fullName.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="user-name">{userInfo.fullName}</span>
+
+                            <button
+                                onClick={() => handleLogout()}
+                                className="logout-btn"
+                            >
+                                Đăng Xuất
+                            </button>
+                        </div>
+                    )}
                 </div>
             </header>
 

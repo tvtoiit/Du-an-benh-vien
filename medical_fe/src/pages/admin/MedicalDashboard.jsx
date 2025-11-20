@@ -6,6 +6,7 @@ import ExamDashboard from '../features/Dashboard/ExamDashboard';
 import UserManagement from '../admin/users/UserManagement';
 import permissions from '../../config/permissions';
 import loginService from "../../services/loginService";
+import { useNavigate } from "react-router-dom";
 
 const MedicalDashboard = () => {
     const [role, setRole] = useState(null);
@@ -14,6 +15,8 @@ const MedicalDashboard = () => {
     const [activeRole, setActiveRole] = useState('Người dùng');
     // get token từ localstorage
     const getlocalStorage = localStorage.getItem("token");
+    const navigate = useNavigate();
+
 
     // call api get role user từ token
     useEffect(() => {
@@ -43,6 +46,11 @@ const MedicalDashboard = () => {
 
         fetchData();
     }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/");
+    };
 
     const can = (permissionKey) => {
         return userPermissions && userPermissions[permissionKey];
@@ -123,6 +131,8 @@ const MedicalDashboard = () => {
             default:
                 return null;
         }
+
+
     };
 
     return (
@@ -130,14 +140,13 @@ const MedicalDashboard = () => {
             <header className="header-container">
                 <div className="logo">LOGO</div>
                 <nav className="header-nav">
-                    <ul>
-                        <li><a href="#">Lễ tân</a></li>
-                        <li><a href="#">Cận lâm sàng</a></li>
-                        <li><a href="#">Bác sĩ</a></li>
-                        <li><a href="#">Nhà thuốc</a></li>
-                        <li><a href="#">Thu ngân</a></li>
-                        <li><a href="#">Đăng xuất</a></li>
+                    <ul className="logout-list">
+                        <li className="logout-btn" onClick={handleLogout}>
+                            Đăng xuất
+                        </li>
                     </ul>
+
+
                 </nav>
             </header>
 
