@@ -1,9 +1,11 @@
 package com.nhom2.qnu.service.impl;
 
-;import com.nhom2.qnu.model.PaymentDetails;
+import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PrescriptionHistory;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
+import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
+import com.nhom2.qnu.repository.AdvancePaymentRepository;
 import com.nhom2.qnu.repository.PaymentDetailsRepository;
 import com.nhom2.qnu.repository.PatientsRepository;
 import com.nhom2.qnu.repository.PrescriptionHistoryRepository;
@@ -15,149 +17,222 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PaymentDetailsServiceImpl implements PaymentDetailsService {
+
+    private static final long DEFAULT_EXAM_FEE = 100_000L; // tiền khám mặc định, bạn có thể đổi sau
 
     private final PaymentDetailsRepository paymentDetailsRepository;
     private final PatientsRepository patientsRepository;
     private final PrescriptionHistoryRepository prescriptionHistoryRepository;
+    private final AdvancePaymentRepository advancePaymentRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public PaymentDetailsServiceImpl(PaymentDetailsRepository paymentDetailsRepository,
                                      PatientsRepository patientsRepository,
                                      PrescriptionHistoryRepository prescriptionHistoryRepository,
+                                     AdvancePaymentRepository advancePaymentRepository,
                                      JdbcTemplate jdbcTemplate) {
         this.paymentDetailsRepository = paymentDetailsRepository;
         this.patientsRepository = patientsRepository;
         this.prescriptionHistoryRepository = prescriptionHistoryRepository;
+        this.advancePaymentRepository = advancePaymentRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Tạo PaymentDetails (hóa đơn) cho một bệnh nhân.
+     * total_amount = examFee + serviceFee + medicineFee (chưa trừ tạm ứng).
+     */
     @Override
-    @Transactional
     public PaymentDetails createPaymentDetails(PaymentDetailsRequest req) {
-        // validate patient exists
+        // 1. Tìm bệnh nhân
         Patients patient = patientsRepository.findById(req.getPatientId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Patient not found with id: " + req.getPatientId()));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Patient not found with id: " + req.getPatientId()
+                ));
 
-        // optional prescription
+        // 2. Nếu có prescriptionId thì load
         PrescriptionHistory prescription = null;
         if (req.getPrescriptionId() != null && !req.getPrescriptionId().isBlank()) {
             prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Prescription not found with id: " + req.getPrescriptionId()));
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Prescription not found with id: " + req.getPrescriptionId()
+                    ));
         }
 
-        // compute totals
+        // 3. Tính tiền khám/dịch vụ/thuốc (dùng cùng logic với getPaymentSummary)
+        long examFee = DEFAULT_EXAM_FEE;
         BigDecimal servicesTotal = sumServicesForPatient(req.getPatientId());
-        BigDecimal medicinesTotal = BigDecimal.ZERO;
-        if (prescription != null) {
-            medicinesTotal = sumMedicinesForPrescription(req.getPrescriptionId());
-        }
+        BigDecimal medicinesTotal = (prescription != null)
+                ? sumMedicinesForPrescription(prescription.getPrescriptionId())
+                : BigDecimal.ZERO;
 
-        BigDecimal total = servicesTotal.add(medicinesTotal);
+        BigDecimal examFeeBd = BigDecimal.valueOf(examFee);
+        BigDecimal totalAmount = examFeeBd.add(servicesTotal).add(medicinesTotal);
 
-        // prepare entity and save
-        PaymentDetails pd = new PaymentDetails();
-        pd.setPatient(patient);
-        pd.setPrescriptionHistory(prescription);
-        pd.setTotal_amount(total);
+        // 4. Map vào entity
+        PaymentDetails entity = new PaymentDetails();
+        entity.setPatient(patient);
+        entity.setPrescriptionHistory(prescription);
+        entity.setTotal_amount(totalAmount);
 
-        return paymentDetailsRepository.save(pd);
+        // 5. Lưu DB
+        return paymentDetailsRepository.save(entity);
     }
 
+    /**
+     * Cập nhật PaymentDetails:
+     * - Có thể đổi patient / prescription
+     * - Tính lại total_amount theo dữ liệu mới nhất.
+     */
     @Override
-    @Transactional
     public PaymentDetails updatePaymentDetails(String paymentDetailId, PaymentDetailsRequest req) {
         PaymentDetails existing = paymentDetailsRepository.findById(paymentDetailId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "PaymentDetails not found with id: " + paymentDetailId));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "PaymentDetails not found with id: " + paymentDetailId
+                ));
 
-        // update patient if provided
+        // 1. Cập nhật patient (nếu req truyền lên)
         if (req.getPatientId() != null && !req.getPatientId().isBlank()) {
             Patients patient = patientsRepository.findById(req.getPatientId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Patient not found with id: " + req.getPatientId()));
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Patient not found with id: " + req.getPatientId()
+                    ));
             existing.setPatient(patient);
         }
 
-        // update prescription if provided
-        PrescriptionHistory prescription = null;
+        // 2. Cập nhật prescription (nếu req truyền lên)
         if (req.getPrescriptionId() != null && !req.getPrescriptionId().isBlank()) {
-            prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Prescription not found with id: " + req.getPrescriptionId()));
+            PrescriptionHistory prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Prescription not found with id: " + req.getPrescriptionId()
+                    ));
             existing.setPrescriptionHistory(prescription);
         }
 
-        // recompute totals using current patient/prescription on entity
-        String patientIdToUse = existing.getPatient() != null ? existing.getPatient().getPatientId() : null;
-        String prescriptionIdToUse = existing.getPrescriptionHistory() != null ? existing.getPrescriptionHistory().getPrescriptionId() : null;
+        // 3. Tính lại total_amount dựa trên patient/prescription hiện tại của entity
+        String patientIdToUse = existing.getPatient() != null
+                ? existing.getPatient().getPatientId()
+                : null;
 
-        BigDecimal servicesTotal = patientIdToUse != null ? sumServicesForPatient(patientIdToUse) : BigDecimal.ZERO;
-        BigDecimal medicinesTotal = prescriptionIdToUse != null ? sumMedicinesForPrescription(prescriptionIdToUse) : BigDecimal.ZERO;
-        existing.setTotal_amount(servicesTotal.add(medicinesTotal));
+        String prescriptionIdToUse = (existing.getPrescriptionHistory() != null)
+                ? existing.getPrescriptionHistory().getPrescriptionId()
+                : null;
+
+        long examFee = DEFAULT_EXAM_FEE;
+        BigDecimal servicesTotal = (patientIdToUse != null)
+                ? sumServicesForPatient(patientIdToUse)
+                : BigDecimal.ZERO;
+
+        BigDecimal medicinesTotal = (prescriptionIdToUse != null)
+                ? sumMedicinesForPrescription(prescriptionIdToUse)
+                : BigDecimal.ZERO;
+
+        BigDecimal examFeeBd = BigDecimal.valueOf(examFee);
+        BigDecimal totalAmount = examFeeBd.add(servicesTotal).add(medicinesTotal);
+
+        existing.setTotal_amount(totalAmount);
 
         return paymentDetailsRepository.save(existing);
     }
 
     /**
-     * Sum giá các service của patient từ bảng tbl_patient_service JOIN tbl_service
+     * Tính summary cho màn hình thanh toán (FE PaymentForm).
      */
-    private BigDecimal sumServicesForPatient(String patientId) {
-        try {
-            String sql = "SELECT COALESCE(SUM(s.price), 0) " +
-                    "FROM tbl_patient_service ps " +
-                    "JOIN tbl_service s ON ps.service_id = s.service_id " +
-                    "WHERE ps.patient_id = ?";
-            Double result = jdbcTemplate.queryForObject(sql, new Object[]{patientId}, Double.class);
-            return result == null ? BigDecimal.ZERO : BigDecimal.valueOf(result);
-        } catch (Exception ex) {
-            // nếu bảng/column khác tên, log và trả 0
-            // bạn có thể thay bằng logger nếu project có logging
-            System.err.println("sumServicesForPatient error: " + ex.getMessage());
-            return BigDecimal.ZERO;
+    @Override
+    public PaymentSummaryResponse getPaymentSummary(String patientId, String prescriptionId) {
+
+        Patients patient = patientsRepository.findById(patientId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Patient not found with id: " + patientId
+                ));
+
+        // 1. Tiền khám
+        long examFee = DEFAULT_EXAM_FEE;
+
+        // 2. Tiền dịch vụ CLS (từ tbl_patient_service + tbl_service)
+        long serviceFee = sumServicesForPatient(patientId).longValue();
+
+        // 3. Tiền thuốc
+        long medicineFee = 0L;
+        if (prescriptionId != null && !prescriptionId.isBlank()) {
+            medicineFee = sumMedicinesForPrescription(prescriptionId).longValue();
         }
+
+        // 4. Tổng tạm ứng (AdvancePayment)
+        Double advance = advancePaymentRepository.sumAmountByPatientId(patientId);
+        long advanceTotal = (advance != null) ? advance.longValue() : 0L;
+
+        // 5. Tổng chi phí & số tiền cần trả thêm
+        long totalCost = examFee + serviceFee + medicineFee;
+        long amountToPay = Math.max(totalCost - advanceTotal, 0L);
+
+        return PaymentSummaryResponse.builder()
+                .patientId(patient.getPatientId())
+                .fullName(patient.getUser().getFullName())
+                .examFee(examFee)
+                .serviceFee(serviceFee)
+                .medicineFee(medicineFee)
+                .advanceTotal(advanceTotal)
+                .totalCost(totalCost)
+                .amountToPay(amountToPay)
+                .build();
     }
 
     /**
-     * Sum tiền thuốc cho prescription.
+     * Sum tiền dịch vụ dựa trên:
+     *  - tbl_patient_service(patient_id, service_id)
+     *  - tbl_service(service_id, price)
+     */
+    private BigDecimal sumServicesForPatient(String patientId) {
+        String sql =
+                "SELECT COALESCE(SUM(s.price), 0) " +
+                        "FROM tbl_patient_service ps " +
+                        "JOIN tbl_service s ON ps.service_id = s.service_id " +
+                        "WHERE ps.patient_id = ?";
+
+        BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, patientId);
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    /**
+     * Sum tiền thuốc cho một đơn kê (prescriptionId) dựa trên:
+     *  - tbl_prescription_history (prescription_id, medicine_id)
+     *  - tbl_medicines (medicine_id, price)
      *
-     * Cố gắng dùng bảng tbl_prescription_item nếu có (cột quantity và unit_price hoặc lấy giá từ tbl_medicines).
-     * Nếu không có, fallback: trả 0 (hoặc bạn có thể chỉnh SQL phù hợp với schema bạn dùng).
+     * Lưu ý: với schema hiện tại, mỗi prescription_id tương ứng 1 medicine_id,
+     * nên SUM(m.price) thực tế chỉ là 1 dòng. Nếu sau này có bảng chi tiết toa,
+     * bạn có thể chỉnh SQL cho phù hợp.
      */
     private BigDecimal sumMedicinesForPrescription(String prescriptionId) {
-        // 1) thử bảng tbl_prescription_item (thường có prescription_id, medicine_id, quantity, unit_price)
-        try {
-            String sqlItem = "SELECT COALESCE(SUM( (CASE WHEN pi.unit_price IS NOT NULL THEN pi.unit_price ELSE m.price END) * pi.quantity ), 0) " +
-                    "FROM tbl_prescription_item pi " +
-                    "LEFT JOIN tbl_medicines m ON pi.medicine_id = m.medicine_id " +
-                    "WHERE pi.prescription_id = ?";
-            Double result = jdbcTemplate.queryForObject(sqlItem, new Object[]{prescriptionId}, Double.class);
-            if (result != null && result > 0) {
-                return BigDecimal.valueOf(result);
-            }
-        } catch (Exception ex) {
-            // bảng không tồn tại hoặc column khác tên -> tiếp fallback
-            System.err.println("sumMedicinesForPrescription (item) error: " + ex.getMessage());
-        }
+        String sql =
+                "SELECT COALESCE(SUM(m.price), 0) " +
+                        "FROM tbl_prescription_history ph " +
+                        "JOIN tbl_medicines m ON ph.medicine_id = m.medicine_id " +
+                        "WHERE ph.prescription_id = ?";
 
-        // 2) fallback: nếu bạn có tiền thuốc trực tiếp trong tbl_prescription_history (ví dụ cột total_amount),
-        //    thử lấy nó:
-        try {
-            String sqlFallback = "SELECT COALESCE(ph.total_amount, 0) FROM tbl_prescription_history ph WHERE ph.prescription_id = ?";
-            Double result = jdbcTemplate.queryForObject(sqlFallback, new Object[]{prescriptionId}, Double.class);
-            if (result != null) {
-                return BigDecimal.valueOf(result);
-            }
-        } catch (Exception ex) {
-            System.err.println("sumMedicinesForPrescription (fallback) error: " + ex.getMessage());
-        }
-
-        // nếu không tìm được cấu trúc dữ liệu phù hợp thì trả 0 — bạn có thể chỉnh lại SQL cho đúng schema
-        return BigDecimal.ZERO;
+        BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, prescriptionId);
+        return result != null ? result : BigDecimal.ZERO;
     }
+
+    @Override
+    public List<PaymentSummaryResponse> getWaitingPayments() {
+        // ví dụ: tạm thời lấy tất cả bệnh nhân rồi map sang summary
+        return patientsRepository.findAll()
+                .stream()
+                .map(p -> getPaymentSummary(p.getPatientId(), null))
+                .collect(Collectors.toList());
+    }
+
 }

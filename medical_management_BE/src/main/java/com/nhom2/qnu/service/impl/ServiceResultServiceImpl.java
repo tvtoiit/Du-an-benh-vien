@@ -2,6 +2,8 @@ package com.nhom2.qnu.service.impl;
 
 import com.nhom2.qnu.payload.request.ServiceResultRequest;
 import com.nhom2.qnu.model.*;
+import com.nhom2.qnu.payload.response.PatientWithResultResponse;
+import com.nhom2.qnu.payload.response.ServiceResultResponse;
 import com.nhom2.qnu.repository.*;
 import com.nhom2.qnu.service.ServiceResultService;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,5 +90,51 @@ public class ServiceResultServiceImpl implements ServiceResultService {
         }
 
         return serviceResultRepository.save(result);
+    }
+
+    // 1) Danh sách bệnh nhân đã có kết quả CLS
+    public List<PatientWithResultResponse> getPatientsWithCompletedResults(String doctorId) {
+        List<Patients> patients;
+
+        if (doctorId != null && !doctorId.isEmpty()) {
+            patients = serviceResultRepository
+                    .findDistinctPatientsByStatusAndDoctor("Hoàn thành", doctorId);
+        } else {
+            patients = serviceResultRepository
+                    .findDistinctPatientsByStatus("Hoàn thành");
+        }
+
+        return patients.stream()
+                .map(p -> PatientWithResultResponse.builder()
+                        .patientId(p.getPatientId())
+                        .fullName(p.getUser().getFullName())
+//                        .gender(p.getUser().getGender())
+                        .dateOfBirth(p.getDateOfBirth())
+//                        .contactNumber(p.getUser().getPhone())
+                        .status("Đã có kết quả cận lâm sàng")
+                        .build()
+                )
+                .toList();
+    }
+
+    // 2) Danh sách kết quả CLS theo bệnh nhân
+    public List<ServiceResultResponse> getCompletedResultsByPatient(String patientId) {
+        List<ServiceResult> list =
+                serviceResultRepository.findByPatient_PatientIdAndStatus(patientId, "Hoàn thành");
+
+        return list.stream()
+                .map(sr -> ServiceResultResponse.builder()
+                        .resultId(sr.getResultId())
+                        .serviceName(sr.getService().getServiceName())
+                        .resultData(sr.getResultData())
+                        .note(sr.getNote())
+                        .imageUrl(sr.getImageUrl())
+                        .doctorName(sr.getDoctor() != null
+                                ? sr.getDoctor().getUser().getFullName()
+                                : null)
+                        .createdAt(sr.getCreatedAt())
+                        .build()
+                )
+                .toList();
     }
 }

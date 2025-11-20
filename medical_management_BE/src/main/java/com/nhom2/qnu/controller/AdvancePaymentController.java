@@ -3,6 +3,7 @@ package com.nhom2.qnu.controller;
 import com.nhom2.qnu.model.AdvancePayment;
 import com.nhom2.qnu.payload.request.AdvancePaymentRequest;
 import com.nhom2.qnu.service.AdvancePaymentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/advance-payments")
+@RequestMapping("/api/v1/advance-payments")
 @Validated
 public class AdvancePaymentController {
-
-    private final AdvancePaymentService advancePaymentService;
+    @Autowired
+    private AdvancePaymentService advancePaymentService;
 
     public AdvancePaymentController(AdvancePaymentService advancePaymentService) {
         this.advancePaymentService = advancePaymentService;

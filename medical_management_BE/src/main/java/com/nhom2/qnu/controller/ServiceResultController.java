@@ -2,20 +2,21 @@ package com.nhom2.qnu.controller;
 
 import com.nhom2.qnu.payload.request.ServiceResultRequest;
 import com.nhom2.qnu.model.ServiceResult;
+import com.nhom2.qnu.payload.response.PatientWithResultResponse;
+import com.nhom2.qnu.payload.response.ServiceResultResponse;
 import com.nhom2.qnu.service.ServiceResultService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/service-results")
 public class ServiceResultController {
-
-    private final ServiceResultService serviceResultService;
-
-    public ServiceResultController(ServiceResultService serviceResultService) {
-        this.serviceResultService = serviceResultService;
-    }
+    @Autowired
+    private ServiceResultService serviceResultService;
 
     /**
      * API tạo kết quả dịch vụ cho bệnh nhân
@@ -44,5 +45,25 @@ public class ServiceResultController {
         ServiceResult saved = serviceResultService.saveServiceResult(request);
 
         return ResponseEntity.ok(saved);
+    }
+
+    // GET /api/v1/service-results/patients-with-results?doctorId=xxx
+    @GetMapping("/patients-with-results")
+    public ResponseEntity<List<PatientWithResultResponse>> getPatientsWithResults(
+            @RequestParam(required = false) String doctorId
+    ) {
+        return ResponseEntity.ok(
+                serviceResultService.getPatientsWithCompletedResults(doctorId)
+        );
+    }
+
+    // GET /api/v1/service-results/patient/{patientId}
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<ServiceResultResponse>> getResultsByPatient(
+            @PathVariable String patientId
+    ) {
+        return ResponseEntity.ok(
+                serviceResultService.getCompletedResultsByPatient(patientId)
+        );
     }
 }

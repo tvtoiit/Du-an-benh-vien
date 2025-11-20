@@ -1,21 +1,50 @@
-import React, { useState } from "react";
+// DsBenhNhanThanhToan.jsx
+import React, { useState, useEffect } from "react";
 import {
-    Box, Typography, Paper, Table, TableHead, TableRow,
-    TableCell, TableBody, Button, TableContainer
+    Box,
+    Typography,
+    Paper,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Button,
+    TableContainer,
 } from "@mui/material";
 import PaymentForm from "./PaymentForm";
-
-const mockPaymentList = [
-    { id: 1, name: "Nguyễn Văn A", total: 350000, status: "Chưa thanh toán" },
-    { id: 2, name: "Trần Thị B", total: 420000, status: "Chưa thanh toán" },
-    { id: 3, name: "Lê Văn C", total: 410000, status: "Đã thanh toán" },
-];
+import paymentService from "../../../services/paymentService";
 
 const DsBenhNhanThanhToan = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            try {
+                setLoading(true);
+                const res = await paymentService.getWaitingList();
+                // giả sử BE trả list dạng:
+                // [{ patientId, fullName, totalCost, status, prescriptionId }]
+                setPatients(res);
+            } catch (error) {
+                console.error("Error fetching waiting payments: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPatients();
+    }, []);
 
     if (selectedPatient) {
-        return <PaymentForm patient={selectedPatient} onBack={() => setSelectedPatient(null)} />;
+        return (
+            <PaymentForm
+                patient={selectedPatient}
+                onBack={() => setSelectedPatient(null)}
+            />
+        );
     }
 
     return (
@@ -28,33 +57,62 @@ const DsBenhNhanThanhToan = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell><b>Tên bệnh nhân</b></TableCell>
-                            <TableCell align="right"><b>Tổng tiền (VNĐ)</b></TableCell>
-                            <TableCell><b>Trạng thái</b></TableCell>
-                            <TableCell align="center"><b>Thao tác</b></TableCell>
+                            <TableCell>
+                                <b>Tên bệnh nhân</b>
+                            </TableCell>
+                            <TableCell align="right">
+                                <b>Tổng tiền (VNĐ)</b>
+                            </TableCell>
+                            <TableCell>
+                                <b>Trạng thái</b>
+                            </TableCell>
+                            <TableCell align="center">
+                                <b>Thao tác</b>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {mockPaymentList.map((p) => (
-                            <TableRow key={p.id}>
-                                <TableCell>{p.name}</TableCell>
-                                <TableCell align="right">{p.total.toLocaleString()}</TableCell>
-                                <TableCell>{p.status}</TableCell>
-                                <TableCell align="center">
-                                    {p.status === "Đã thanh toán" ? (
-                                        <Button variant="outlined" disabled>Đã TT</Button>
-                                    ) : (
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => setSelectedPatient(p)}
-                                        >
-                                            Thanh toán
-                                        </Button>
-                                    )}
+                        {loading && (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center">
+                                    Đang tải...
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )}
+
+                        {!loading && patients.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={4} align="center">
+                                    Không có bệnh nhân nào chờ thanh toán
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading &&
+                            patients.map((p) => (
+                                <TableRow key={p.patientId}>
+                                    <TableCell>{p.fullName}</TableCell>
+                                    <TableCell align="right">
+                                        {(p.totalCost || 0).toLocaleString()}
+                                    </TableCell>
+                                    <TableCell>{p.status || "Chưa thanh toán"}</TableCell>
+                                    <TableCell align="center">
+                                        {p.status === "Đã thanh toán" ? (
+                                            <Button variant="outlined" disabled>
+                                                Đã TT
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => setSelectedPatient(p)}
+                                            >
+                                                Thanh toán
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                     </TableBody>
                 </Table>
             </TableContainer>

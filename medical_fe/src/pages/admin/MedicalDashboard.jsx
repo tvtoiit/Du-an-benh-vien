@@ -160,7 +160,7 @@ const MedicalDashboard = () => {
                                 [Quản lí bác sĩ]
                             </li>
                         )}
-                        {can("chiDinhKham") && (
+                        {(can("tiepNhan") || can("phieuKham") || can("canLamSang") || can("keDonThuoc") || can("thanhToan")) && (
                             <li className={activeRole === 'Khám bệnh' ? 'active' : ''} onClick={() => setActiveRole('Khám bệnh')}>
                                 [Quản lí khám bệnh]
                             </li>

@@ -26,13 +26,15 @@ public class AdvancePaymentServiceImpl implements AdvancePaymentService {
     }
 
     @Override
-    @Transactional
     public AdvancePayment createAdvancePayment(AdvancePaymentRequest req) {
+        // 1. Tìm bệnh nhân
         Patients patient = patientsRepository.findById(req.getPatientId())
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Patient not found with id: " + req.getPatientId()
+                        HttpStatus.NOT_FOUND,
+                        "Patient not found with id: " + req.getPatientId()
                 ));
 
+        // 2. Map request -> entity
         AdvancePayment ap = new AdvancePayment();
         ap.setPatient(patient);
         ap.setAmount(req.getAmount());
@@ -40,42 +42,32 @@ public class AdvancePaymentServiceImpl implements AdvancePaymentService {
         ap.setCreatedBy(req.getCreatedBy());
         ap.setCreatedAt(LocalDateTime.now());
 
+        // 3. Lưu DB
         return advancePaymentRepository.save(ap);
-    }
-
-    @Override
-    @Transactional
+    }@Override
     public AdvancePayment updateAdvancePayment(String advanceId, AdvancePaymentRequest req) {
         AdvancePayment existing = advancePaymentRepository.findById(advanceId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "AdvancePayment not found with id: " + advanceId
-                ));
+                        HttpStatus.NOT_FOUND, "Advance payment not found with id: " + advanceId));
 
-        // update patient nếu có thay đổi
-        if (req.getPatientId() != null && !req.getPatientId().isBlank()) {
-            String newPatientId = req.getPatientId();
-            String currentPatientId = existing.getPatient() != null ? existing.getPatient().getPatientId() : null;
-            if (currentPatientId == null || !currentPatientId.equals(newPatientId)) {
-                Patients patient = patientsRepository.findById(newPatientId)
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.NOT_FOUND, "Patient not found with id: " + newPatientId
-                        ));
-                existing.setPatient(patient);
-            }
+        // nếu bạn cho phép đổi bệnh nhân:
+        if (req.getPatientId() != null) {
+            Patients patient = patientsRepository.findById(req.getPatientId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Patient not found with id: " + req.getPatientId()));
+            existing.setPatient(patient);
         }
 
-        if (req.getAmount() != null) {
-            existing.setAmount(req.getAmount());
-        }
-
-        if (req.getNote() != null) {
-            existing.setNote(req.getNote());
-        }
-
-        if (req.getCreatedBy() != null) {
-            existing.setCreatedBy(req.getCreatedBy());
-        }
+        if (req.getAmount() != null) existing.setAmount(req.getAmount());
+        if (req.getNote() != null) existing.setNote(req.getNote());
+        if (req.getCreatedBy() != null) existing.setCreatedBy(req.getCreatedBy());
 
         return advancePaymentRepository.save(existing);
+    }
+
+    // helper: tổng tạm ứng theo bệnh nhân
+    public Double getTotalAdvanceByPatient(String patientId) {
+        Double sum = advancePaymentRepository.sumAmountByPatientId(patientId);
+        return sum != null ? sum : 0.0;
     }
 }

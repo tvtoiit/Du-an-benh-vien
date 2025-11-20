@@ -12,66 +12,40 @@ import {
     Button,
     Chip,
 } from "@mui/material";
-import MedicalExamForm from "./MedicalExamForm";
-import appointmentService from "../../../services/appointmentService";
+import ConclusionForm from "./ConclusionForm";
+import serviceResultService from "../../../services/serviceResultService";
 
-const DsBenhNhanKham = () => {
+const DsBenhNhanCoKetQua = () => {
     const [patients, setPatients] = useState([]);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [selectedPatient, setSelectedPatient] = useState(null);
 
     useEffect(() => {
-        const fetchAppointments = async () => {
+        const fetchPatients = async () => {
             try {
-
-                const res = await appointmentService.getAll();
-
                 const doctorId = localStorage.getItem("doctorId");
-
-
-                // Tùy backend của bạn, giả sử status dùng:
-                // "waiting for censorship" / "approved" / "done"
-                const waiting = res.filter(
-                    (item) =>
-                    (item.status === "waiting for censorship" ||
-                        item.status === "approved")
-                );
-
-
-                setPatients(waiting);
+                const res = await serviceResultService.getPatientsWithResults(doctorId);
+                const list = Array.isArray(res) ? res : res.data ?? [];
+                setPatients(list);
             } catch (error) {
-                console.error("Failed to fetch appointments", error);
+                console.error("Failed to fetch patients with results", error);
             }
         };
-
-        fetchAppointments();
+        fetchPatients();
     }, []);
 
-    if (selectedAppointment) {
+    if (selectedPatient) {
         return (
-            <MedicalExamForm
-                appointment={selectedAppointment}
-                onBack={() => setSelectedAppointment(null)}
+            <ConclusionForm
+                patient={selectedPatient}
+                onBack={() => setSelectedPatient(null)}
             />
         );
     }
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case "waiting for censorship":
-                return "warning";
-            case "approved":
-                return "info";
-            case "done":
-                return "success";
-            default:
-                return "default";
-        }
-    };
-
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h5" fontWeight="bold" mb={3} color="primary">
-                Danh sách bệnh nhân chờ khám
+                Bệnh nhân đã có kết quả cận lâm sàng
             </Typography>
 
             <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
@@ -88,43 +62,33 @@ const DsBenhNhanKham = () => {
                             </TableCell>
                         </TableRow>
                     </TableHead>
-
                     <TableBody>
-                        {patients.map((item, index) => {
-                            const p = item.patient;
-
-                            return (
-                                <TableRow key={item.appointmentScheduleId} hover>
-                                    <TableCell>{index + 1}</TableCell>
-
-                                    <TableCell>{p.fullName}</TableCell>
-
-                                    <TableCell>
-                                        {p.dateOfBirth?.split("T")[0] ?? "—"}
-                                    </TableCell>
-
-                                    <TableCell>{p.contactNumber ?? "—"}</TableCell>
-
-                                    <TableCell>
-                                        <Chip
-                                            label={item.status}
-                                            color={getStatusColor(item.status)}
-                                            size="small"
-                                        />
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => setSelectedAppointment(item)}
-                                        >
-                                            Khám
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            );
-                        })}
+                        {patients.map((p, index) => (
+                            <TableRow key={p.patientId} hover>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{p.fullName}</TableCell>
+                                <TableCell>
+                                    {p.dateOfBirth?.split("T")[0] ?? "—"}
+                                </TableCell>
+                                <TableCell>{p.contactNumber ?? "—"}</TableCell>
+                                <TableCell>
+                                    <Chip
+                                        label={p.status}
+                                        color="success"
+                                        size="small"
+                                    />
+                                </TableCell>
+                                <TableCell align="center">
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => setSelectedPatient(p)}
+                                    >
+                                        Gặp bác sĩ kết luận
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -132,4 +96,4 @@ const DsBenhNhanKham = () => {
     );
 };
 
-export default DsBenhNhanKham;
+export default DsBenhNhanCoKetQua;

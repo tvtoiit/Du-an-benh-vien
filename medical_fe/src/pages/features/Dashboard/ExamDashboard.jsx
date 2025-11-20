@@ -68,10 +68,10 @@ const features = [
 
 // map giữa feature và key quyền trong permissions
 const featurePermissionMap = {
-    tiepNhan: "chiDinhKham",
-    phieuKham: "chiDinhKham",
-    canLamSang: "quanLyKho",
-    keDonThuoc: "quanLyKho",
+    tiepNhan: "tiepNhan",
+    phieuKham: "phieuKham",
+    canLamSang: "canLamSang",
+    keDonThuoc: "keDonThuoc",
     thanhToan: "thanhToan",
 };
 

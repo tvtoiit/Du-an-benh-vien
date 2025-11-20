@@ -104,16 +104,6 @@ const PatientList = ({ onSelectPatient }) => {
                                 <TableCell>{p.address}</TableCell>
                                 <TableCell align="center">
                                     <Stack direction="row" spacing={1} justifyContent="center">
-                                        <Tooltip title="Tiếp nhận">
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                size="small"
-                                            >
-                                                Tiếp nhận
-                                            </Button>
-                                        </Tooltip>
-
                                         <Tooltip title="Xem chi tiết">
                                             <IconButton color="primary" onClick={() => handleView(p)}>
                                                 <VisibilityIcon />
