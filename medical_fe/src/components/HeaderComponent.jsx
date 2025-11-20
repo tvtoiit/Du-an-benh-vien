@@ -30,18 +30,6 @@ export default function Header({ menuItems, activeMenu, setActiveMenu, onRegiste
             });
     }, []);
 
-    // Đóng dropdown khi click ra ngoài
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setShowDropdown(false);
-            }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         setCheckUser(false);

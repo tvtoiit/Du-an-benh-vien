@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/Home.css";
+import patientService from "../../services/parentService";
+import userService from "../../services/userService";
 
 export default function RegisterModal({ onClose }) {
+  const [users, setUsers] = useState([]);
+
   const [formData, setFormData] = useState({
+    userId: "",
     fullName: "",
     contactNumber: "",
     email: "",
@@ -12,33 +17,31 @@ export default function RegisterModal({ onClose }) {
     otherInfoEHealth: ""
   });
 
-  // handle input
+  useEffect(() => {
+    userService
+      .getAll()
+      .then((data) => setUsers(data))
+      .catch((err) => console.error("Lỗi load danh sách user:", err));
+  }, []);
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/v1/patients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        alert("Đăng ký thành công!");
-        onClose();
+      await patientService.create(formData);
+      alert("Đăng ký thành công!");
+      onClose();
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        alert("Lỗi: " + (error.response.data.error || "Không xác định!"));
       } else {
-        const errMsg = await res.text();
-        alert("Lỗi: " + errMsg);
+        alert("Không thể kết nối server!");
       }
-    } catch (err) {
-      console.error(err);
-      alert("Không thể kết nối server!");
     }
   };
 
@@ -51,6 +54,23 @@ export default function RegisterModal({ onClose }) {
         </div>
 
         <form className="modal-form" onSubmit={handleSubmit}>
+
+          {/* 🔹 DROPDOWN USER */}
+          <select
+            name="userId"
+            value={formData.userId}
+            onChange={handleChange}
+            className="select-box"
+            required
+          >
+            <option value="">-- Chọn tài khoản người dùng --</option>
+            {users.map((u) => (
+              <option key={u.userId} value={u.userId}>
+                {u.fullName} — {u.email}
+              </option>
+            ))}
+          </select>
+
           <input
             type="text"
             name="fullName"
