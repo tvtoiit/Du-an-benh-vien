@@ -17,8 +17,4 @@ public class UserAdminRequest {
   private String email;
 
   private String address;
-
-  private String username;
-
-  private String password;
 }

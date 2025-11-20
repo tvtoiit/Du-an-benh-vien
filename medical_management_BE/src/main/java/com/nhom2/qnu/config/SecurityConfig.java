@@ -20,6 +20,10 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
@@ -90,5 +94,26 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+
+        // Cho phép FE
+        config.addAllowedOrigin("http://localhost:5173");
+
+        config.addAllowedHeader("*");
+
+        // Quan trọng: cho phép tất cả method, bao gồm PUT, DELETE, OPTIONS
+        config.addAllowedMethod("*");
+
+        // Cho phép browser thấy các header
+        config.addExposedHeader("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

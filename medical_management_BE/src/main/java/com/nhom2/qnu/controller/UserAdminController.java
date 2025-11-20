@@ -17,7 +17,7 @@ import com.nhom2.qnu.payload.request.UserAdminRequest;
 import com.nhom2.qnu.service.UserAdminService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
+//@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping(value = "/api/v1/user_admin")
 public class UserAdminController {
   @Autowired
@@ -28,26 +28,26 @@ public class UserAdminController {
     return userAdminService.getUSerAdminByToken(token);
   }
 
-  @GetMapping("")
+  @GetMapping("/getAll")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   public ResponseEntity<Object> getAllUser() {
     return userAdminService.getAllUSerAdmin();
   }
 
   @PostMapping("/create")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+//  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public ResponseEntity<Object> getCreateUser(@RequestBody UserAdminRequest request) {
     return userAdminService.createUSerAdmin(request);
   }
 
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+//  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public ResponseEntity<Object> updateUser(@PathVariable("id") String id, @RequestBody RequestUpdateUser request) {
     return userAdminService.updateUser(id, request);
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+//  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public ResponseEntity<Object> deleteUser(@PathVariable("id") String id) {
     return userAdminService.delete(id);
   }

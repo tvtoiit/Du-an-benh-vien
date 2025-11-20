@@ -18,4 +18,6 @@ public class RequestUpdateUser {
 
   private String roleName;
 
+  private Boolean status;
+
 }

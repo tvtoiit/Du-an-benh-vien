@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -17,49 +17,49 @@ import {
     DialogActions,
 } from "@mui/material";
 import { Delete, Edit, Add } from "@mui/icons-material";
+import userService from "../../../services/userService";
 
 const UserManagement = () => {
-    // Fake data ban đầu
-    const [users, setUsers] = useState([
-        {
-            user_id: "1",
-            full_name: "Nguyễn Văn A",
-            email: "vana@example.com",
-            phone_number: "0901234567",
-            address: "Hà Nội",
-            status: "active",
-        },
-        {
-            user_id: "2",
-            full_name: "Trần Thị B",
-            email: "thib@example.com",
-            phone_number: "0987654321",
-            address: "TP.HCM",
-            status: "inactive",
-        },
-    ]);
-
+    const [users, setUsers] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+
     const [formData, setFormData] = useState({
         full_name: "",
         email: "",
         phone_number: "",
         address: "",
-        status: "active",
+        status: true,
     });
+
+    useEffect(() => {
+        userService
+            .getAll()
+            .then((data) => setUsers(data))
+            .catch((err) => console.error(err));
+    }, []);
 
     const handleOpen = (user = null) => {
         setEditingUser(user);
+
         setFormData(
-            user || {
-                full_name: "",
-                email: "",
-                phone_number: "",
-                address: "",
-                status: "active",
-            }
+            user
+                ? {
+                    full_name: user.fullName,
+                    email: user.email,
+                    phone_number: user.phoneNumber,
+                    address: user.address,
+                    status: user.status,
+                }
+                : {
+                    full_name: "",
+                    email: "",
+                    phone_number: "",
+                    address: "",
+                    status: true,
+                }
         );
+
         setOpen(true);
     };
 
@@ -72,32 +72,78 @@ const UserManagement = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // ✅ Thêm hoặc sửa user trong danh sách
-    const handleSave = () => {
-        if (editingUser) {
-            // cập nhật user
-            setUsers((prev) =>
-                prev.map((u) =>
-                    u.user_id === editingUser.user_id ? { ...u, ...formData } : u
-                )
-            );
+    const handleSave = async () => {
+        try {
+            if (editingUser) {
+                // UPDATE USER
+                await userService.update(editingUser.userId, {
+                    fullName: formData.full_name,
+                    phoneNumber: formData.phone_number,
+                    address: formData.address,
+                    status: formData.status
+                });
+
+                setUsers((prev) =>
+                    prev.map((u) =>
+                        u.userId === editingUser.userId
+                            ? {
+                                ...u,
+                                fullName: formData.full_name,
+                                email: formData.email,
+                                phoneNumber: formData.phone_number,
+                                address: formData.address,
+                                status: formData.status === "active"
+                            }
+                            : u
+                    )
+                );
+
+            } else {
+                // CREATE USER - FE only sends basic info
+                const createdUser = await userService.create({
+                    fullName: formData.full_name,
+                    email: formData.email,
+                    phoneNumber: formData.phone_number,
+                    address: formData.address
+                });
+
+                setUsers((prev) => [...prev, createdUser]);
+            }
+
+            handleClose();
+        } catch (error) {
+            console.error(error);
+
+            if (error.response) {
+                const err = error.response.data;
+
+                // Nếu BE trả về dạng { error: "..."}
+                if (err.error) {
+                    alert(err.error);
+                    return;
+                }
+
+                // Nếu BE trả về string (Tài khoản đã tồn tại!)
+                if (typeof err === "string") {
+                    alert(err);
+                    return;
+                }
+            }
+
+            alert("Có lỗi xảy ra khi lưu người dùng!");
         }
-        // } else {
-        //     // thêm mới
-        //     const newUser = { user_id: uuidv4(), ...formData };
-        //     setUsers((prev) => [...prev, newUser]);
-        // }
-        handleClose();
     };
-    /////////////////////CALL API SERVICE HERE /////////////////////
-    // import userService from "../services/userService";
 
-    // useEffect(() => {
-    //   userService.getAll().then(setUsers);
-    // }, []);
+    const handleDelete = async (userId) => {
+        if (!window.confirm("Bạn có chắc muốn xoá người dùng này?")) return;
 
-    const handleDelete = (user_id) => {
-
+        try {
+            await userService.delete(userId);
+            setUsers((prev) => prev.filter((u) => u.userId !== userId));
+        } catch (error) {
+            console.error(error);
+            alert("Có lỗi xảy ra khi xoá người dùng!");
+        }
     };
 
     return (
@@ -129,12 +175,14 @@ const UserManagement = () => {
                     </TableHead>
                     <TableBody>
                         {users.map((u) => (
-                            <TableRow key={u.user_id}>
-                                <TableCell>{u.full_name}</TableCell>
+                            <TableRow key={u.userId}>
+                                <TableCell>{u.fullName}</TableCell>
                                 <TableCell>{u.email}</TableCell>
-                                <TableCell>{u.phone_number}</TableCell>
+                                <TableCell>{u.phoneNumber}</TableCell>
                                 <TableCell>{u.address}</TableCell>
-                                <TableCell>{u.status}</TableCell>
+                                <TableCell>
+                                    {u.status ? "Active" : "Inactive"}
+                                </TableCell>
                                 <TableCell>
                                     <Button
                                         color="primary"
@@ -145,26 +193,28 @@ const UserManagement = () => {
                                     </Button>
                                     <Button
                                         color="error"
-                                        onClick={() => handleDelete(u.user_id)}
+                                        onClick={() => handleDelete(u.userId)}
                                         startIcon={<Delete />}
                                     >
-                                        Xóa
+                                        Xoá
                                     </Button>
                                 </TableCell>
                             </TableRow>
                         ))}
+
                         {users.length === 0 && (
-                            <TableRow>
+                            <TableRow key="empty">
                                 <TableCell colSpan={6} align="center">
                                     Không có người dùng nào
                                 </TableCell>
                             </TableRow>
                         )}
+
                     </TableBody>
                 </Table>
             </TableContainer>
 
-            {/* Form thêm/sửa */}
+            {/* Form thêm / sửa */}
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>
                     {editingUser ? "Sửa người dùng" : "Thêm người dùng"}

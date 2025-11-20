@@ -2,6 +2,7 @@ package com.nhom2.qnu.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.nhom2.qnu.exception.DataNotFoundException;
@@ -42,7 +43,8 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Override
   public ResponseEntity<Object> getAllUSerAdmin() {
-    List<User> lst = userRepositories.findAll();
+      List<User> lst = userRepositories.findByStatus(true);
+//    List<User> lst = userRepositories.findAll();
     if (lst.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
@@ -99,35 +101,68 @@ public class UserAdminServiceImpl implements UserAdminService {
     return ResponseEntity.ok().body(response);
   }
 
-  @Override
-  public ResponseEntity<Object> createUSerAdmin(UserAdminRequest request) {
-    Optional<User> user = userRepositories.findUserByUsernameEmail(request.getUsername(), request.getEmail());
-    if (user.isPresent()) {
-      return ResponseEntity.ok().body("Username or Email exits");
+    @Override
+    public ResponseEntity<Object> createUSerAdmin(UserAdminRequest request) {
+
+        // 1. Check email trùng
+        Optional<User> existEmail = userRepositories.findUserByEmail(request.getEmail());
+        if (existEmail.isPresent()) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", "Email đã tồn tại, vui lòng nhập email khác!"));
+        }
+
+        Account existAcc = accountRepository.findByusername(request.getEmail());
+        if (existAcc != null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", "Tài khoản đã tồn tại, vui lòng dùng email khác!"));
+        }
+
+        // 2. Lấy role USER tự động
+        Role role = roleRepositories.findByName("ROLE_USER");
+        if (role == null) {
+            return ResponseEntity.badRequest().body("Role USER not found");
+        }
+
+        // 3. Tạo account
+        Account acc = Account.builder()
+                .username(request.getEmail())
+                .password(request.getEmail())
+                .role(role)
+                .build();
+
+// 👉 BẮT BUỘC SAVE ACCOUNT TRƯỚC
+        accountRepository.save(acc);
+
+// 4. Tạo user
+        User userCreate = User.builder()
+                .account(acc)
+                .address(request.getAddress())
+                .email(request.getEmail())
+                .fullName(request.getFullName())
+                .status(true)
+                .phoneNumber(request.getPhoneNumber())
+                .build();
+
+        // 5. Lưu user
+        userRepositories.save(userCreate);
+
+
+        UserAdminResponse respon = UserAdminResponse.builder()
+                .userId(userCreate.getUserId())
+                .accountId(userCreate.getAccount().getAccountId())
+                .fullName(userCreate.getFullName())
+                .email(userCreate.getEmail())
+                .phoneNumber(userCreate.getPhoneNumber())
+                .address(userCreate.getAddress())
+                .status(userCreate.getStatus())
+                .build();
+
+        return ResponseEntity.ok(respon);
     }
 
-    Role role = roleRepositories.findByName("USER");
-    Account acc = Account
-        .builder()
-        .username(request.getUsername())
-        .password(request.getPassword())
-        .role(role)
-        .build();
-    accountRepository.save(acc);
-    User userCreate = User.builder()
-        .account(acc)
-        .address(request.getAddress())
-        .email(request.getEmail())
-        .fullName(request.getFullName())
-        .status(true)
-        .phoneNumber(request.getPhoneNumber())
-        .build();
-
-    userRepositories.save(userCreate);
-    return ResponseEntity.ok().body("Create Success");
-  }
-
-  @Override
+    @Override
   public ResponseEntity<Object> delete(String id) {
     Optional<User> user = userRepositories.findUserByStatus(id);
     if (user.isEmpty()) {
@@ -138,30 +173,49 @@ public class UserAdminServiceImpl implements UserAdminService {
     return ResponseEntity.ok().body("Delete Success");
   }
 
-  @Override
-  public ResponseEntity<Object> updateUser(String id, RequestUpdateUser request) {
-    Optional<User> user = userRepositories.findById(id);
-    if (user.isEmpty()) {
-      return ResponseEntity.noContent().build();
-    }
-    if (!(request.getFullName() == null) || !(request.getFullName() == "")) {
-      user.get().setFullName(request.getFullName());
-    }
-    if (!(request.getPhoneNumber() == null) || !(request.getPhoneNumber() == "")) {
-      user.get().setPhoneNumber(request.getPhoneNumber());
-    }
-    if (!(request.getAddress() == null) || !(request.getAddress() == "")) {
-      user.get().setAddress(request.getAddress());
-    }
-    if (!(request.getRoleName() == null) || !(request.getRoleName() == "")) {
-      Role role = roleRepositories.findByName(request.getRoleName());
-      user.get().getAccount().setRole(role);
-    }
-    userRepositories.save(user.get());
-    return ResponseEntity.ok().body("Update Success");
-  }
+    @Override
+    public ResponseEntity<Object> updateUser(String id, RequestUpdateUser request) {
+        Optional<User> optionalUser = userRepositories.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "User không tồn tại"));
+        }
 
-  public User getUserOfSocket(String token) {
+        User user = optionalUser.get();
+
+        // Cập nhật fullName nếu FE gửi đúng
+        if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+            user.setFullName(request.getFullName());
+        }
+
+        // Cập nhật status
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
+        }
+
+        // Cập nhật phoneNumber
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+
+        // Cập nhật address
+        if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+            user.setAddress(request.getAddress());
+        }
+
+        // Cập nhật role nếu có thay đổi
+        if (request.getRoleName() != null && !request.getRoleName().trim().isEmpty()) {
+            Role role = roleRepositories.findByName(request.getRoleName());
+            if (role != null) {
+                user.getAccount().setRole(role);
+            }
+        }
+
+        userRepositories.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Update Success"));
+    }
+
+    public User getUserOfSocket(String token) {
     String username = jwtProviderUtils.getUserNameFromJwtToken(token);
     Account account = accountRepository.findByusername(username);
     User user = userRepositories.findById(account.getUser().getUserId())

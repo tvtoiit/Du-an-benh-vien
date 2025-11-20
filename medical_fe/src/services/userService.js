@@ -1,11 +1,11 @@
 import api from "../core/api";
 
 const userService = {
-    getAll: () => api.get("/users"),
-    getById: (id) => api.get(`/users/${id}`),
-    create: (data) => api.post("/users", data),
-    update: (id, data) => api.put(`/users/${id}`, data),
-    delete: (id) => api.delete(`/users/${id}`)
+    getAll: () => api.get("/user_admin/getAll"),
+    getById: (id) => api.get(`/user_admin/${id}`),
+    create: (data) => api.post("/user_admin/create", data),
+    update: (id, data) => api.put(`/user_admin/${id}`, data),
+    delete: (id) => api.delete(`/user_admin/${id}`)
 };
 
 export default userService;
