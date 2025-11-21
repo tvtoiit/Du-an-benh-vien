@@ -1,18 +1,15 @@
+// src/components/Patient/RegisterModal.jsx
 import React, { useState, useEffect } from "react";
-import "../../styles/Home.css";
-import patientService from "../../services/parentService";
-import userService from "../../services/userService";
+import "../../../styles/Home.css";
+import patientService from "../../../services/parentService";
+import userService from "../../../services/userService";
 
 export default function RegisterModal({ onClose }) {
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
     userId: "",
-    fullName: "",
-    contactNumber: "",
-    email: "",
     dateOfBirth: "",
-    address: "",
     otherInfo: "",
     otherInfoEHealth: ""
   });
@@ -34,7 +31,7 @@ export default function RegisterModal({ onClose }) {
     try {
       await patientService.create(formData);
       alert("Đăng ký thành công!");
-      onClose();
+      onClose(true); // reload lại danh sách
     } catch (error) {
       console.error(error);
       if (error.response) {
@@ -49,13 +46,12 @@ export default function RegisterModal({ onClose }) {
     <div className="modal-overlay">
       <div className="modal">
         <div className="modal-header">
-          <h2>ĐĂNG KÝ KHÁM VÀ TƯ VẤN</h2>
-          <button className="close-btn" onClick={onClose}>✖</button>
+          <h2>Thêm Bệnh Nhân</h2>
+          <button className="close-btn" onClick={() => onClose(false)}>✖</button>
         </div>
 
         <form className="modal-form" onSubmit={handleSubmit}>
 
-          {/* 🔹 DROPDOWN USER */}
           <select
             name="userId"
             value={formData.userId}
@@ -72,44 +68,11 @@ export default function RegisterModal({ onClose }) {
           </select>
 
           <input
-            type="text"
-            name="fullName"
-            placeholder="Họ và tên *"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="contactNumber"
-            placeholder="Điện thoại *"
-            value={formData.contactNumber}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-
-          <input
             type="date"
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleChange}
-          />
-
-          <input
-            type="text"
-            name="address"
-            placeholder="Địa chỉ"
-            value={formData.address}
-            onChange={handleChange}
+            required
           />
 
           <textarea
@@ -117,6 +80,7 @@ export default function RegisterModal({ onClose }) {
             placeholder="Nhu cầu khám bệnh / Ghi chú"
             value={formData.otherInfo}
             onChange={handleChange}
+            required
           />
 
           <textarea

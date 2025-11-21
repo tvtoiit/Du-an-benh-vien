@@ -13,15 +13,7 @@ public class PatientRequest {
 
     private String userId;
 
-    private String fullName;
-
-    private String contactNumber;
-
-    private String email;
-
     private Date dateOfBirth;
-
-    private String address;
 
     private String otherInfo;
 

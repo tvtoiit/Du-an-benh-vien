@@ -1,8 +1,7 @@
+// src/components/Patient/PatientList.jsx
 import React, { useEffect, useState } from "react";
 import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
-import { useNavigate } from "react-router-dom";
-import TiepNhan from "../../features/Appointments/TiepNhan";
 import {
     Box,
     Typography,
@@ -23,32 +22,31 @@ import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RegisterModal from "../../user/RegisterModal";
+import RegisterModal from "./RegisterModal";
 
-const PatientList = ({ onSelectPatient }) => {
+const PatientList = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                const response = await parentService.getAll();
-                setPatients(response);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadPatients = async () => {
+        try {
+            const response = await parentService.getAll();
+            setPatients(response);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchPatients();
+    useEffect(() => {
+        loadPatients();
     }, []);
 
     const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
-
-    const handleView = (patient) => {
-        alert(`Xem chi tiết bệnh nhân: ${patient.name}`);
+    const handleCloseModal = (reload = false) => {
+        setIsModalOpen(false);
+        if (reload) loadPatients(); // reload danh sách
     };
 
     const calculateAge = (dob) => {
@@ -57,16 +55,7 @@ const PatientList = ({ onSelectPatient }) => {
         return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
     };
 
-    const handleEdit = (patient) => {
-        // Chỉnh sủa bệnh nhân
-    };
-
-    const handleDelete = (patientId) => {
-        // Xóa bệnh nhân
-    };
-
     if (loading) return <CircularProgress sx={{ m: 4 }} />;
-    if (error) return <Typography color="error">{error}</Typography>;
 
     return (
         <Box sx={{ p: 4 }}>
@@ -74,6 +63,7 @@ const PatientList = ({ onSelectPatient }) => {
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     Quản lý danh sách bệnh nhân
                 </Typography>
+
                 <Button
                     variant="contained"
                     color="primary"
@@ -92,9 +82,10 @@ const PatientList = ({ onSelectPatient }) => {
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Tuổi</TableCell>
                             <TableCell>Địa chỉ</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
+                            <TableCell>Email</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {patients.map((p) => (
                             <TableRow key={p.patientId} hover>
@@ -102,25 +93,7 @@ const PatientList = ({ onSelectPatient }) => {
                                 <TableCell>{p.fullName}</TableCell>
                                 <TableCell>{calculateAge(p.dateOfBirth)}</TableCell>
                                 <TableCell>{p.address}</TableCell>
-                                <TableCell align="center">
-                                    <Stack direction="row" spacing={1} justifyContent="center">
-                                        <Tooltip title="Xem chi tiết">
-                                            <IconButton color="primary" onClick={() => handleView(p)}>
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Sửa thông tin">
-                                            <IconButton color="warning" onClick={() => handleEdit(p)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Xóa bệnh nhân">
-                                            <IconButton color="error" onClick={() => handleDelete(p.patientId)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Stack>
-                                </TableCell>
+                                <TableCell>{p.email}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

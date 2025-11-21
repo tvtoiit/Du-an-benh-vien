@@ -33,9 +33,6 @@ public class Patients implements Serializable {
     @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
 
-    @Column(name = "gender", length = 10, nullable = true)
-    private String gender;
-
     @Column(name = "other_info", nullable = false)
     private String otherInfo;
 

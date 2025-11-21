@@ -55,18 +55,12 @@ public class PatientsServiceImpl implements PatientsService {
     patients.setDateOfBirth(newPatients.getDateOfBirth());
     patients.setOtherInfo(newPatients.getOtherInfo());
 
-    if (patients.getUser() != null) {
-      patients.getUser().setFullName(newPatients.getFullName());
-      patients.getUser().setPhoneNumber(newPatients.getContactNumber());
-      patients.getUser().setAddress(newPatients.getAddress());
-      patients.getUser().setEmail(newPatients.getEmail());
-    }
-
     Patients updatedPatient = patientsRepository.save(patients);
 
     PatientResponse patientResponse = new PatientResponse();
     patientResponse.setPatientId(updatedPatient.getPatientId());
 
+    // Lấy từ User (không update)
     if (updatedPatient.getUser() != null) {
       patientResponse.setFullName(updatedPatient.getUser().getFullName());
       patientResponse.setAddress(updatedPatient.getUser().getAddress());
@@ -116,24 +110,26 @@ public class PatientsServiceImpl implements PatientsService {
   @Override
   @Transactional
   public EHealthRecordsResponse createPatients(PatientRequest patientRequest) {
+
+    // Tạo entity Patients
     Patients patients = new Patients();
 
+    // --- 1. GÁN USER CHO BỆNH NHÂN ---
     if (patientRequest.getUserId() != null) {
       User user = userRepository.findById(patientRequest.getUserId())
           .orElseThrow(() -> new DataNotFoundException("User not found"));
-      patients.setUser(user);
 
-      user.setFullName(patientRequest.getFullName());
-      user.setPhoneNumber(patientRequest.getContactNumber());
-      user.setEmail(patientRequest.getEmail());
-      user.setAddress(patientRequest.getAddress());
+      patients.setUser(user);
     }
 
+    // --- 2. SET CÁC TRƯỜNG CỦA PATIENT ---
     patients.setDateOfBirth(patientRequest.getDateOfBirth());
     patients.setOtherInfo(patientRequest.getOtherInfo());
 
+    // --- 3. LƯU PATIENT ---
     Patients newPatients = patientsRepository.save(patients);
 
+    // --- 4. TẠO HỒ SƠ SỨC KHỎE ---
     return eHealthRecordsService.createEHealthRecord(
         patientRequest, newPatients.getPatientId());
   }
