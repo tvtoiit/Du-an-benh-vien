@@ -6,135 +6,172 @@ import com.nhom2.qnu.payload.response.PatientWithResultResponse;
 import com.nhom2.qnu.payload.response.ServiceResultResponse;
 import com.nhom2.qnu.repository.*;
 import com.nhom2.qnu.service.ServiceResultService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
+
+import java.time.LocalDate;
 
 @Service
 public class ServiceResultServiceImpl implements ServiceResultService {
 
-    private final ServiceResultRepository serviceResultRepository;
-    private final PatientsRepository patientRepository;
-    private final ServicesRepository servicesRepository;
-    private final DoctorRepository doctorRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final MedicalHistoriesRepository medicalHistoryRepository;
+        private final ServiceResultRepository serviceResultRepository;
+        private final PatientsRepository patientRepository;
+        private final ServicesRepository servicesRepository;
+        private final DoctorRepository doctorRepository;
+        private final AppointmentRepository appointmentRepository;
+        private final MedicalHistoriesRepository medicalHistoryRepository;
 
-    public ServiceResultServiceImpl(ServiceResultRepository serviceResultRepository,
-            PatientsRepository patientRepository,
-            ServicesRepository servicesRepository,
-            DoctorRepository doctorRepository,
-            AppointmentRepository appointmentRepository,
-            MedicalHistoriesRepository medicalHistoryRepository) {
-        this.serviceResultRepository = serviceResultRepository;
-        this.patientRepository = patientRepository;
-        this.servicesRepository = servicesRepository;
-        this.doctorRepository = doctorRepository;
-        this.appointmentRepository = appointmentRepository;
-        this.medicalHistoryRepository = medicalHistoryRepository;
-    }
-
-    @Override
-    public ServiceResult saveServiceResult(ServiceResultRequest request) throws IOException {
-        ServiceResult result = new ServiceResult();
-
-        // Bệnh nhân
-        Patients patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        result.setPatient(patient);
-
-        // Dịch vụ
-        Services service = servicesRepository.findById(request.getServiceId())
-                .orElseThrow(() -> new RuntimeException("Service not found"));
-        result.setService(service);
-
-        // Bác sĩ (nếu có)
-        if (request.getDoctorId() != null && !request.getDoctorId().isEmpty()) {
-            Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                    .orElseThrow(() -> new RuntimeException("Doctor not found"));
-            result.setDoctor(doctor);
+        public ServiceResultServiceImpl(ServiceResultRepository serviceResultRepository,
+                        PatientsRepository patientRepository,
+                        ServicesRepository servicesRepository,
+                        DoctorRepository doctorRepository,
+                        AppointmentRepository appointmentRepository,
+                        MedicalHistoriesRepository medicalHistoryRepository) {
+                this.serviceResultRepository = serviceResultRepository;
+                this.patientRepository = patientRepository;
+                this.servicesRepository = servicesRepository;
+                this.doctorRepository = doctorRepository;
+                this.appointmentRepository = appointmentRepository;
+                this.medicalHistoryRepository = medicalHistoryRepository;
         }
 
-        // Lịch hẹn (nếu có)
-        // if (request.getAppointmentScheduleId() != null &&
-        // !request.getAppointmentScheduleId().isEmpty()) {
-        // AppointmentSchedules appointment =
-        // appointmentRepository.findById(request.getAppointmentScheduleId())
-        // .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        // result.setAppointmentSchedule(appointment);
-        // }
+        @Override
+        public ServiceResult saveServiceResult(ServiceResultRequest request) throws IOException {
+                ServiceResult result = new ServiceResult();
 
-        // Lịch sử khám (nếu có)
-        // if (request.getMedicalHistoryId() != null &&
-        // !request.getMedicalHistoryId().isEmpty()) {
-        // MedicalHistories history =
-        // medicalHistoryRepository.findById(request.getMedicalHistoryId())
-        // .orElseThrow(() -> new RuntimeException("Medical history not found"));
-        // result.setMedicalHistory(history);
-        // }
+                // Bệnh nhân
+                Patients patient = patientRepository.findById(request.getPatientId())
+                                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                result.setPatient(patient);
 
-        result.setResultData(request.getResultData());
-        result.setStatus(request.getStatus());
-        result.setImageUrl(null);
+                // Dịch vụ
+                Services service = servicesRepository.findById(request.getServiceId())
+                                .orElseThrow(() -> new RuntimeException("Service not found"));
+                result.setService(service);
 
-        // File (nếu có)
-        MultipartFile file = request.getImageFile();
-        if (file != null && !file.isEmpty()) {
-            // TODO: Lưu file lên server hoặc cloud storage
-            String fileUrl = "/uploads/" + file.getOriginalFilename();
-            result.setImageUrl(fileUrl);
+                // Bác sĩ (nếu có)
+                if (request.getDoctorId() != null && !request.getDoctorId().isEmpty()) {
+                        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                                        .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                        result.setDoctor(doctor);
+                }
+
+                // Lịch hẹn (nếu có)
+                // if (request.getAppointmentScheduleId() != null &&
+                // !request.getAppointmentScheduleId().isEmpty()) {
+                // AppointmentSchedules appointment =
+                // appointmentRepository.findById(request.getAppointmentScheduleId())
+                // .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                // result.setAppointmentSchedule(appointment);
+                // }
+
+                // Lịch sử khám (nếu có)
+                // if (request.getMedicalHistoryId() != null &&
+                // !request.getMedicalHistoryId().isEmpty()) {
+                // MedicalHistories history =
+                // medicalHistoryRepository.findById(request.getMedicalHistoryId())
+                // .orElseThrow(() -> new RuntimeException("Medical history not found"));
+                // result.setMedicalHistory(history);
+                // }
+
+                result.setResultData(request.getResultData());
+                result.setStatus(request.getStatus());
+                result.setImageUrl(null);
+
+                // File (nếu có)
+                MultipartFile file = request.getImageFile();
+                if (file != null && !file.isEmpty()) {
+                        // TODO: Lưu file lên server hoặc cloud storage
+                        String fileUrl = "/uploads/" + file.getOriginalFilename();
+                        result.setImageUrl(fileUrl);
+                }
+
+                return serviceResultRepository.save(result);
         }
 
-        return serviceResultRepository.save(result);
-    }
+        @Override
+        public List<PatientWithResultResponse> getPatientsWithCompletedResults(String doctorId) {
 
-    // 1) Danh sách bệnh nhân đã có kết quả CLS
-    public List<PatientWithResultResponse> getPatientsWithCompletedResults(String doctorId) {
-        List<Patients> patients;
+                // ===== 1) Lấy danh sách bệnh nhân CÓ KẾT QUẢ CLS =====
+                List<Patients> completedList = (doctorId != null && !doctorId.isEmpty())
+                                ? serviceResultRepository.findDistinctPatientsByStatusAndDoctor("Hoàn thành", doctorId)
+                                : serviceResultRepository.findDistinctPatientsByStatus("Hoàn thành");
 
-        if (doctorId != null && !doctorId.isEmpty()) {
-            patients = serviceResultRepository
-                    .findDistinctPatientsByStatusAndDoctor("Hoàn thành", doctorId);
-        } else {
-            patients = serviceResultRepository
-                    .findDistinctPatientsByStatus("Hoàn thành");
+                // ===== 2) Lấy danh sách bệnh nhân ĐÃ TIẾP NHẬN =====
+                List<AppointmentSchedules> acceptedAppointments = appointmentRepository.findAllByStatus("Chờ khám");
+
+                List<Patients> acceptedList = acceptedAppointments.stream()
+                                .map(AppointmentSchedules::getPatients)
+                                .collect(Collectors.toList());
+
+                // ===== 3) Lấy danh sách ID =====
+                Set<String> completedIds = completedList.stream()
+                                .map(Patients::getPatientId)
+                                .collect(Collectors.toSet());
+
+                Set<String> acceptedIds = acceptedList.stream()
+                                .map(Patients::getPatientId)
+                                .collect(Collectors.toSet());
+
+                // ===== 4) Gộp danh sách không trùng =====
+                Map<String, Patients> merged = new HashMap<>();
+                completedList.forEach(p -> merged.put(p.getPatientId(), p));
+                acceptedList.forEach(p -> merged.put(p.getPatientId(), p));
+
+                // ===== 5) Build response: CHỈ 2 TRẠNG THÁI =====
+                return merged.values().stream()
+                                .map(p -> {
+
+                                        boolean hasCompleted = completedIds.contains(p.getPatientId());
+                                        boolean hasAccepted = acceptedIds.contains(p.getPatientId());
+
+                                        String type;
+
+                                        if (hasCompleted && hasAccepted) {
+                                                type = "kết quả CLS"; // Tiếp nhận + có kết quả
+                                        } else {
+                                                type = "Đã tiếp nhận"; // Chỉ tiếp nhận
+                                        }
+
+                                        return PatientWithResultResponse.builder()
+                                                        .patientId(p.getPatientId())
+                                                        .fullName(p.getUser().getFullName())
+                                                        .dateOfBirth(p.getDateOfBirth())
+                                                        .contactNumber(p.getUser().getPhoneNumber())
+                                                        .status(type)
+                                                        .build();
+                                })
+                                .toList();
         }
 
-        return patients.stream()
-                .map(p -> PatientWithResultResponse.builder()
-                        .patientId(p.getPatientId())
-                        .fullName(p.getUser().getFullName())
-//                        .gender(p.getUser().getGender())
-                        .dateOfBirth(p.getDateOfBirth())
-//                        .contactNumber(p.getUser().getPhone())
-                        .status("Đã có kết quả cận lâm sàng")
-                        .build()
-                )
-                .toList();
-    }
+        // 2) Danh sách kết quả CLS theo bệnh nhân
+        public List<ServiceResultResponse> getCompletedResultsByPatient(String patientId) {
+                List<ServiceResult> list = serviceResultRepository.findByPatient_PatientIdAndStatus(patientId,
+                                "Hoàn thành");
 
-    // 2) Danh sách kết quả CLS theo bệnh nhân
-    public List<ServiceResultResponse> getCompletedResultsByPatient(String patientId) {
-        List<ServiceResult> list =
-                serviceResultRepository.findByPatient_PatientIdAndStatus(patientId, "Hoàn thành");
-
-        return list.stream()
-                .map(sr -> ServiceResultResponse.builder()
-                        .resultId(sr.getResultId())
-                        .serviceName(sr.getService().getServiceName())
-                        .resultData(sr.getResultData())
-                        .note(sr.getNote())
-                        .imageUrl(sr.getImageUrl())
-                        .doctorName(sr.getDoctor() != null
-                                ? sr.getDoctor().getUser().getFullName()
-                                : null)
-                        .createdAt(sr.getCreatedAt())
-                        .build()
-                )
-                .toList();
-    }
+                return list.stream()
+                                .map(sr -> ServiceResultResponse.builder()
+                                                .resultId(sr.getResultId())
+                                                .serviceName(sr.getService().getServiceName())
+                                                .resultData(sr.getResultData())
+                                                .note(sr.getNote())
+                                                .imageUrl(sr.getImageUrl())
+                                                .doctorName(sr.getDoctor() != null
+                                                                ? sr.getDoctor().getUser().getFullName()
+                                                                : null)
+                                                .createdAt(sr.getCreatedAt())
+                                                .build())
+                                .toList();
+        }
 }

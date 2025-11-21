@@ -23,9 +23,9 @@ import java.util.List;
 public class AppointmentServiceImpl implements AppointmentService {
 
     // Định nghĩa các status dùng chung
-    private static final String STATUS_WAITING = "waiting for censorship";
-    private static final String STATUS_FAILED = "Failed";
-    private static final String STATUS_SUCCESS = "Successful";
+    private static final String STATUS_WAITING = "Chờ khám";
+    private static final String STATUS_FAILED = "Bỏ qua";
+    private static final String STATUS_SUCCESS = "Hoàn thành";
 
     @Autowired
     private AppointmentRepository appointmentRepository;

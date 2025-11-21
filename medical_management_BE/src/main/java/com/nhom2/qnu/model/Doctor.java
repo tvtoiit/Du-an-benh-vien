@@ -30,7 +30,7 @@ public class Doctor implements Serializable {
     @Column(name = "experience", nullable = false)
     private int experience;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

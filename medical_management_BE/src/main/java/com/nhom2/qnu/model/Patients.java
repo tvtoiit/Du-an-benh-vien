@@ -48,7 +48,7 @@ public class Patients implements Serializable {
     @JsonIgnore
     private EHealthRecords eHealthRecords;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

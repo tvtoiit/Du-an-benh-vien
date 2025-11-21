@@ -184,6 +184,16 @@ const MedicalDashboard = () => {
                                 [Quản lí thu ngân]
                             </li>
                         )}
+                        {can("khoa") && (
+                            <li className={activeRole === 'admin' ? 'active' : ''} onClick={() => setActiveRole('admin')}>
+                                [Quản lí khoa]
+                            </li>
+                        )}
+                        {can("phong") && (
+                            <li className={activeRole === 'admin' ? 'active' : ''} onClick={() => setActiveRole('admin')}>
+                                [Quản lí phòng]
+                            </li>
+                        )}
                     </ul>
                 </aside>
 

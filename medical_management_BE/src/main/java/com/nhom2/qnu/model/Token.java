@@ -36,7 +36,7 @@ public class Token implements Serializable {
     @Column(name = "expired")
     public boolean expired;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
-    public Account account;
+    private Account account;
 }

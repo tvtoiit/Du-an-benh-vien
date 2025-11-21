@@ -50,6 +50,10 @@ const PatientList = () => {
         if (reload) loadPatients();
     };
 
+    const formatDate = (isoString) => {
+        return isoString ? isoString.substring(0, 10) : "";
+    };
+
     // Xem chi tiết
     const handleView = (p) => {
         alert(
@@ -64,12 +68,6 @@ const PatientList = () => {
     // Sửa thông tin bệnh nhân
     const handleEdit = (p) => {
         setEditingPatient(p);
-    };
-
-    const calculateAge = (dob) => {
-        const birthDate = new Date(dob);
-        const diff = new Date() - birthDate;
-        return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
     };
 
     if (loading) return <CircularProgress sx={{ m: 4 }} />;
@@ -97,7 +95,7 @@ const PatientList = () => {
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
                             <TableCell>Mã BN</TableCell>
                             <TableCell>Họ tên</TableCell>
-                            <TableCell>Tuổi</TableCell>
+                            <TableCell>Ngày khám</TableCell>
                             <TableCell>Địa chỉ</TableCell>
                             <TableCell>Triệu chứng</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -109,7 +107,7 @@ const PatientList = () => {
                             <TableRow key={p.patientId} hover>
                                 <TableCell>{p.patientId}</TableCell>
                                 <TableCell>{p.fullName}</TableCell>
-                                <TableCell>{calculateAge(p.dateOfBirth)}</TableCell>
+                                <TableCell>{formatDate(p.dateOfBirth)}</TableCell>
                                 <TableCell>{p.address}</TableCell>
                                 <TableCell>{p.otherInfo}</TableCell>
 

@@ -26,7 +26,7 @@ public class PaymentDetails implements Serializable {
     @Column(name = "payment_detail_id", length = 36, nullable = false)
     private String paymentDetailId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", referencedColumnName = "patient_id")
     private Patients patient;
 

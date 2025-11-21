@@ -29,7 +29,7 @@ public class PrescriptionHistory implements Serializable {
     @Column(name = "prescription_id", length = 36, nullable = false)
     private String prescriptionId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patients patient;
 

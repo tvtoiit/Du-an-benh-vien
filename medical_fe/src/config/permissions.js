@@ -1,7 +1,6 @@
 // src/config/permissions.js
 
 export const permissions = {
-    // BỆNH NHÂN / USER: không vào khu quản trị
     ROLE_BENHNHAN: {
         quanLyUser: false,
         quanLyBenhNhan: false,
@@ -9,8 +8,6 @@ export const permissions = {
         chiDinhKham: false,
         quanLyKho: false,
         thanhToan: false,
-
-        // bên trong ExamDashboard
         tiepNhan: false,
         phieuKham: false,
         canLamSang: false,
@@ -18,7 +15,6 @@ export const permissions = {
         thanhToan: false,
     },
 
-    // Trường hợp backend trả ROLE_USER thay vì ROLE_BENHNHAN
     ROLE_USER: {
         quanLyUser: false,
         quanLyBenhNhan: false,
@@ -26,7 +22,6 @@ export const permissions = {
         chiDinhKham: false,
         quanLyKho: false,
         thanhToan: false,
-
         tiepNhan: false,
         phieuKham: false,
         canLamSang: false,
@@ -34,9 +29,8 @@ export const permissions = {
         thanhToan: false,
     },
 
-    // LỄ TÂN: quản lý bệnh nhân + tiếp nhận khám
     ROLE_LETAN: {
-        quanLyUser: false,
+        quanLyUser: true,
         quanLyBenhNhan: true,   // menu [Quản lí bệnh nhân]
         quanLyBacSi: false,
         chiDinhKham: true,      // menu [Quản lí khám bệnh] -> để dùng màn Tiếp nhận
@@ -63,7 +57,7 @@ export const permissions = {
         // bên trong ExamDashboard
         tiepNhan: false,        // không tiếp nhận
         phieuKham: true,        // Khám bệnh (phiếu khám)
-        canLamSang: true,       // Chỉ định cận lâm sàng
+        canLamSang: false,       // Chỉ định cận lâm sàng
         keDonThuoc: true,       // Kê đơn thuốc
         thanhToan: false,       // thanh toán để Thu ngân lo
     },
@@ -73,7 +67,7 @@ export const permissions = {
         quanLyUser: false,
         quanLyBenhNhan: false,
         quanLyBacSi: false,
-        chiDinhKham: false,
+        chiDinhKham: true,
         quanLyKho: true,        // menu [Quản lí dược kho] / Cận lâm sàng
         thanhToan: false,
 

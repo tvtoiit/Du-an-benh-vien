@@ -26,11 +26,11 @@ public class AppointmentSchedules implements Serializable {
     @Column(name = "appointment_schedule_id", length = 36, nullable = false)
     private String appointmentScheduleId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patients patients;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
