@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
+import EditPatientModal from "./EditPatientModal";
 import {
     Box,
     Typography,
@@ -20,8 +21,7 @@ import {
 } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit"; s
 import RegisterModal from "./RegisterModal";
 
 const PatientList = () => {
@@ -29,6 +29,7 @@ const PatientList = () => {
     const [loading, setLoading] = useState(true);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingPatient, setEditingPatient] = useState(null);
 
     const loadPatients = async () => {
         try {
@@ -46,7 +47,23 @@ const PatientList = () => {
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = (reload = false) => {
         setIsModalOpen(false);
-        if (reload) loadPatients(); // reload danh sách
+        if (reload) loadPatients();
+    };
+
+    // Xem chi tiết
+    const handleView = (p) => {
+        alert(
+            `Thông tin bệnh nhân:\n\n` +
+            `Họ tên: ${p.fullName}\n` +
+            `Email: ${p.email}\n` +
+            `Địa chỉ: ${p.address}\n` +
+            `Ngày sinh: ${p.dateOfBirth}`
+        );
+    };
+
+    // Sửa thông tin bệnh nhân
+    const handleEdit = (p) => {
+        setEditingPatient(p);
     };
 
     const calculateAge = (dob) => {
@@ -82,7 +99,8 @@ const PatientList = () => {
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Tuổi</TableCell>
                             <TableCell>Địa chỉ</TableCell>
-                            <TableCell>Email</TableCell>
+                            <TableCell>Triệu chứng</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
 
@@ -93,7 +111,24 @@ const PatientList = () => {
                                 <TableCell>{p.fullName}</TableCell>
                                 <TableCell>{calculateAge(p.dateOfBirth)}</TableCell>
                                 <TableCell>{p.address}</TableCell>
-                                <TableCell>{p.email}</TableCell>
+                                <TableCell>{p.otherInfo}</TableCell>
+
+                                <TableCell align="center">
+                                    <Stack direction="row" spacing={1} justifyContent="center">
+                                        <Tooltip title="Xem chi tiết">
+                                            <IconButton color="primary" onClick={() => handleView(p)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Sửa thông tin">
+                                            <IconButton color="warning" onClick={() => handleEdit(p)}>
+                                                <EditIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Stack>
+                                </TableCell>
+
                             </TableRow>
                         ))}
                     </TableBody>
@@ -101,6 +136,16 @@ const PatientList = () => {
             </TableContainer>
 
             {isModalOpen && <RegisterModal onClose={handleCloseModal} />}
+            {editingPatient && (
+                <EditPatientModal
+                    patient={editingPatient}
+                    onClose={() => {
+                        setEditingPatient(null);
+                        loadPatients();
+                    }}
+                />
+            )}
+
         </Box>
     );
 };
