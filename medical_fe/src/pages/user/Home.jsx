@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../../styles/Home.css";
-import RegisterModal from "./RegisterModal";
 import Login from "../user/login/Login";
 import Header from "../../components/HeaderComponent";
 import Footer from "../../components/FooterComponent";
@@ -49,7 +48,7 @@ export default function Home() {
       </div>
 
       {/* Modals */}
-      {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} />}
+      {/* {showRegisterModal && <RegisterModal onClose={() => setShowRegisterModal(false)} />} */}
       {showLoginModal && <Login onLoginClick={() => setShowLoginModal(false)} onRegisterClick={() => setShowRegisterModal(true)} />}
     </div>
   );

@@ -181,7 +181,7 @@ const UserManagement = () => {
                                 <TableCell>{u.phoneNumber}</TableCell>
                                 <TableCell>{u.address}</TableCell>
                                 <TableCell>
-                                    {u.status ? "Active" : "Inactive"}
+                                    {u.status ? "Hoạt động" : "Không hoạt động"}
                                 </TableCell>
                                 <TableCell>
                                     <Button
