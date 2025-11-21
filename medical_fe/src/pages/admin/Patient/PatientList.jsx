@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit"; s
+import EditIcon from "@mui/icons-material/Edit";
 import RegisterModal from "./RegisterModal";
 
 const PatientList = () => {
