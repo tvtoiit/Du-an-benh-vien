@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface ServiceResultService {
     ServiceResult saveServiceResult(ServiceResultRequest request) throws IOException;
+
     List<ServiceResultResponse> getCompletedResultsByPatient(String patientId);
-    List<PatientWithResultResponse> getPatientsWithCompletedResults(String doctorId);
+
+    List<PatientWithResultResponse> getPatientsWithCompletedResults();
 }

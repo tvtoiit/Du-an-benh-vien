@@ -21,23 +21,21 @@ const DsBenhNhanCoKetQua = () => {
     const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
 
+    const handleBack = (needRefresh) => {
+        setSelectedPatient(null);
+
+        if (needRefresh) {
+            fetchData();
+        };
+    };
+
     const fetchData = async () => {
         try {
             const doctorId = localStorage.getItem("doctorId");
 
             const results = await serviceResultService.getPatientsWithResults(doctorId);
-            // const accepted = await appointmentService.getAll();
 
             const listResults = Array.isArray(results) ? results : [];
-            // const listAccepted = Array.isArray(accepted) ? accepted : [];
-
-            // const merged = [...listResults];
-
-            // listAccepted.forEach(p => {
-            //     if (!merged.some(m => m.patientId === p.patientId)) {
-            //         merged.push(p);
-            //     }
-            // });
 
             setPatients(listResults);
         } catch (error) {
@@ -56,17 +54,17 @@ const DsBenhNhanCoKetQua = () => {
             return (
                 <MedicalExamForm
                     appointment={{ patient: selectedPatient }}
-                    onBack={() => setSelectedPatient(null)}
+                    onBack={handleBack}
                 />
             );
         }
 
         // Nếu là bệnh nhân có kết quả CLS → mở kết luận
-        if (selectedPatient.status === "kết quả CLS") {
+        if (selectedPatient.status === "Kết quả CLS") {
             return (
                 <ConclusionForm
                     patient={selectedPatient}
-                    onBack={() => setSelectedPatient(null)}
+                    onBack={handleBack}
                 />
             );
         }
@@ -127,7 +125,7 @@ const DsBenhNhanCoKetQua = () => {
                                         </Button>
                                     )}
 
-                                    {p.status === "kết quả CLS" && (
+                                    {p.status === "Kết quả CLS" && (
                                         <Button
                                             variant="contained"
                                             color="warning"

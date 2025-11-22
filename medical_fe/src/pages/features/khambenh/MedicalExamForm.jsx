@@ -98,6 +98,7 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             await parentService.addServicesForPatient(patient.patientId, selectedServices);
 
             alert(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
+            onBack(true);
         } catch (error) {
             console.error("Lỗi lưu phiếu khám:", error);
             alert("Lưu phiếu khám thất bại, vui lòng thử lại!");

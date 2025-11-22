@@ -47,20 +47,20 @@ const ConclusionForm = ({ patient, onBack }) => {
             }
 
             const payload = {
-                // để symptom/result mô tả là "kết luận sau CLS"
-                symptom: "",
-                result: "Kết luận sau cận lâm sàng",
+                patientId: patient.patientId,
+                doctorId: doctorId,
                 diagnosis: formData.diagnosis,
                 secondaryDiagnosis: formData.secondaryDiagnosis,
                 note: formData.note,
-                patientId: patient.patientId,
-                doctorId: doctorId,
+                testResults: formData.diagnosis,
+                admissionDate: new Date(),
+                dischargeDate: new Date(),
             };
 
-            await medicalHistoryService.create(payload);
+            await medicalHistoryService.createResult(payload);
 
             alert("Đã lưu kết luận của bác sĩ");
-            onBack();
+            onBack(true);
         } catch (error) {
             console.error("Lỗi lưu kết luận:", error);
             alert("Lưu kết luận thất bại, vui lòng thử lại!");
@@ -73,7 +73,6 @@ const ConclusionForm = ({ patient, onBack }) => {
                 Kết luận sau cận lâm sàng
             </Typography>
 
-            {/* Thông tin bệnh nhân */}
             <Typography variant="h6" gutterBottom color="secondary">
                 Thông tin bệnh nhân
             </Typography>
@@ -93,7 +92,6 @@ const ConclusionForm = ({ patient, onBack }) => {
 
             <Divider sx={{ my: 2 }} />
 
-            {/* Kết quả cận lâm sàng */}
             <Typography variant="h6" gutterBottom color="secondary">
                 Kết quả cận lâm sàng
             </Typography>
@@ -116,7 +114,6 @@ const ConclusionForm = ({ patient, onBack }) => {
                 ))}
             </Box>
 
-            {/* Kết luận */}
             <Typography variant="h6" gutterBottom color="secondary">
                 Kết luận của bác sĩ
             </Typography>

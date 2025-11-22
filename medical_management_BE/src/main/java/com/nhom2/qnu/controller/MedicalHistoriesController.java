@@ -24,7 +24,13 @@ public class MedicalHistoriesController {
 
     @PutMapping("/{medicalHistoryId}")
     public ResponseEntity<?> updateMedicalHistories(@RequestBody MedicalHistoriesRequest request,
-                                                    @PathVariable(value = "medicalHistoryId") String medicalHistoryId) {
-        return new ResponseEntity<>(medicalHistoriesService.updateMedicalHistories(request, medicalHistoryId), HttpStatus.CREATED);
+            @PathVariable(value = "medicalHistoryId") String medicalHistoryId) {
+        return new ResponseEntity<>(medicalHistoriesService.updateMedicalHistories(request, medicalHistoryId),
+                HttpStatus.CREATED);
+    }
+
+    @PostMapping("/conclude")
+    public ResponseEntity<?> conclude(@RequestBody MedicalHistoriesRequest req) {
+        return ResponseEntity.ok(medicalHistoriesService.conclude(req));
     }
 }

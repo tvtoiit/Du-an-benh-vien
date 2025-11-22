@@ -83,8 +83,8 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                                 <TableRow key={p.patientId}>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>{p.fullName}</TableCell>
-                                    <TableCell>{p.cccd}</TableCell>
-                                    <TableCell>{p.phoneNumber}</TableCell>
+                                    <TableCell>{p.address}</TableCell>
+                                    <TableCell>{p.contactNumber}</TableCell>
                                     <TableCell align="right">
                                         <Button
                                             variant="contained"

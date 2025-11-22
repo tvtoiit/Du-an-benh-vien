@@ -86,13 +86,20 @@ const ExamDashboard = ({ userPermissions }) => {
     const [selectedFeature, setSelectedFeature] = useState(null);
     const [selectedPatient, setSelectedPatient] = useState(null);
 
+    const handleBack1 = (needRefresh) => {
+
+        if (needRefresh) {
+            fetchData();
+        }
+    };
+
     const can = (permissionKey) =>
         userPermissions && userPermissions[permissionKey];
 
     const handleClick = (featureKey) => {
         const permKey = featurePermissionMap[featureKey];
         if (!can(permKey)) {
-            alert("❌ Bạn không có quyền thực hiện chức năng này!");
+            alert("Bạn không có quyền thực hiện chức năng này!");
             return;
         }
         setSelectedFeature(featureKey);
@@ -209,7 +216,10 @@ const ExamDashboard = ({ userPermissions }) => {
                         !selectedPatient ? (
                             <DanhSachTiepNhan onSelectPatient={handleSelectPatient} />
                         ) : (
-                            <TiepNhan selectedPatient={selectedPatient} />
+                            <TiepNhan
+                                selectedPatient={selectedPatient}
+                                onBack={handleBack1}
+                            />
                         )
                     ) : (
                         featureComponents[selectedFeature]?.()

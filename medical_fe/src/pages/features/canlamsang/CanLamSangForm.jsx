@@ -44,7 +44,6 @@ const CanLamSangForm = ({ patient, onBack }) => {
         const data = new FormData();
         data.append("patientId", patient.patientId);
         data.append("serviceId", selectedService.serviceId);
-        data.append("doctorId", patient.doctorId || "");
         data.append("appointmentScheduleId", patient.appointmentScheduleId || "");
         data.append("medicalHistoryId", patient.medicalHistoryId || "");
         data.append("resultData", formData.result);

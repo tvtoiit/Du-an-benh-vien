@@ -30,6 +30,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
         private final ServicesRepository servicesRepository;
         private final DoctorRepository doctorRepository;
         private final AppointmentRepository appointmentRepository;
+
         private final MedicalHistoriesRepository medicalHistoryRepository;
 
         public ServiceResultServiceImpl(ServiceResultRepository serviceResultRepository,
@@ -61,11 +62,11 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 result.setService(service);
 
                 // Bác sĩ (nếu có)
-                if (request.getDoctorId() != null && !request.getDoctorId().isEmpty()) {
-                        Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                                        .orElseThrow(() -> new RuntimeException("Doctor not found"));
-                        result.setDoctor(doctor);
-                }
+                // if (request.getDoctorId() != null && !request.getDoctorId().isEmpty()) {
+                // Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                // .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                // result.setDoctor(doctor);
+                // }
 
                 // Lịch hẹn (nếu có)
                 // if (request.getAppointmentScheduleId() != null &&
@@ -101,21 +102,21 @@ public class ServiceResultServiceImpl implements ServiceResultService {
         }
 
         @Override
-        public List<PatientWithResultResponse> getPatientsWithCompletedResults(String doctorId) {
+        public List<PatientWithResultResponse> getPatientsWithCompletedResults() {
 
-                // ===== 1) Lấy danh sách bệnh nhân CÓ KẾT QUẢ CLS =====
-                List<Patients> completedList = (doctorId != null && !doctorId.isEmpty())
-                                ? serviceResultRepository.findDistinctPatientsByStatusAndDoctor("Hoàn thành", doctorId)
-                                : serviceResultRepository.findDistinctPatientsByStatus("Hoàn thành");
+                // 1) Bệnh nhân có kết quả CLS
+                List<Patients> completedList = serviceResultRepository.findDistinctPatientsByStatus("Hoàn thành");
 
-                // ===== 2) Lấy danh sách bệnh nhân ĐÃ TIẾP NHẬN =====
-                List<AppointmentSchedules> acceptedAppointments = appointmentRepository.findAllByStatus("Chờ khám");
-
-                List<Patients> acceptedList = acceptedAppointments.stream()
+                // 2) Bệnh nhân đã tiếp nhận
+                List<Patients> acceptedList = appointmentRepository.findAllByStatus("Chờ khám")
+                                .stream()
                                 .map(AppointmentSchedules::getPatients)
-                                .collect(Collectors.toList());
+                                .toList();
 
-                // ===== 3) Lấy danh sách ID =====
+                // 3) Bệnh nhân đã được bác sĩ kết luận
+                List<Patients> concludedList = medicalHistoryRepository.findPatientsWithConclusion();
+
+                // Convert to ID sets
                 Set<String> completedIds = completedList.stream()
                                 .map(Patients::getPatientId)
                                 .collect(Collectors.toSet());
@@ -124,24 +125,28 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                 .map(Patients::getPatientId)
                                 .collect(Collectors.toSet());
 
-                // ===== 4) Gộp danh sách không trùng =====
+                Set<String> concludedIds = concludedList.stream()
+                                .map(Patients::getPatientId)
+                                .collect(Collectors.toSet());
+
+                // Merge unique list
                 Map<String, Patients> merged = new HashMap<>();
                 completedList.forEach(p -> merged.put(p.getPatientId(), p));
                 acceptedList.forEach(p -> merged.put(p.getPatientId(), p));
+                concludedList.forEach(p -> merged.put(p.getPatientId(), p));
 
-                // ===== 5) Build response: CHỈ 2 TRẠNG THÁI =====
+                // Build final response
                 return merged.values().stream()
                                 .map(p -> {
 
-                                        boolean hasCompleted = completedIds.contains(p.getPatientId());
-                                        boolean hasAccepted = acceptedIds.contains(p.getPatientId());
-
                                         String type;
 
-                                        if (hasCompleted && hasAccepted) {
-                                                type = "kết quả CLS"; // Tiếp nhận + có kết quả
+                                        if (concludedIds.contains(p.getPatientId())) {
+                                                type = "Đã kết luận";
+                                        } else if (completedIds.contains(p.getPatientId())) {
+                                                type = "Kết quả CLS";
                                         } else {
-                                                type = "Đã tiếp nhận"; // Chỉ tiếp nhận
+                                                type = "Đã tiếp nhận";
                                         }
 
                                         return PatientWithResultResponse.builder()

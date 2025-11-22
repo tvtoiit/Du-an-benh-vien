@@ -7,4 +7,6 @@ public interface MedicalHistoriesService {
     MedicalHistoriesResponse createMedicalHistories(MedicalHistoriesRequest request);
 
     MedicalHistoriesResponse updateMedicalHistories(MedicalHistoriesRequest request, String medicalHistoryId);
+
+    MedicalHistoriesResponse conclude(MedicalHistoriesRequest request);
 }

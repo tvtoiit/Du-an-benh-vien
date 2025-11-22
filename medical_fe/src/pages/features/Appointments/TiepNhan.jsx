@@ -137,12 +137,8 @@ const TiepNhan = ({ selectedPatient }) => {
                 // status không cần gửi, BE sẽ tự set "waiting for censorship"
             };
 
-            const response = await appointmentService.create(payload);
-
-            alert("Tạo chỉ định khám thành công!");
-            console.log(response.data ?? response);
-
-            handleReset();
+            await appointmentService.create(payload);
+            onBack(true);
         } catch (error) {
             console.error("Lỗi khi tạo chỉ định:", error);
             alert("Lỗi khi tạo chỉ định khám!");
