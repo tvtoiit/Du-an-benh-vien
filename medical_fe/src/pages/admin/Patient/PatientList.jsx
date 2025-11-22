@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
 import EditPatientModal from "./EditPatientModal";
+import patientService from "../../../services/parentService";
 import {
     Box,
     Typography,
@@ -27,6 +28,7 @@ import RegisterModal from "./RegisterModal";
 const PatientList = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [users, setUsers] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPatient, setEditingPatient] = useState(null);
@@ -39,6 +41,13 @@ const PatientList = () => {
             setLoading(false);
         }
     };
+    // Kiểm tra có data không để ẩn button thêm bệnh nhân
+    useEffect(() => {
+        patientService
+            .getWaitingPatients()
+            .then((data) => setUsers(data))
+            .catch((err) => console.error("Lỗi load danh sách user:", err));
+    }, []);
 
     useEffect(() => {
         loadPatients();
@@ -84,6 +93,7 @@ const PatientList = () => {
                     color="primary"
                     onClick={handleOpenModal}
                     startIcon={<FaPlus />}
+                    disabled={!users || users.length === 0}
                 >
                     Thêm Bệnh Nhân Mới
                 </Button>

@@ -47,6 +47,11 @@ public class PatientsServiceImpl implements PatientsService {
   private EHealthRecordsService eHealthRecordsService;
 
   @Override
+  public List<Patients> getPatientsNotAccepted() {
+    return patientsRepository.findPatientsNotAccepted();
+  }
+
+  @Override
   public PatientResponse updatePatients(PatientRequest newPatients, String id) {
     Patients patients = patientsRepository.findById(id)
         .orElseThrow(() -> new AccessDeniedException(

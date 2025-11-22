@@ -24,8 +24,8 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
 
                 let res;
                 // Nếu bạn có API riêng cho danh sách chờ tiếp nhận thì dùng:
-                if (patientService.getWaitingPatients) {
-                    res = await patientService.getWaitingPatients();
+                if (patientService.getWaitingPatients1) {
+                    res = await patientService.getWaitingPatients1();
                 } else {
                     // fallback: lấy toàn bộ bệnh nhân
                     res = await patientService.getAll();

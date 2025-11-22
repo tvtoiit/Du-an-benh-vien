@@ -139,6 +139,8 @@ const TiepNhan = ({ selectedPatient }) => {
 
             await appointmentService.create(payload);
             onBack(true);
+
+
         } catch (error) {
             console.error("Lỗi khi tạo chỉ định:", error);
             alert("Lỗi khi tạo chỉ định khám!");

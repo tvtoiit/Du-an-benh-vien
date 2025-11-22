@@ -57,4 +57,10 @@ public class PatientsController {
     List<PatientServiceResponse> response = patientsService.getAllPatientsWithServices();
     return ResponseEntity.ok(response);
   }
+
+  @GetMapping("/not-accepted")
+  public ResponseEntity<?> getNotAcceptedPatients() {
+    return ResponseEntity.ok(
+        patientsService.getPatientsNotAccepted());
+  }
 }

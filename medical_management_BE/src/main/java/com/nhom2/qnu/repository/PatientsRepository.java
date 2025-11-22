@@ -23,4 +23,12 @@ public interface PatientsRepository extends JpaRepository<Patients, String> {
 
     @Query("SELECT DISTINCT p FROM Patients p JOIN FETCH p.services")
     List<Patients> findAllWithServices();
+
+    @Query("""
+                SELECT p FROM Patients p
+                WHERE NOT EXISTS (
+                    SELECT a FROM AppointmentSchedules a
+                )
+            """)
+    List<Patients> findPatientsNotAccepted();
 }

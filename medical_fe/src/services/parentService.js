@@ -7,7 +7,8 @@ const parentService = {
     update: (id, data) => api.put(`/patients/${id}`, data),
     addServicesForPatient: (idPatient, idServicesArray) =>
         api.post(`/patients/add_service?idPatient=${idPatient}&idSerivces=${idServicesArray.join(",")}`),
-    getPatientsWithServices: () => api.get("/patients/services")
+    getPatientsWithServices: () => api.get("/patients/services"),
+    getWaitingPatients: () => api.get("/patients/not-accepted"),
 };
 
 export default parentService;

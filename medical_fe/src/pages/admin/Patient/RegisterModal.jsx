@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import "../../../styles/Home.css";
 import patientService from "../../../services/parentService";
-import userService from "../../../services/userService";
 
 export default function RegisterModal({ onClose }) {
   const [users, setUsers] = useState([]);
@@ -15,8 +14,8 @@ export default function RegisterModal({ onClose }) {
   });
 
   useEffect(() => {
-    userService
-      .getAll()
+    patientService
+      .getWaitingPatients()
       .then((data) => setUsers(data))
       .catch((err) => console.error("Lỗi load danh sách user:", err));
   }, []);
