@@ -51,4 +51,9 @@ public class UserAdminController {
   public ResponseEntity<Object> deleteUser(@PathVariable("id") String id) {
     return userAdminService.delete(id);
   }
+
+  @GetMapping("/by-role")
+  public ResponseEntity<?> getPatients() {
+    return ResponseEntity.ok(userAdminService.getPatients());
+  }
 }

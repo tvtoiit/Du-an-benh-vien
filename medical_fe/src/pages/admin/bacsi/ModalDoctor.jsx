@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Modal,
@@ -8,6 +8,9 @@ import {
     Stack
 } from "@mui/material";
 import doctorService from "../../../services/doctorService";
+
+import userService from "../../../services/userService";
+import { MenuItem } from "@mui/material";
 
 const style = {
     position: "absolute",
@@ -28,6 +31,21 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
         phoneNumber: "",
         email: "",
     });
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await userService.getByRole();
+                const list = res.data ?? res;
+                setUsers(list);
+            } catch (err) {
+                console.error("Lỗi load users:", err);
+            }
+        };
+
+        fetchUsers();
+    }, []);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -58,12 +76,20 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
 
                 <Stack spacing={2}>
                     <TextField
-                        label="Họ và tên"
-                        name="fullName"
+                        select
+                        label="Chọn tài khoản người dùng"
+                        name="userId"
                         fullWidth
-                        value={form.fullName}
+                        value={form.userId || ""}
                         onChange={handleChange}
-                    />
+                    >
+                        {users.map((u) => (
+                            <MenuItem key={u.userId} value={u.userId}>
+                                {u.fullName} — {u.email}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+
 
                     <TextField
                         label="Chuyên khoa"
@@ -73,21 +99,7 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
                         onChange={handleChange}
                     />
 
-                    <TextField
-                        label="Số điện thoại"
-                        name="phoneNumber"
-                        fullWidth
-                        value={form.phoneNumber}
-                        onChange={handleChange}
-                    />
 
-                    <TextField
-                        label="Email"
-                        name="email"
-                        fullWidth
-                        value={form.email}
-                        onChange={handleChange}
-                    />
 
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         <Button variant="contained" color="error" onClick={onClose}>

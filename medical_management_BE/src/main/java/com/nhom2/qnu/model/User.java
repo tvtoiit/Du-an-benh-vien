@@ -56,6 +56,7 @@ public class User implements Serializable {
     private Date updatedAt;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

@@ -7,6 +7,8 @@ import UserManagement from '../admin/users/UserManagement';
 import permissions from '../../config/permissions';
 import loginService from "../../services/loginService";
 import { useNavigate } from "react-router-dom";
+import ListThuoc from '../admin/thuoc/ThuocList';
+import ServiceList from '../admin/dichvu/ServiceList';
 
 const MedicalDashboard = () => {
     const [role, setRole] = useState(null);
@@ -101,21 +103,19 @@ const MedicalDashboard = () => {
                     </div>
                 );
 
-            case 'Cận lâm sàng':
-                if (!can("quanLyKho")) return <p>Bạn không có quyền truy cập Cận lâm sàng.</p>;
+            case 'Thuoc':
+                if (!can("Thuoc")) return <p>Bạn không có quyền truy cập Thuốc</p>;
                 return (
                     <div className="main-content-box">
-                        <h3>Kết quả xét nghiệm</h3>
-                        <p>Khu vực này để nhập và xem các kết quả xét nghiệm.</p>
+                        <ListThuoc />
                     </div>
                 );
 
-            case 'Thu ngân':
-                if (!can("thanhToan")) return <p>Bạn không có quyền truy cập Thanh toán.</p>;
+            case 'dichVu':
+                if (!can("dichVu")) return <p>Bạn không có quyền truy cập Dịch vụ.</p>;
                 return (
                     <div className="main-content-box">
-                        <h3>Hóa đơn</h3>
-                        <p>Quản lý các hóa đơn thanh toán cho bệnh nhân.</p>
+                        <ServiceList />
                     </div>
                 );
 
@@ -174,14 +174,14 @@ const MedicalDashboard = () => {
                                 [Quản lí khám bệnh]
                             </li>
                         )}
-                        {can("quanLyKho") && (
-                            <li className={activeRole === 'Cận lâm sàng' ? 'active' : ''} onClick={() => setActiveRole('Cận lâm sàng')}>
-                                [Quản lí dược kho]
+                        {can("Thuoc") && (
+                            <li className={activeRole === 'Thuoc' ? 'active' : ''} onClick={() => setActiveRole('Thuoc')}>
+                                [Quản lí thuốc]
                             </li>
                         )}
-                        {can("thanhToan") && (
-                            <li className={activeRole === 'Thu ngân' ? 'active' : ''} onClick={() => setActiveRole('Thu ngân')}>
-                                [Quản lí thu ngân]
+                        {can("dichVu") && (
+                            <li className={activeRole === 'dichVu' ? 'active' : ''} onClick={() => setActiveRole('dichVu')}>
+                                [Quản lí dịch vụ]
                             </li>
                         )}
                         {can("khoa") && (

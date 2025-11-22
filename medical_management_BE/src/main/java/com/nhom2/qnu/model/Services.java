@@ -48,9 +48,6 @@ public class Services implements Serializable {
   @Column(name = "price", nullable = false, length = 18)
   private BigDecimal price;
 
-  @Column(name = "type", length = 50, nullable = false)
-  private String type;
-
   @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
   @JsonIgnore
   private Set<Patients> patients = new HashSet<>();

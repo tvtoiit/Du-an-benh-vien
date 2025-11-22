@@ -121,6 +121,8 @@ export const permissions = {
         chiDinhKham: true,
         quanLyKho: true,
         thanhToan: true,
+        Thuoc: true,
+        dichVu: true,
 
         // các chức năng chi tiết trong ExamDashboard
         tiepNhan: true,

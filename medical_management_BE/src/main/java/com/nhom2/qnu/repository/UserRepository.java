@@ -1,5 +1,6 @@
 package com.nhom2.qnu.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,12 @@ public interface UserRepository extends JpaRepository<User, String> {
   Optional<User> findUserByStatus(@Param("id") String id);
 
   Optional<User> findByAccount_Username(String userName);
+
+  @Query("""
+          SELECT u FROM User u
+          JOIN u.account a
+          JOIN a.role r
+          WHERE r.name = :roleName
+      """)
+  List<User> findUsersByRoleName(@Param("roleName") String roleName);
 }

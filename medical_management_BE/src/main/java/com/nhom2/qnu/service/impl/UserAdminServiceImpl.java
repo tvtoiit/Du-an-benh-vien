@@ -21,6 +21,7 @@ import com.nhom2.qnu.repository.AccountRepository;
 import com.nhom2.qnu.repository.DoctorRepository;
 import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.repository.UserRepositories;
+import com.nhom2.qnu.repository.UserRepository;
 import com.nhom2.qnu.service.UserAdminService;
 
 @Service
@@ -40,6 +41,9 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Autowired
   private DoctorRepository doctorRepository;
+
+  @Autowired
+  private UserRepository usersRepository;
 
   @Override
   public ResponseEntity<Object> getAllUSerAdmin() {
@@ -221,4 +225,10 @@ public class UserAdminServiceImpl implements UserAdminService {
         .orElseThrow(() -> new DataNotFoundException("User does not exist"));
     return user;
   }
+
+  public List<User> getPatients() {
+    List<User> list = usersRepository.findUsersByRoleName("ROLE_USER");
+    return list;
+  }
+
 }

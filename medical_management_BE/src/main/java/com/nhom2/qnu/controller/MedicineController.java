@@ -34,7 +34,7 @@ public class MedicineController {
         return new ResponseEntity<>(medicinesService.updateMedicines(request, id), HttpStatus.CREATED);
     }
 
-    @PostMapping("")
+    @PostMapping("/create")
     public ResponseEntity<?> createMedicines(@RequestBody MedicinesRequest request) {
         return new ResponseEntity<>(medicinesService.createMedicins(request), HttpStatus.CREATED);
     }
