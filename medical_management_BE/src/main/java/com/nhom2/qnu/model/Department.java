@@ -1,6 +1,9 @@
 package com.nhom2.qnu.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.Set;
 import java.util.HashSet;
@@ -32,10 +35,12 @@ public class Department implements Serializable {
 
     // 1 Department -> N Doctors
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Doctor> doctors = new HashSet<>();
 
     // 1 Department -> N Rooms
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Room> rooms = new HashSet<>();
 
     @PrePersist

@@ -14,6 +14,7 @@ import {
     FaMicroscope,
     FaPrescriptionBottleAlt,
     FaCashRegister,
+    FaDollarSign
 } from "react-icons/fa";
 
 import TiepNhan from "../Appointments/TiepNhan";
@@ -22,6 +23,7 @@ import DsbenhNhanKham from "../khambenh/DsBenhNhanKham";
 import DsCanLamSangList from "../canlamsang/DsCanLamSangList";
 import DsBenhNhanCoKetQua from "../thuoc/DsBenhNhanCoKetQua";
 import DsBenhNhanThanhToan from "../thanhtoan/DsBenhNhanThanhToan";
+import DsBenhNhanUng from "../ungtien/DsBenhNhanUng"
 
 const features = [
     {
@@ -34,6 +36,14 @@ const features = [
     },
     {
         id: 2,
+        title: "Ứng tiền",
+        icon: <FaDollarSign size={36} color="#2e7d32" />,
+        description:
+            "Thực hiện tạo và quản lý khoản tạm ứng viện phí cho bệnh nhân trước khi điều trị.",
+        key: "ungTien",
+    },
+    {
+        id: 3,
         title: "Khám bệnh (phiếu khám)",
         icon: <FaStethoscope size={36} color="#2e7d32" />,
         description:
@@ -41,7 +51,7 @@ const features = [
         key: "phieuKham",
     },
     {
-        id: 3,
+        id: 4,
         title: "Chỉ định cận lâm sàng",
         icon: <FaMicroscope size={36} color="#0288d1" />,
         description:
@@ -49,7 +59,7 @@ const features = [
         key: "canLamSang",
     },
     {
-        id: 4,
+        id: 5,
         title: "Kê đơn thuốc",
         icon: <FaPrescriptionBottleAlt size={36} color="#f57c00" />,
         description:
@@ -57,7 +67,7 @@ const features = [
         key: "keDonThuoc",
     },
     {
-        id: 5,
+        id: 6,
         title: "Thanh toán & hoàn tất",
         icon: <FaCashRegister size={36} color="#c2185b" />,
         description:
@@ -69,6 +79,7 @@ const features = [
 // map giữa feature và key quyền trong permissions
 const featurePermissionMap = {
     tiepNhan: "tiepNhan",
+    ungTien: "ungTien",
     phieuKham: "phieuKham",
     canLamSang: "canLamSang",
     keDonThuoc: "keDonThuoc",
@@ -80,6 +91,7 @@ const featureComponents = {
     canLamSang: () => <DsCanLamSangList />,
     keDonThuoc: () => <DsBenhNhanCoKetQua />,
     thanhToan: () => <DsBenhNhanThanhToan />,
+    ungTien: () => <DsBenhNhanUng />
 };
 
 const ExamDashboard = ({ userPermissions }) => {
@@ -87,9 +99,8 @@ const ExamDashboard = ({ userPermissions }) => {
     const [selectedPatient, setSelectedPatient] = useState(null);
 
     const handleBack1 = (needRefresh) => {
-
         if (needRefresh) {
-            fetchData();
+            setSelectedPatient(null);
         }
     };
 

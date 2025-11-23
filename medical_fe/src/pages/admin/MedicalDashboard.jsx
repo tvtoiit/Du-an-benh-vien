@@ -9,12 +9,16 @@ import loginService from "../../services/loginService";
 import { useNavigate } from "react-router-dom";
 import ListThuoc from '../admin/thuoc/ThuocList';
 import ServiceList from '../admin/dichvu/ServiceList';
+import DepartmentList from '../admin/khoa/DepartmentList';
+import RoomList from '../admin/phong/RoomList'
+import ThongKeDashboard from './thongke/ThongKeDashboard';
 
 const MedicalDashboard = () => {
     const [role, setRole] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
     // Sử dụng state để quản lý vai trò đang được chọn
     const [activeRole, setActiveRole] = useState('Người dùng');
+
     // get token từ localstorage
     const getlocalStorage = localStorage.getItem("token");
     const navigate = useNavigate();
@@ -39,6 +43,8 @@ const MedicalDashboard = () => {
                     else if (userPermission.chiDinhKham) setActiveRole('Khám bệnh');
                     else if (userPermission.quanLyKho) setActiveRole('Cận lâm sàng');
                     else if (userPermission.thanhToan) setActiveRole('Thu ngân');
+                    else if (userPermission.Khoa) setActiveRole('Khoa');
+                    else if (userPermission.Phong) setActiveRole('Phong');
                     else setActiveRole(null);
                 }
             } catch (error) {
@@ -119,12 +125,26 @@ const MedicalDashboard = () => {
                     </div>
                 );
 
-            case 'Nhà thuốc':
-                if (!can("quanLyKho")) return <p>Bạn không có quyền truy cập Nhà thuốc.</p>;
+            case 'Khoa':
+                if (!can("Khoa")) return <p>Bạn không có quyền truy cập Khoa</p>;
                 return (
                     <div className="main-content-box">
-                        <h3>Đơn thuốc</h3>
-                        <p>Hiển thị và quản lý các đơn thuốc đã được kê.</p>
+                        <DepartmentList />
+                    </div>
+                );
+
+            case 'Phong':
+                if (!can("Phong")) return <p>Bạn không có quyền truy cập Phong</p>;
+                return (
+                    <div className="main-content-box">
+                        <RoomList />
+                    </div>
+                );
+            case 'Thongke':
+                if (!can("Thongke")) return <p>Bạn không có quyền truy cập Thongke</p>;
+                return (
+                    <div className="main-content-box">
+                        <ThongKeDashboard />
                     </div>
                 );
 
@@ -184,14 +204,19 @@ const MedicalDashboard = () => {
                                 [Quản lí dịch vụ]
                             </li>
                         )}
-                        {can("khoa") && (
-                            <li className={activeRole === 'admin' ? 'active' : ''} onClick={() => setActiveRole('admin')}>
+                        {can("Khoa") && (
+                            <li className={activeRole === 'Khoa' ? 'active' : ''} onClick={() => setActiveRole('Khoa')}>
                                 [Quản lí khoa]
                             </li>
                         )}
-                        {can("phong") && (
-                            <li className={activeRole === 'admin' ? 'active' : ''} onClick={() => setActiveRole('admin')}>
+                        {can("Phong") && (
+                            <li className={activeRole === 'Phong' ? 'active' : ''} onClick={() => setActiveRole('Phong')}>
                                 [Quản lí phòng]
+                            </li>
+                        )}
+                        {can("Thongke") && (
+                            <li className={activeRole === 'Thongke' ? 'active' : ''} onClick={() => setActiveRole('Thongke')}>
+                                [Thống kê]
                             </li>
                         )}
                     </ul>

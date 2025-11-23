@@ -2,8 +2,12 @@ package com.nhom2.qnu.controller;
 
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
+import com.nhom2.qnu.payload.response.PatientPaymentResponse;
+import com.nhom2.qnu.payload.response.PaymentDetailsResponse;
 import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
 import com.nhom2.qnu.service.PaymentDetailsService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,18 +21,13 @@ import java.util.List;
 @RequestMapping("/api/v1/payment-details")
 @Validated
 public class PaymentDetailsController {
+    @Autowired
+    private PaymentDetailsService paymentDetailsService;
 
-    private final PaymentDetailsService paymentDetailsService;
-
-    public PaymentDetailsController(PaymentDetailsService paymentDetailsService) {
-        this.paymentDetailsService = paymentDetailsService;
-    }
-
-    // *** API FE đang gọi: GET /api/v1/payment-details/waiting
     @GetMapping("/waiting")
-    public ResponseEntity<List<PaymentSummaryResponse>> getWaitingPayments() {
-        // Tạm thời trả list rỗng cho FE, sau sẽ implement service
-        return ResponseEntity.ok(Collections.emptyList());
+    public ResponseEntity<List<PatientPaymentResponse>> getPatientsForPayment() {
+        return ResponseEntity.ok(
+                paymentDetailsService.getPatientsForPayment());
     }
 
     @PostMapping
@@ -49,10 +48,8 @@ public class PaymentDetailsController {
     @GetMapping("/summary")
     public ResponseEntity<PaymentSummaryResponse> getSummary(
             @RequestParam String patientId,
-            @RequestParam(required = false) String prescriptionId
-    ) {
+            @RequestParam(required = false) String prescriptionId) {
         return ResponseEntity.ok(
-                paymentDetailsService.getPaymentSummary(patientId, prescriptionId)
-        );
+                paymentDetailsService.getPaymentSummary(patientId, prescriptionId));
     }
 }

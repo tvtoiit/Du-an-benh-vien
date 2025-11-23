@@ -3,6 +3,10 @@ package com.nhom2.qnu.controller;
 import com.nhom2.qnu.payload.request.AppointmentSchedulesRequest;
 import com.nhom2.qnu.payload.response.AppointmentSchedulesResponse;
 import com.nhom2.qnu.service.AppointmentService;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +35,22 @@ public class AppointmentSchedulesController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createAppointmentSchedules(@RequestBody AppointmentSchedulesRequest request) {
+    public ResponseEntity<?> createAppointmentSchedules(
+            @RequestBody AppointmentSchedulesRequest request) {
+
         AppointmentSchedulesResponse response = appointmentService.createAppointmentSchedules(request);
+
         if (response == null) {
-            return new ResponseEntity<>("During this time you have another appointment", HttpStatus.NOT_FOUND);
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "During this time you have another appointment");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
         }
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", "Created successfully");
+        body.put("data", response);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @PutMapping("/{appointmentSchedulesId}")

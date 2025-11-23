@@ -30,6 +30,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
         private final ServicesRepository servicesRepository;
         private final DoctorRepository doctorRepository;
         private final AppointmentRepository appointmentRepository;
+        private final PrescriptionHistoryRepository prescriptionHistoryRepository;
 
         private final MedicalHistoriesRepository medicalHistoryRepository;
 
@@ -38,6 +39,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                         ServicesRepository servicesRepository,
                         DoctorRepository doctorRepository,
                         AppointmentRepository appointmentRepository,
+                        PrescriptionHistoryRepository prescriptionHistoryRepository,
                         MedicalHistoriesRepository medicalHistoryRepository) {
                 this.serviceResultRepository = serviceResultRepository;
                 this.patientRepository = patientRepository;
@@ -45,6 +47,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 this.doctorRepository = doctorRepository;
                 this.appointmentRepository = appointmentRepository;
                 this.medicalHistoryRepository = medicalHistoryRepository;
+                this.prescriptionHistoryRepository = prescriptionHistoryRepository;
         }
 
         @Override
@@ -103,6 +106,8 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
         @Override
         public List<PatientWithResultResponse> getPatientsWithCompletedResults() {
+                // Lấy danh sách bệnh nhân đã kê đơn thuốc
+                List<Patients> prescribedList = prescriptionHistoryRepository.findPatientsWithPrescription();
 
                 // 1) Bệnh nhân có kết quả CLS
                 List<Patients> completedList = serviceResultRepository.findDistinctPatientsByStatus("Hoàn thành");
@@ -117,6 +122,10 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 List<Patients> concludedList = medicalHistoryRepository.findPatientsWithConclusion();
 
                 // Convert to ID sets
+                Set<String> prescribedIds = prescribedList.stream()
+                                .map(Patients::getPatientId)
+                                .collect(Collectors.toSet());
+
                 Set<String> completedIds = completedList.stream()
                                 .map(Patients::getPatientId)
                                 .collect(Collectors.toSet());
@@ -131,6 +140,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
                 // Merge unique list
                 Map<String, Patients> merged = new HashMap<>();
+                prescribedList.forEach(p -> merged.put(p.getPatientId(), p));
                 completedList.forEach(p -> merged.put(p.getPatientId(), p));
                 acceptedList.forEach(p -> merged.put(p.getPatientId(), p));
                 concludedList.forEach(p -> merged.put(p.getPatientId(), p));
@@ -141,7 +151,9 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
                                         String type;
 
-                                        if (concludedIds.contains(p.getPatientId())) {
+                                        if (prescribedIds.contains(p.getPatientId())) {
+                                                type = "Đã kê đơn thuốc";
+                                        } else if (concludedIds.contains(p.getPatientId())) {
                                                 type = "Đã kết luận";
                                         } else if (completedIds.contains(p.getPatientId())) {
                                                 type = "Kết quả CLS";

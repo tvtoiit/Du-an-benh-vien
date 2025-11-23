@@ -45,7 +45,9 @@ const PatientList = () => {
     useEffect(() => {
         patientService
             .getWaitingPatients()
-            .then((data) => setUsers(data))
+            .then((data) => {
+                setUsers(data);
+            })
             .catch((err) => console.error("Lỗi load danh sách user:", err));
     }, []);
 

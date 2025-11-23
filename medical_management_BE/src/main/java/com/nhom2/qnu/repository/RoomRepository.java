@@ -8,4 +8,16 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, String> {
     List<Room> findByDepartment_DepartmentId(String departmentId);
+
+    boolean existsByDepartment_DepartmentId(String departmentId);
+
+    boolean existsByRoomName(String roomName);
+
+    boolean existsByRoomNameAndDepartment_DepartmentId(String roomName, String departmentId);
+
+    boolean existsByRoomNameAndDepartment_DepartmentIdAndRoomIdNot(
+            String roomName,
+            String departmentId,
+            String roomId);
+
 }

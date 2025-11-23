@@ -17,5 +17,4 @@ public class DepartmentResponse {
     private String departmentId;
     private String name;
     private String description;
-    private List<String> roomNames;
 }

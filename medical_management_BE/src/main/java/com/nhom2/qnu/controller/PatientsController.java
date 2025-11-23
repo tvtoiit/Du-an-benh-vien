@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nhom2.qnu.payload.request.PatientRequest;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
+import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 import com.nhom2.qnu.service.PatientsService;
 
 @RestController
@@ -63,4 +64,5 @@ public class PatientsController {
     return ResponseEntity.ok(
         patientsService.getPatientsNotAccepted());
   }
+
 }

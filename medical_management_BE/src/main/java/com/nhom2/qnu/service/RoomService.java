@@ -7,6 +7,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface RoomService {
-    public List<Room> getRoomsByDepartment(String departmentId);
+    List<Room> getRoomsByDepartment(String departmentId);
+
+    Room create(Room room);
+
+    Room update(String roomId, Room room);
+
+    void delete(String roomId);
+
+    List<Room> getAll();
 
 }

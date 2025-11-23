@@ -123,6 +123,8 @@ export const permissions = {
         thanhToan: true,
         Thuoc: true,
         dichVu: true,
+        Khoa: true,
+        Phong: true,
 
         // các chức năng chi tiết trong ExamDashboard
         tiepNhan: true,
@@ -130,6 +132,7 @@ export const permissions = {
         canLamSang: true,
         keDonThuoc: true,
         thanhToan: true,
+        ungTien: true
     },
 };
 

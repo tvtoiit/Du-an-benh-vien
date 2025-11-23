@@ -1,6 +1,8 @@
 package com.nhom2.qnu.repository;
 
 import com.nhom2.qnu.model.Patients;
+import com.nhom2.qnu.model.User;
+import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -24,11 +26,19 @@ public interface PatientsRepository extends JpaRepository<Patients, String> {
     @Query("SELECT DISTINCT p FROM Patients p JOIN FETCH p.services")
     List<Patients> findAllWithServices();
 
+    // @Query("""
+    // SELECT p FROM Patients p
+    // WHERE NOT EXISTS (
+    // SELECT a FROM AppointmentSchedules a
+    // )
+    // """)
+    // List<Patients> findPatientsNotAccepted();s
+
     @Query("""
-                SELECT p FROM Patients p
-                WHERE NOT EXISTS (
-                    SELECT a FROM AppointmentSchedules a
-                )
+                SELECT u FROM User u
+                JOIN u.account acc
+                JOIN acc.role r
+                WHERE r.roleId = 'USER'
             """)
-    List<Patients> findPatientsNotAccepted();
+    List<User> findUsersWithUserRole();
 }

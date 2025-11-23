@@ -13,7 +13,7 @@ import {
     Alert,
 } from "@mui/material";
 
-const TiepNhan = ({ selectedPatient }) => {
+const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
     const [formData, setFormData] = useState({
         department: "",
         doctor: "",
@@ -134,16 +134,15 @@ const TiepNhan = ({ selectedPatient }) => {
                     .replace("T", " "),
                 room: formData.room,
                 note: formData.note,
-                // status không cần gửi, BE sẽ tự set "waiting for censorship"
             };
 
-            await appointmentService.create(payload);
+            const res = await appointmentService.create(payload);
+            console.log("Tạo lịch thành công:", res);
             onBack(true);
 
-
         } catch (error) {
-            console.error("Lỗi khi tạo chỉ định:", error);
-            alert("Lỗi khi tạo chỉ định khám!");
+            console.error("Lỗi khi tạo chỉ định FULL:", error);
+            alert(error?.response?.data?.message || "Lỗi khi tạo chỉ định khám!");
         }
     };
 

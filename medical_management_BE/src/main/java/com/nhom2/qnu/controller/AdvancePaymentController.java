@@ -29,12 +29,18 @@ public class AdvancePaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // Update existing advance payment (PUT replaces resource; DTO currently requires patientId & amount)
+    // Update existing advance payment (PUT replaces resource; DTO currently
+    // requires patientId & amount)
     @PutMapping("/{id}")
     public ResponseEntity<AdvancePayment> update(
             @PathVariable("id") String advanceId,
             @Valid @RequestBody AdvancePaymentRequest request) {
         AdvancePayment updated = advancePaymentService.updateAdvancePayment(advanceId, request);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/patients")
+    public ResponseEntity<?> getPatients() {
+        return ResponseEntity.ok(advancePaymentService.getPatientsForAdvance());
     }
 }

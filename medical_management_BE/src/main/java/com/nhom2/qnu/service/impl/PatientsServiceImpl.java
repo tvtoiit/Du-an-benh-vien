@@ -3,6 +3,7 @@ package com.nhom2.qnu.service.impl;
 import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.model.Patients;
+import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.model.Services;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.PatientRequest;
@@ -11,7 +12,9 @@ import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.EHealthRecordsResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
+import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 import com.nhom2.qnu.repository.PatientsRepository;
+import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.repository.ServicesRepository;
 import com.nhom2.qnu.repository.ServiceResultRepository;
 import com.nhom2.qnu.repository.UserRepository;
@@ -22,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.nhom2.qnu.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +42,9 @@ public class PatientsServiceImpl implements PatientsService {
   private UserRepository userRepository;
 
   @Autowired
+  private RoleRepository roleRepository;
+
+  @Autowired
   private ServicesRepository servicesRepository;
 
   @Autowired
@@ -47,8 +54,8 @@ public class PatientsServiceImpl implements PatientsService {
   private EHealthRecordsService eHealthRecordsService;
 
   @Override
-  public List<Patients> getPatientsNotAccepted() {
-    return patientsRepository.findPatientsNotAccepted();
+  public List<User> getPatientsNotAccepted() {
+    return patientsRepository.findUsersWithUserRole();
   }
 
   @Override
@@ -116,7 +123,6 @@ public class PatientsServiceImpl implements PatientsService {
   @Transactional
   public EHealthRecordsResponse createPatients(PatientRequest patientRequest) {
 
-    // Tạo entity Patients
     Patients patients = new Patients();
 
     // --- 1. GÁN USER CHO BỆNH NHÂN ---
@@ -125,9 +131,18 @@ public class PatientsServiceImpl implements PatientsService {
           .orElseThrow(() -> new DataNotFoundException("User not found"));
 
       patients.setUser(user);
+
+      // ✅ SET ROLE = BENHNHAN
+      Role role = roleRepository.findById("BENHNHAN")
+          .orElseThrow(() -> new DataNotFoundException("Role BENHNHAN not found"));
+
+      user.getAccount().setRole(role);
+
+      // ✅ LƯU LẠI USER (vì user thay đổi)
+      userRepository.save(user);
     }
 
-    // --- 2. SET CÁC TRƯỜNG CỦA PATIENT ---
+    // --- 2. SET THÔNG TIN PATIENT ---
     patients.setDateOfBirth(patientRequest.getDateOfBirth());
     patients.setOtherInfo(patientRequest.getOtherInfo());
 

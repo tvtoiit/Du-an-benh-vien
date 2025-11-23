@@ -1,5 +1,6 @@
 package com.nhom2.qnu.service;
 
+import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.payload.request.AppointmentSchedulesRequest;
 import com.nhom2.qnu.payload.response.AppointmentSchedulesResponse;
 

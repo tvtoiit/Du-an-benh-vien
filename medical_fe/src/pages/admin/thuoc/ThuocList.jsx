@@ -34,7 +34,7 @@ const MedicineList = () => {
     const loadMedicines = async () => {
         try {
             const response = await medicineService.getAll();
-            setMedicines(response);
+            setMedicines(Array.isArray(response) ? response : []);
         } finally {
             setLoading(false);
         }

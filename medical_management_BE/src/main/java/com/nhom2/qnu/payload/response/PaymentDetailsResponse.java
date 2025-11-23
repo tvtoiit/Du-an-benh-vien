@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class PaymentDetailsResponse {
-    
+
     private String paymentDetailId;
     private Patients patient;
     private PrescriptionHistory prescriptionHistory;
