@@ -4,6 +4,7 @@ import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
 import EditPatientModal from "./EditPatientModal";
 import patientService from "../../../services/parentService";
+import { toast } from "react-toastify";
 import {
     Box,
     Typography,
@@ -67,12 +68,12 @@ const PatientList = () => {
 
     // Xem chi tiết
     const handleView = (p) => {
-        alert(
-            `Thông tin bệnh nhân:\n\n` +
-            `Họ tên: ${p.fullName}\n` +
-            `Email: ${p.email}\n` +
-            `Địa chỉ: ${p.address}\n` +
-            `Ngày sinh: ${p.dateOfBirth}`
+        toast.info(
+            `Họ tên: ${p.fullName}
+            Email: ${p.email}
+            Địa chỉ: ${p.address}
+            Ngày sinh: ${formatDate(p.dateOfBirth)}`,
+            { autoClose: 4000 }
         );
     };
 

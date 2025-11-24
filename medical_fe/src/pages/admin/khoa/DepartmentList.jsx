@@ -25,6 +25,7 @@ import {
 import { FaPlus } from "react-icons/fa";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { toast } from "react-toastify";
 
 const DepartmentList = () => {
     const [departments, setDepartments] = useState([]);
@@ -66,10 +67,10 @@ const DepartmentList = () => {
         try {
             await departmentService.delete(id);
             setDepartments((prev) => prev.filter((d) => d.departmentId !== id));
-            alert("Đã xoá khoa.");
+            toast.success("✅ Đã xoá khoa.");
         } catch (err) {
             console.error(err);
-            alert("Xoá khoa thất bại!");
+            toast.error("❌ Xoá khoa thất bại!");
         }
     };
 

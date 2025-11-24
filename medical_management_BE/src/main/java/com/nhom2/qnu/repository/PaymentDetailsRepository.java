@@ -1,6 +1,5 @@
 package com.nhom2.qnu.repository;
 
-import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.payload.response.PatientPaymentResponse;
 import com.nhom2.qnu.payload.response.RevenueReportResponse;
@@ -29,13 +28,13 @@ public interface PaymentDetailsRepository extends JpaRepository<PaymentDetails, 
     List<PatientPaymentResponse> findPatientsReadyForPayment();
 
     @Query("""
-                SELECT new com.nhom2.qnu.payload.response.RevenueReportResponse(
-                    FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m'),
-                    SUM(p.total_amount)
-                )
-                FROM PaymentDetails p
-                GROUP BY FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m')
-                ORDER BY FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m')
+            SELECT new com.nhom2.qnu.payload.response.RevenueReportResponse(
+                FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m'),
+                SUM(p.total_amount)
+            )
+            FROM PaymentDetails p
+            GROUP BY FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m')
+            ORDER BY FUNCTION('DATE_FORMAT', p.createdAt, '%Y-%m')
             """)
     List<RevenueReportResponse> getMonthlyRevenue();
 }

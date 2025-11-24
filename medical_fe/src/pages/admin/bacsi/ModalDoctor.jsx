@@ -8,9 +8,12 @@ import {
     Stack
 } from "@mui/material";
 import doctorService from "../../../services/doctorService";
+import departmentService from "../../../services/departmentService";
+
 
 import userService from "../../../services/userService";
 import { MenuItem } from "@mui/material";
+import { toast } from "react-toastify";
 
 const style = {
     position: "absolute",
@@ -26,12 +29,30 @@ const style = {
 
 const ModalDoctor = ({ onClose, onSuccess }) => {
     const [form, setForm] = useState({
-        fullName: "",
-        specialty: "",
-        phoneNumber: "",
-        email: "",
+        userId: "",
+        departmentId: "",
+        experience: ""
     });
+
     const [users, setUsers] = useState([]);
+    const [departments, setDepartments] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const resUsers = await userService.getByRole();
+                setUsers(resUsers.data ?? resUsers);
+
+                const resDept = await departmentService.getAll();
+                setDepartments(resDept.data ?? resDept);
+            } catch (err) {
+                console.error("Lỗi load dữ liệu:", err);
+            }
+        };
+
+        fetchData();
+    }, []);
+
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -52,20 +73,21 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
     };
 
     const handleSubmit = async () => {
-        if (!form.fullName || !form.specialty) {
-            alert("Vui lòng nhập đầy đủ họ tên và chuyên khoa");
+        if (!form.userId || !form.departmentId || !form.experience) {
+            toast.success("Vui lòng chọn đầy đủ thông tin!");
             return;
         }
 
         try {
             await doctorService.create(form);
-            alert("Thêm bác sĩ thành công!");
-            if (onSuccess) onSuccess();
+            toast.success("✅ Thêm bác sĩ thành công!");
+            onSuccess?.();
             onClose();
-        } catch (error) {
-            alert("Không thể thêm bác sĩ.");
+        } catch (err) {
+            toast.error("❌ Không thể thêm bác sĩ");
         }
     };
+
 
     return (
         <Modal open onClose={onClose}>
@@ -80,26 +102,39 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
                         label="Chọn tài khoản người dùng"
                         name="userId"
                         fullWidth
-                        value={form.userId || ""}
+                        value={form.userId}
                         onChange={handleChange}
                     >
-                        {users.map((u) => (
+                        {users.map(u => (
                             <MenuItem key={u.userId} value={u.userId}>
                                 {u.fullName} — {u.email}
                             </MenuItem>
                         ))}
                     </TextField>
 
+                    <TextField
+                        select
+                        label="Chọn khoa"
+                        name="departmentId"
+                        fullWidth
+                        value={form.departmentId}
+                        onChange={handleChange}
+                    >
+                        {departments.map(d => (
+                            <MenuItem key={d.departmentId} value={d.departmentId}>
+                                {d.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
 
                     <TextField
-                        label="Chuyên khoa"
-                        name="specialty"
+                        label="Kinh nghiệm (năm)"
+                        name="experience"
+                        type="number"
                         fullWidth
-                        value={form.specialty}
+                        value={form.experience}
                         onChange={handleChange}
                     />
-
-
 
                     <Stack direction="row" spacing={2} justifyContent="flex-end">
                         <Button variant="contained" color="error" onClick={onClose}>

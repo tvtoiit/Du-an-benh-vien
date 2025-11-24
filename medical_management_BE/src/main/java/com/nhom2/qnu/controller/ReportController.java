@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nhom2.qnu.payload.response.RevenueReportResponse;
 import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 import com.nhom2.qnu.payload.response.VisitReportResponse;
-import com.nhom2.qnu.repository.AppointmentRepository;
-import com.nhom2.qnu.repository.PaymentDetailsRepository;
-import com.nhom2.qnu.repository.ServicesRepository;
 import com.nhom2.qnu.service.ReportService;
 
 import lombok.RequiredArgsConstructor;

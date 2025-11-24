@@ -7,6 +7,7 @@ import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.enums.NameRoleEnum;
 import com.nhom2.qnu.enums.TokenEnum;
 import com.nhom2.qnu.exception.DataExistException;
+import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.payload.request.login_signup.LoginRequest;
 import com.nhom2.qnu.payload.request.login_signup.SignupRequest;
 import com.nhom2.qnu.payload.response.ApiResponse;
@@ -75,7 +76,9 @@ public class AuthServiceImpl implements AuthService {
             Account account = new Account();
             account.setUsername(signupRequest.getUsername());
             account.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-            Role role = roleRepository.findByName(NameRoleEnum.ROLE_USER.toString());
+            Role role = roleRepository.findByName(NameRoleEnum.ROLE_USER.name())
+                    .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
             account.setRole(role);
             accountRepository.save(account);
             User user = new User();

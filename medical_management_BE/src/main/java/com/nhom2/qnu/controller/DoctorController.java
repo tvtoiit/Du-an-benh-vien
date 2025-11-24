@@ -26,11 +26,11 @@ public class DoctorController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateDoctor(@RequestBody DoctorRequest request,
             @PathVariable(value = "id") String id) {
-        return new ResponseEntity<>(doctorService.updateDoctors(request, id), HttpStatus.CREATED);
+        return new ResponseEntity<>(doctorService.updateDoctors(id, request), HttpStatus.CREATED);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createDoctor(@RequestBody DoctorRequest request) {
+    public ResponseEntity<?> createDoctors(@RequestBody DoctorRequest request) {
         return new ResponseEntity<>(doctorService.createDoctors(request), HttpStatus.CREATED);
     }
 

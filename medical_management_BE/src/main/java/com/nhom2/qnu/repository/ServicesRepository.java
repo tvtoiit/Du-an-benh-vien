@@ -13,15 +13,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ServicesRepository extends JpaRepository<Services, String> {
     @Query("""
-                SELECT new com.nhom2.qnu.payload.response.ServiceUsageReportResponse(
+                    SELECT new com.nhom2.qnu.payload.response.ServiceUsageReportResponse(
                     s.serviceName,
-                    COUNT(ps.patient.patientId),
+                    COUNT(ps.patientId),
                     SUM(s.price)
                 )
                 FROM Services s
                 JOIN s.patients ps
                 GROUP BY s.serviceName
-                ORDER BY COUNT(ps.patient.patientId) DESC
+                ORDER BY COUNT(ps.patientId) DESC
             """)
     List<ServiceUsageReportResponse> getServiceUsageStats();
 }

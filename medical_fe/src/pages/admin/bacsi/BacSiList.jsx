@@ -25,13 +25,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import ModalDoctor from "./ModalDoctor";
-import ModalDoctorView from "./ModalDoctorView";
+import ModalDoctorEdit from "./ModalDoctorEdit";
 
 const BacSiList = () => {
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [viewDoctor, setViewDoctor] = useState(null);
+    const [editingDoctor, setEditingDoctor] = useState(null);
 
 
     // ======================== LOAD DANH SÁCH BÁC SĨ ==========================
@@ -51,21 +51,6 @@ const BacSiList = () => {
     // ======================== MODAL ==========================
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
-
-    // Xem chi tiết bác sĩ
-    const handleView = (doctor) => setViewDoctor(doctor);
-
-    // ======================== DELETE ==========================
-    const handleDelete = async (doctorId) => {
-        if (window.confirm("Bạn có chắc muốn xoá bác sĩ này?")) {
-            try {
-                await doctorService.delete(doctorId);
-                setDoctors(doctors.filter((d) => d.doctorId !== doctorId));
-            } catch (err) {
-                alert("Không thể xoá bác sĩ!");
-            }
-        }
-    };
 
     if (loading) return <CircularProgress sx={{ m: 4 }} />;
 
@@ -120,27 +105,10 @@ const BacSiList = () => {
 
                                 <TableCell align="center">
                                     <Stack direction="row" spacing={1} justifyContent="center">
-                                        {/* XEM */}
-                                        <Tooltip title="Xem chi tiết">
-                                            <IconButton color="primary" onClick={() => handleView(d)}>
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                        </Tooltip>
-
                                         {/* SỬA */}
                                         <Tooltip title="Sửa thông tin">
-                                            <IconButton color="warning">
+                                            <IconButton color="warning" onClick={() => setEditingDoctor(d)}>
                                                 <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-
-                                        {/* XOÁ */}
-                                        <Tooltip title="Xóa bác sĩ">
-                                            <IconButton
-                                                color="error"
-                                                onClick={() => handleDelete(d.doctorId)}
-                                            >
-                                                <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
                                     </Stack>
@@ -159,11 +127,11 @@ const BacSiList = () => {
                 />
             )}
 
-            {/* MODAL XEM CHI TIẾT */}
-            {viewDoctor && (
-                <ModalDoctorView
-                    doctor={viewDoctor}
-                    onClose={() => setViewDoctor(null)}
+            {editingDoctor && (
+                <ModalDoctorEdit
+                    doctor={editingDoctor}
+                    onClose={() => setEditingDoctor(null)}
+                    onSuccess={fetchDoctors}
                 />
             )}
         </Box>

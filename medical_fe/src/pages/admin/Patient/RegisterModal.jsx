@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import "../../../styles/Home.css";
 import patientService from "../../../services/parentService";
+import { toast } from "react-toastify";
 
 export default function RegisterModal({ onClose }) {
   const [users, setUsers] = useState([]);
@@ -29,14 +30,14 @@ export default function RegisterModal({ onClose }) {
 
     try {
       await patientService.create(formData);
-      alert("Đăng ký thành công!");
-      onClose(true); // reload lại danh sách
+      toast.success("✅ Đăng ký thành công!!");
+      onClose(true);
     } catch (error) {
       console.error(error);
       if (error.response) {
         alert("Lỗi: " + (error.response.data.error || "Không xác định!"));
       } else {
-        alert("Không thể kết nối server!");
+        toast.error("❌ Không thể kết nối server!");
       }
     }
   };

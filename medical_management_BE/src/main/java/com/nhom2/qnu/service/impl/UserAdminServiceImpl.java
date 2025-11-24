@@ -9,6 +9,7 @@ import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.utils.JwtProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.nhom2.qnu.model.Account;
 import com.nhom2.qnu.model.Doctor;
@@ -38,6 +39,9 @@ public class UserAdminServiceImpl implements UserAdminService {
 
   @Autowired
   private JwtProviderUtils jwtProviderUtils;
+
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   private DoctorRepository doctorRepository;
@@ -124,7 +128,9 @@ public class UserAdminServiceImpl implements UserAdminService {
     }
 
     // 2. Lấy role USER tự động
-    Role role = roleRepositories.findByName("ROLE_USER");
+    Role role = roleRepositories.findByName(request.getRoleName())
+        .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
     if (role == null) {
       return ResponseEntity.badRequest().body("Role USER not found");
     }
@@ -132,11 +138,11 @@ public class UserAdminServiceImpl implements UserAdminService {
     // 3. Tạo account
     Account acc = Account.builder()
         .username(request.getEmail())
-        .password(request.getEmail())
+        .password(passwordEncoder.encode(request.getEmail()))
         .role(role)
         .build();
 
-    // 👉 BẮT BUỘC SAVE ACCOUNT TRƯỚC
+    // SAVE ACCOUNT TRƯỚC
     accountRepository.save(acc);
 
     // 4. Tạo user
@@ -207,10 +213,8 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     // Cập nhật role nếu có thay đổi
     if (request.getRoleName() != null && !request.getRoleName().trim().isEmpty()) {
-      Role role = roleRepositories.findByName(request.getRoleName());
-      if (role != null) {
-        user.getAccount().setRole(role);
-      }
+      roleRepositories.findByName(request.getRoleName())
+          .ifPresent(role -> user.getAccount().setRole(role));
     }
 
     userRepositories.save(user);

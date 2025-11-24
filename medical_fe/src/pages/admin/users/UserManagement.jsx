@@ -15,14 +15,17 @@ import {
     DialogContent,
     TextField,
     DialogActions,
+    MenuItem
 } from "@mui/material";
 import { Delete, Edit, Add } from "@mui/icons-material";
 import userService from "../../../services/userService";
+import roleService from "../../../services/roleService";
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [roles, setRoles] = useState([]);
 
     const [formData, setFormData] = useState({
         full_name: "",
@@ -30,6 +33,7 @@ const UserManagement = () => {
         phone_number: "",
         address: "",
         status: true,
+        roleName: ""
     });
 
     useEffect(() => {
@@ -38,6 +42,14 @@ const UserManagement = () => {
             .then((data) => setUsers(data))
             .catch((err) => console.error(err));
     }, []);
+
+    /// lấy all role 
+    useEffect(() => {
+        roleService.getAllRole()
+            .then(data => setRoles(data))
+            .catch(err => console.error(err));
+    }, []);
+
 
     const handleOpen = (user = null) => {
         setEditingUser(user);
@@ -50,6 +62,7 @@ const UserManagement = () => {
                     phone_number: user.phoneNumber,
                     address: user.address,
                     status: user.status,
+                    roleName: user.roleName
                 }
                 : {
                     full_name: "",
@@ -57,6 +70,7 @@ const UserManagement = () => {
                     phone_number: "",
                     address: "",
                     status: true,
+                    roleName: roles[0]?.name ?? ""
                 }
         );
 
@@ -80,7 +94,8 @@ const UserManagement = () => {
                     fullName: formData.full_name,
                     phoneNumber: formData.phone_number,
                     address: formData.address,
-                    status: formData.status
+                    status: formData.status,
+                    roleName: formData.roleName
                 });
 
                 setUsers((prev) =>
@@ -92,7 +107,8 @@ const UserManagement = () => {
                                 email: formData.email,
                                 phoneNumber: formData.phone_number,
                                 address: formData.address,
-                                status: formData.status === "active"
+                                status: formData.status === "active",
+                                roleName: formData.roleName
                             }
                             : u
                     )
@@ -104,7 +120,8 @@ const UserManagement = () => {
                     fullName: formData.full_name,
                     email: formData.email,
                     phoneNumber: formData.phone_number,
-                    address: formData.address
+                    address: formData.address,
+                    roleName: formData.roleName
                 });
 
                 setUsers((prev) => [...prev, createdUser]);
@@ -229,6 +246,7 @@ const UserManagement = () => {
                         onChange={handleChange}
                     />
                     <TextField
+                        disabled={!!editingUser}
                         margin="dense"
                         label="Email"
                         name="email"
@@ -252,6 +270,21 @@ const UserManagement = () => {
                         value={formData.address}
                         onChange={handleChange}
                     />
+                    <TextField
+                        select
+                        margin="dense"
+                        label="Quyền"
+                        name="roleName"
+                        fullWidth
+                        value={formData.roleName ?? ""}
+                        onChange={handleChange}
+                    >
+                        {roles.map(r => (
+                            <MenuItem key={r.roleId} value={r.roleName}>
+                                {r.roleName}
+                            </MenuItem>
+                        ))}
+                    </TextField>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Hủy</Button>

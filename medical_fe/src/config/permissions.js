@@ -43,6 +43,7 @@ export const permissions = {
         canLamSang: false,
         keDonThuoc: false,
         thanhToan: false,
+
     },
 
     // BÁC SĨ: chỉ tập trung Khám bệnh + Cận lâm sàng + Kê đơn
@@ -84,7 +85,7 @@ export const permissions = {
         quanLyUser: false,
         quanLyBenhNhan: false,
         quanLyBacSi: false,
-        chiDinhKham: false,
+        chiDinhKham: true,
         quanLyKho: false,
         thanhToan: true,        // menu [Quản lí thu ngân]
 
@@ -94,6 +95,7 @@ export const permissions = {
         canLamSang: false,
         keDonThuoc: false,
         thanhToan: true,        // "Thanh toán & hoàn tất"
+        ungTien: true
     },
 
     // (nếu có) NHÀ THUỐC riêng
@@ -125,6 +127,7 @@ export const permissions = {
         dichVu: true,
         Khoa: true,
         Phong: true,
+        Thongke: true,
 
         // các chức năng chi tiết trong ExamDashboard
         tiepNhan: true,

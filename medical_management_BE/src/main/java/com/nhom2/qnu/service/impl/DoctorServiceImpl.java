@@ -4,6 +4,7 @@ import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.model.Department;
 import com.nhom2.qnu.model.Doctor;
+import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.model.Room;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.DoctorRequest;
@@ -12,6 +13,7 @@ import com.nhom2.qnu.payload.response.DoctorResponse;
 import com.nhom2.qnu.repository.DepartmentRepository;
 import com.nhom2.qnu.repository.DoctorRepository;
 import com.nhom2.qnu.repository.UserRepository;
+import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.service.DoctorService;
 
 import java.util.ArrayList;
@@ -30,74 +32,90 @@ public class DoctorServiceImpl implements DoctorService {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private DepartmentRepository departmentRepository;
 
     @Override
     public DoctorResponse createDoctors(DoctorRequest request) {
-        // Tạo object Doctor
-        Doctor doctor = new Doctor();
 
-        // Lấy user theo userId
+        // 1) Lấy user theo userId
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
-        doctor.setUser(user);
 
-        // Set chuyên môn
-        doctor.setExperience(request.getExperience());
+        // 2) Check user đã là bác sĩ chưa
+        if (doctorRepository.existsByUser(user)) {
+            throw new RuntimeException("User này đã được gán làm bác sĩ trước đó!");
+        }
 
-        // Lấy department theo departmentId
+        // 3) (OPTIONAL) Update role của account → ROLE_BACSI
+        Role doctorRole = roleRepository.findByName("ROLE_BACSI")
+                .orElseThrow(() -> new DataNotFoundException("Role not found"));
+
+        user.getAccount().setRole(doctorRole);
+        userRepository.save(user); // lưu lại role mới
+
+        // 4) Lấy khoa
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new DataNotFoundException("Department not found"));
+
+        // 5) Tạo Doctor mới
+        Doctor doctor = new Doctor();
+        doctor.setUser(user);
+        doctor.setExperience(request.getExperience());
         doctor.setDepartment(department);
 
-        // Lưu vào repository
         Doctor newDoctor = doctorRepository.save(doctor);
 
-        // Tạo response
-        DoctorResponse response = new DoctorResponse();
-        response.setDoctorId(newDoctor.getDoctorId());
-        response.setDoctorName(newDoctor.getUser().getFullName());
-        response.setExperience(newDoctor.getExperience());
-        response.setContactNumber(newDoctor.getUser().getPhoneNumber());
-        response.setEmail(newDoctor.getUser().getEmail());
+        // 6) Build response
+        return DoctorResponse.builder()
+                .doctorId(newDoctor.getDoctorId())
+                .doctorName(user.getFullName())
+                .experience(newDoctor.getExperience())
+                .contactNumber(user.getPhoneNumber())
+                .email(user.getEmail())
+                .departmentName(department.getName())
+                .roomNames(
+                        department.getRooms()
+                                .stream()
+                                .map(Room::getRoomName)
+                                .collect(Collectors.toList()))
+                .build();
 
-        // Thêm thông tin khoa
-        response.setDepartmentName(newDoctor.getDepartment().getName());
-
-        // Thêm danh sách phòng của khoa
-        response.setRoomNames(
-                newDoctor.getDepartment().getRooms()
-                        .stream()
-                        .map(Room::getRoomName)
-                        .collect(Collectors.toList()));
-
-        return response;
     }
 
     @Override
-    public DoctorResponse updateDoctors(DoctorRequest request, String id) {
+    public DoctorResponse updateDoctors(String id, DoctorRequest request) {
+
         Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new AccessDeniedException(
-                        new ApiResponse(Boolean.FALSE, "You can't update doctors!")));
+                .orElseThrow(() -> new DataNotFoundException("Doctor not found"));
 
-        // Update thông tin user
-        User user = doctor.getUser();
-        user.setFullName(request.getDoctorName());
-        user.setPhoneNumber(request.getContactNumber());
-        user.setEmail(request.getEmail());
+        // cập nhật kinh nghiệm
+        if (request.getExperience() != null) {
+            doctor.setExperience(request.getExperience());
+        }
 
-        // Update chuyên môn bác sĩ
-        doctor.setExperience(request.getExperience());
+        // nếu đổi khoa
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new DataNotFoundException("Department not found"));
+
+            doctor.setDepartment(department);
+        }
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
 
-        DoctorResponse doctorResponse = new DoctorResponse();
-        doctorResponse.setDoctorId(updatedDoctor.getDoctorId());
-        doctorResponse.setDoctorName(updatedDoctor.getUser().getFullName());
-        doctorResponse.setExperience(updatedDoctor.getExperience());
-        doctorResponse.setContactNumber(updatedDoctor.getUser().getPhoneNumber());
-        doctorResponse.setEmail(updatedDoctor.getUser().getEmail());
-        return doctorResponse;
+        return DoctorResponse.builder()
+                .doctorId(updatedDoctor.getDoctorId())
+                .experience(updatedDoctor.getExperience())
+                .departmentName(updatedDoctor.getDepartment().getName())
+                .roomNames(
+                        updatedDoctor.getDepartment().getRooms()
+                                .stream()
+                                .map(Room::getRoomName)
+                                .toList())
+                .build();
     }
 
     @Override

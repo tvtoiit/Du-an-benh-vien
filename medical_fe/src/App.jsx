@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import PrivateRoute from "./components/PrivateRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // pages
 import Home from "./pages/user/Home";
@@ -10,20 +11,17 @@ import Register from "./pages/user/register/Register";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={
-        <Home />
-      } />
-      <Route path="/admin" element={
-        <MedicalDashboard />
-      } />
-      <Route path="/login" element={
-        <Login />
-      } />
-      <Route path="/register" element={
-        <Register />
-      } />
-    </Routes>
+    <>
+      {/* đặt ToastContainer ở đây */}
+      <ToastContainer position="top-right" autoClose={2000} />
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/admin" element={<MedicalDashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </>
   );
 }
 

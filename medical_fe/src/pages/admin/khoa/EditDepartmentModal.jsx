@@ -9,6 +9,7 @@ import {
     Stack,
 } from "@mui/material";
 import departmentService from "../../../services/departmentService";
+import { toast } from "react-toastify";
 
 const style = {
     position: "absolute",
@@ -34,7 +35,7 @@ const EditDepartmentModal = ({ department, onClose }) => {
 
     const handleSubmit = async () => {
         if (!form.name.trim()) {
-            alert("Vui lòng nhập tên khoa");
+            toast.success("ui lòng nhập tên khoa");
             return;
         }
 
@@ -43,7 +44,8 @@ const EditDepartmentModal = ({ department, onClose }) => {
             onClose(true);
         } catch (err) {
             console.error(err);
-            alert("Không thể cập nhật khoa.");
+            toast.error("Không thể cập nhật khoa.");
+
         }
     };
 

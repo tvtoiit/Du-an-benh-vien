@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class DoctorRequest {
     private String userId;
     private String doctorName;
-    private int experience;
+    private Integer experience;
     private String contactNumber;
     private String email;
     private String departmentId;

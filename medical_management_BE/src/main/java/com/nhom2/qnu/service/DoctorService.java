@@ -8,7 +8,7 @@ import com.nhom2.qnu.payload.response.DoctorResponse;
 public interface DoctorService {
     DoctorResponse createDoctors(DoctorRequest request);
 
-    DoctorResponse updateDoctors(DoctorRequest request, String id);
+    DoctorResponse updateDoctors(String id, DoctorRequest request);
 
     DoctorResponse findDoctorServiceImpl(String id);
 
