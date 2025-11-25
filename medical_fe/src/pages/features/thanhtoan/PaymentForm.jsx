@@ -9,6 +9,7 @@ import {
     TextField,
     Chip,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 import paymentService from "../../../services/paymentService";
 import advancePaymentService from "../../../services/advancePaymentService";
@@ -45,11 +46,10 @@ const PaymentForm = ({ patient, onBack }) => {
             setConfirming(true);
             await paymentService.createPaymentDetails({ patientId, prescriptionId });
 
-            alert(`Thanh toán thành công!`);
+            toast.success(`Thanh toán thành công!`);
             onBack();
         } catch (error) {
-            console.error(error);
-            alert("Thanh toán thất bại!");
+            toast.error("Thanh toán thất bại!");
         } finally {
             setConfirming(false);
         }

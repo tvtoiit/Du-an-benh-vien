@@ -13,6 +13,7 @@ import {
 import serviceService from "../../../services/servicesServices";
 import parentService from "../../../services/parentService";
 import medicalHistoryService from "../../../services/medicalHistoryService";
+import { toast } from "react-toastify";
 
 const MedicalExamForm = ({ appointment, onBack }) => {
     const patient = appointment.patient;
@@ -74,7 +75,7 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             const doctorId = localStorage.getItem("doctorId");
 
             if (!doctorId) {
-                alert("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
+                toast.error("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
                 return;
             }
 
@@ -97,11 +98,10 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             // 2. Gán các dịch vụ cận lâm sàng cho bệnh nhân (API của bạn)
             await parentService.addServicesForPatient(patient.patientId, selectedServices);
 
-            alert(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
+            toast.success(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
             onBack(true);
         } catch (error) {
-            console.error("Lỗi lưu phiếu khám:", error);
-            alert("Lưu phiếu khám thất bại, vui lòng thử lại!");
+            toast.error("Lưu phiếu khám thất bại, vui lòng thử lại!");
         }
     };
 

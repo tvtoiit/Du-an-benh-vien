@@ -35,7 +35,7 @@ export default function RegisterModal({ onClose }) {
     } catch (error) {
       console.error(error);
       if (error.response) {
-        alert("Lỗi: " + (error.response.data.error || "Không xác định!"));
+        toast.error("Lỗi: " + (error.response.data.error || "Không xác định!"));
       } else {
         toast.error("❌ Không thể kết nối server!");
       }

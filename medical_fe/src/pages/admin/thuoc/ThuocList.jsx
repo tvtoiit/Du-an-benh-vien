@@ -23,6 +23,7 @@ import {
 import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
+import { toast } from "react-toastify";
 
 const MedicineList = () => {
     const [medicines, setMedicines] = useState([]);
@@ -52,7 +53,7 @@ const MedicineList = () => {
     };
 
     const handleView = (m) => {
-        alert(
+        toast.info(
             `Thông tin thuốc:\n\n` +
             `Tên thuốc: ${m.name}\n` +
             `Số lượng: ${m.quantity}\n` +

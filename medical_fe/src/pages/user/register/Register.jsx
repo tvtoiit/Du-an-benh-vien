@@ -17,11 +17,10 @@ export default function Register({ onClose }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            alert("Mật khẩu không khớp!");
+            toast.error("Mật khẩu không khớp!");
             return;
         }
-        console.log("Đăng ký thành công:", formData);
-        alert("Đăng ký thành công!");
+        toast.success("Đăng ký thành công!");
         onClose();
     };
 

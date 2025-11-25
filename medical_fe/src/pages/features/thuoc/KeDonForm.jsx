@@ -12,6 +12,7 @@ import {
 import { AddCircle, Delete } from "@mui/icons-material";
 import prescriptionHistoryService from "../../../services/prescriptionHistoryService";
 import medicinesService from "../../../services/medicinesService";
+import { toast } from "react-toastify";
 
 const KeDonForm = ({ patient, onBack }) => {
     const [prescriptions, setPrescriptions] = useState([
@@ -53,7 +54,7 @@ const KeDonForm = ({ patient, onBack }) => {
         try {
             const patientId = patient.patientId || patient.id;
             if (!patientId) {
-                alert("Không tìm thấy patientId");
+                toast.error("Không tìm thấy patientId");
                 return;
             }
 
@@ -68,11 +69,10 @@ const KeDonForm = ({ patient, onBack }) => {
 
             await Promise.all(promises);
 
-            alert(`Đã lưu đơn thuốc cho ${patient.name || patient.fullName}`);
+            toast.success(`Đã lưu đơn thuốc cho ${patient.name || patient.fullName}`);
             onBack();
         } catch (error) {
-            console.error("Lỗi lưu đơn thuốc:", error);
-            alert("Lưu đơn thuốc thất bại, vui lòng thử lại!");
+            toast.error("Lưu đơn thuốc thất bại, vui lòng thử lại!");
         }
     };
 

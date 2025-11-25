@@ -5,6 +5,7 @@ import Footer from "../../../components/FooterComponent";
 import "../../../styles/Login.css";
 import "../../../styles/style.css";
 import loginService from "../../../services/loginService";
+import { toast } from "react-toastify";
 
 export default function Login() {
     let navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function Login() {
                 navigate("/admin");
             }
         } catch (err) {
-            alert("Sai tài khoản hoặc mật khẩu!");
+            toast.error("Sai tài khoản hoặc mật khẩu!");
         }
     };
 

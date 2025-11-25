@@ -23,7 +23,8 @@ import DsbenhNhanKham from "../khambenh/DsBenhNhanKham";
 import DsCanLamSangList from "../canlamsang/DsCanLamSangList";
 import DsBenhNhanCoKetQua from "../thuoc/DsBenhNhanCoKetQua";
 import DsBenhNhanThanhToan from "../thanhtoan/DsBenhNhanThanhToan";
-import DsBenhNhanUng from "../ungtien/DsBenhNhanUng"
+import DsBenhNhanUng from "../ungtien/DsBenhNhanUng";
+import { toast } from "react-toastify";
 
 const features = [
     {
@@ -110,7 +111,7 @@ const ExamDashboard = ({ userPermissions }) => {
     const handleClick = (featureKey) => {
         const permKey = featurePermissionMap[featureKey];
         if (!can(permKey)) {
-            alert("Bạn không có quyền thực hiện chức năng này!");
+            toast.warning("Bạn không có quyền thực hiện chức năng này!");
             return;
         }
         setSelectedFeature(featureKey);

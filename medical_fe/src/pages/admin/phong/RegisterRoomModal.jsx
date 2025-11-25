@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Modal, Typography, TextField, Button, Stack, MenuItem } from "@mui/material";
 import roomService from "../../../services/roomService";
 import departmentService from "../../../services/departmentService";
+import { toast } from "react-toastify";
 
 const style = {
     position: "absolute",
@@ -35,7 +36,7 @@ const RegisterRoomModal = ({ onClose }) => {
 
     const handleSubmit = async () => {
         if (!form.roomName || !form.departmentId) {
-            alert("Vui lòng nhập đủ thông tin");
+            toast.error("Vui lòng nhập đủ thông tin");
             return;
         }
 
@@ -46,10 +47,10 @@ const RegisterRoomModal = ({ onClose }) => {
                     departmentId: form.departmentId
                 }
             });
-            alert('Thêm thành công!');
+            toast.success('Thêm thành công!');
             onClose(true);
         } catch (err) {
-            alert(err.response?.data?.message || "Có lỗi xảy ra!");
+            toast.error(err.response?.data?.message || "Có lỗi xảy ra!");
         }
     };
 

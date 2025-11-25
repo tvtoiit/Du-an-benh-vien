@@ -1,6 +1,7 @@
 import { Box, Button, TextField, Typography, Stack } from "@mui/material";
 import advancePaymentService from "../../../services/advancePaymentService";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const AdvanceForm = ({ patient, onBack }) => {
     const [amount, setAmount] = useState("");
@@ -11,7 +12,7 @@ const AdvanceForm = ({ patient, onBack }) => {
             amount
         });
 
-        alert("Ứng tiền thành công!");
+        toast.success("Ứng tiền thành công!");
         onBack(true);
     };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import roomService from "../../../services/roomService";
 import RegisterRoomModal from "./RegisterRoomModal";
 import EditRoomModal from "./EditRoomModal";
+import { toast } from "react-toastify";
 
 import {
     Box, Typography, Paper, Table, TableBody, TableCell,
@@ -50,7 +51,7 @@ const RoomList = () => {
             await roomService.delete(roomId);
             loadRooms();
         } catch (error) {
-            alert("Không thể xóa phòng!");
+            toast.error("Không thể xóa phòng!");
         }
     };
 

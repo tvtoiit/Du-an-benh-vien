@@ -20,6 +20,7 @@ import {
 import { Delete, Edit, Add } from "@mui/icons-material";
 import userService from "../../../services/userService";
 import roleService from "../../../services/roleService";
+import { toast } from "react-toastify";
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -136,18 +137,18 @@ const UserManagement = () => {
 
                 // Nếu BE trả về dạng { error: "..."}
                 if (err.error) {
-                    alert(err.error);
+                    toast.error(err.error);
                     return;
                 }
 
                 // Nếu BE trả về string (Tài khoản đã tồn tại!)
                 if (typeof err === "string") {
-                    alert(err);
+                    toast.error(err);
                     return;
                 }
             }
 
-            alert("Có lỗi xảy ra khi lưu người dùng!");
+            toast.error("Có lỗi xảy ra khi lưu người dùng!");
         }
     };
 
@@ -159,7 +160,7 @@ const UserManagement = () => {
             setUsers((prev) => prev.filter((u) => u.userId !== userId));
         } catch (error) {
             console.error(error);
-            alert("Có lỗi xảy ra khi xoá người dùng!");
+            toast.error("Có lỗi xảy ra khi xoá người dùng!");
         }
     };
 

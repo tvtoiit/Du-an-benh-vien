@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Modal, Typography, TextField, Button, Stack } from "@mui/material";
 import roomService from "../../../services/roomService";
+import { toast } from "react-toastify";
 
 const style = {
     position: "absolute",
@@ -22,7 +23,7 @@ const EditRoomModal = ({ room, onClose }) => {
             await roomService.update(room.roomId, { roomName });
             onClose(true);
         } catch (err) {
-            alert(err.response?.data?.message || "Có lỗi xảy ra!");
+            toast.error(err.response?.data?.message || "Có lỗi xảy ra!");
         }
 
     };

@@ -12,6 +12,7 @@ import {
     Stack,
     Alert,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
     const [formData, setFormData] = useState({
@@ -120,7 +121,7 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
 
         // nếu đã có lịch đang chờ thì không cho tạo mới
         if (currentAppointment) {
-            alert("Bệnh nhân đang có lịch khám chưa hoàn tất, không thể tạo thêm.");
+            toast.warning("Bệnh nhân đang có lịch khám chưa hoàn tất, không thể tạo thêm.");
             return;
         }
 
@@ -142,7 +143,7 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
 
         } catch (error) {
             console.error("Lỗi khi tạo chỉ định FULL:", error);
-            alert(error?.response?.data?.message || "Lỗi khi tạo chỉ định khám!");
+            toast.error(error?.response?.data?.message || "Lỗi khi tạo chỉ định khám!");
         }
     };
 

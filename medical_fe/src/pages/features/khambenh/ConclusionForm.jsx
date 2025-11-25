@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import serviceResultService from "../../../services/serviceResultService";
 import medicalHistoryService from "../../../services/medicalHistoryService";
+import { toast } from "react-toastify";
 
 const ConclusionForm = ({ patient, onBack }) => {
     const [results, setResults] = useState([]);
@@ -42,7 +43,7 @@ const ConclusionForm = ({ patient, onBack }) => {
         try {
             const doctorId = localStorage.getItem("doctorId");
             if (!doctorId) {
-                alert("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
+                toast.error("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
                 return;
             }
 
@@ -59,11 +60,10 @@ const ConclusionForm = ({ patient, onBack }) => {
 
             await medicalHistoryService.createResult(payload);
 
-            alert("Đã lưu kết luận của bác sĩ");
+            toast.success("Đã lưu kết luận của bác sĩ");
             onBack(true);
         } catch (error) {
-            console.error("Lỗi lưu kết luận:", error);
-            alert("Lưu kết luận thất bại, vui lòng thử lại!");
+            toast.error("Lưu kết luận thất bại, vui lòng thử lại!");
         }
     };
 

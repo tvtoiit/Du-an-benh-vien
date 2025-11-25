@@ -5,6 +5,7 @@ import {
 } from "@mui/material";
 
 import serviceResult from "../../../services/serviceResult";
+import { toast } from "react-toastify";
 
 const CanLamSangForm = ({ patient, onBack }) => {
     const [selectedTest, setSelectedTest] = useState("");
@@ -39,7 +40,7 @@ const CanLamSangForm = ({ patient, onBack }) => {
         e.preventDefault();
 
         const selectedService = labTests.find(s => s.serviceId === selectedTest);
-        if (!selectedService) return alert("Chọn dịch vụ");
+        if (!selectedService) return toast.warning("Chọn dịch vụ");
 
         const data = new FormData();
         data.append("patientId", patient.patientId);
@@ -54,12 +55,12 @@ const CanLamSangForm = ({ patient, onBack }) => {
 
         try {
             const response = await serviceResult.create(data);
-            alert("Lưu thành công: " + selectedService.serviceName);
+            toast.success("Lưu thành công: " + selectedService.serviceName);
             console.log("Kết quả lưu:", response.data);
             setFormData({ result: "", note: "", status: "Chưa làm", file: null });
         } catch (error) {
             console.error(error);
-            alert("Lỗi khi lưu kết quả");
+            toast.error("Lỗi khi lưu kết quả");
         }
     };
 
