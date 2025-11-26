@@ -1,56 +1,182 @@
-import React, { useState } from "react";
+import React from "react";
 import "../../../styles/Register.css";
-import Header from "../../../components/HeaderComponent";
-import Footer from "../../../components/FooterComponent";
+import { toast } from "react-toastify";
+import outthenService from "../../../services/outthenService";
 
-export default function Register({ onClose }) {
-    const [formData, setFormData] = useState({
-        cccd: "",
-        password: "",
-        confirmPassword: ""
+// React Hook Form + Yup
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
+
+// Schema validate bằng Yup
+const schema = yup.object().shape({
+    fullName: yup.string().required("Họ và tên không được bỏ trống"),
+
+    phoneNumber: yup
+        .string()
+        .matches(/^[0-9]{10}$/, "Số điện thoại phải đủ 10 số")
+        .required("Số điện thoại không được bỏ trống"),
+
+    email: yup
+        .string()
+        .email("Email không hợp lệ")
+        .required("Email không được bỏ trống"),
+
+    address: yup.string().required("Địa chỉ không được bỏ trống"),
+
+    password: yup
+        .string()
+        .min(6, "Mật khẩu phải từ 6 ký tự")
+        .required("Vui lòng nhập mật khẩu"),
+
+    confirmPassword: yup
+        .string()
+        .oneOf([yup.ref("password")], "Mật khẩu không trùng khớp")
+        .required("Vui lòng xác nhận mật khẩu")
+});
+
+export default function Register() {
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm({
+        resolver: yupResolver(schema)
     });
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            toast.error("Mật khẩu không khớp!");
-            return;
+    // Submit đăng ký
+    const onSubmit = async (data) => {
+
+        const requestData = {
+            username: data.email,         // Backend lấy username = email
+            password: data.password,
+            user: {
+                fullName: data.fullName,
+                phoneNumber: data.phoneNumber,
+                email: data.email,
+                address: data.address
+            }
+        };
+
+        try {
+            await outthenService.register(requestData);
+            toast.success("Đăng ký thành công!");
+            navigate("/login");
+        } catch (err) {
+            console.log(err);
+            toast.error("Đăng ký thất bại!");
         }
-        toast.success("Đăng ký thành công!");
-        onClose();
     };
 
     return (
-        <div>
-            <Header menuItems={menuItems} activeMenu="" setActiveMenu={() => { }} />
-            <div className="register-modal">
-                <div className="register-container">
-                    <button className="close-btn" onClick={onClose}>×</button>
-                    <h2>Đăng Ký Khám Bệnh</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>CCCD/CMND</label>
-                            <input type="text" name="cccd" value={formData.cccd} onChange={handleChange} required />
-                        </div>
-                        <div className="form-group">
-                            <label>Mật khẩu</label>
-                            <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-                        </div>
+        <div className="register-page">
+            <div className="register-container">
+                <h2>Đăng Ký Tài Khoản</h2>
 
-                        <div className="form-group">
-                            <label>Xác nhận mật khẩu</label>
-                            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
-                        </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
 
-                        <button type="submit" className="btn btn-submit">Đăng Ký</button>
-                    </form>
-                </div>
+                    {/* Họ tên */}
+                    <div className="form-group">
+                        <label>Họ và tên</label>
+                        <input
+                            type="text"
+                            {...register("fullName")}
+                            className={errors.fullName ? "input-error" : ""}
+                        />
+                        {errors.fullName && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.fullName.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Số điện thoại */}
+                    <div className="form-group">
+                        <label>Số điện thoại</label>
+                        <input
+                            type="text"
+                            {...register("phoneNumber")}
+                            className={errors.phoneNumber ? "input-error" : ""}
+                        />
+                        {errors.phoneNumber && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.phoneNumber.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Email */}
+                    <div className="form-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            {...register("email")}
+                            className={errors.email ? "input-error" : ""}
+                        />
+                        {errors.email && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.email.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Địa chỉ */}
+                    <div className="form-group">
+                        <label>Địa chỉ</label>
+                        <input
+                            type="text"
+                            {...register("address")}
+                            className={errors.address ? "input-error" : ""}
+                        />
+                        {errors.address && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.address.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mật khẩu */}
+                    <div className="form-group">
+                        <label>Mật khẩu</label>
+                        <input
+                            type="password"
+                            {...register("password")}
+                            className={errors.password ? "input-error" : ""}
+                        />
+                        {errors.password && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.password.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Xác nhận mật khẩu */}
+                    <div className="form-group">
+                        <label>Xác nhận mật khẩu</label>
+                        <input
+                            type="password"
+                            {...register("confirmPassword")}
+                            className={errors.confirmPassword ? "input-error" : ""}
+                        />
+                        {errors.confirmPassword && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.confirmPassword.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <button type="submit" className="btn btn-submit">
+                        Đăng Ký
+                    </button>
+                    <p className="go-login">
+                        Đã có tài khoản? <a href="/login">Đăng nhập</a>
+                    </p>
+                </form>
             </div>
-            <Footer />
         </div>
     );
 }

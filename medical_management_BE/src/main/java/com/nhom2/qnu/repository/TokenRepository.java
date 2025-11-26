@@ -1,5 +1,6 @@
 package com.nhom2.qnu.repository;
 
+import com.nhom2.qnu.enums.TokenEnum;
 import com.nhom2.qnu.model.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,9 @@ public interface TokenRepository extends JpaRepository<Token, String> {
     Optional<Token> findByToken(String token);
 
     List<Token> findAllByExpired(Boolean exprired);
+
+    Optional<Token> findTopByAccountAccountIdAndTokenTypeOrderByCreatedAtDesc(
+            String accountId,
+            TokenEnum tokenType);
+
 }

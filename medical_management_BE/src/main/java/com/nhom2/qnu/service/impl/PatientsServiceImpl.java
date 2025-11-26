@@ -132,13 +132,13 @@ public class PatientsServiceImpl implements PatientsService {
 
       patients.setUser(user);
 
-      // ✅ SET ROLE = BENHNHAN
+      // SET ROLE = BENHNHAN
       Role role = roleRepository.findById("BENHNHAN")
           .orElseThrow(() -> new DataNotFoundException("Role BENHNHAN not found"));
 
       user.getAccount().setRole(role);
 
-      // ✅ LƯU LẠI USER (vì user thay đổi)
+      // LƯU LẠI USER (vì user thay đổi)
       userRepository.save(user);
     }
 

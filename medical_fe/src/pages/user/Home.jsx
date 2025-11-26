@@ -19,13 +19,6 @@ export default function Home() {
   return (
     <div className="home-root">
       <div className="container">
-        {/* Header */}
-        <Header
-          menuItems={menuItems}
-          activeMenu={activeMenu}
-          setActiveMenu={setActiveMenu}
-          onRegisterClick={() => setShowRegisterModal(true)}
-        />
 
         {/* Hero Section */}
         <section className="hero-section">
@@ -42,9 +35,6 @@ export default function Home() {
         <div className="floating-btn floating-btn-right">
           <div className="floating-btn-content">💬</div>
         </div>
-
-        {/* Footer */}
-        <Footer />
       </div>
 
       {/* Modals */}

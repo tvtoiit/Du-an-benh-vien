@@ -91,3 +91,66 @@ h2 {
 .btn-submit:hover {
     background-color: #0056b3;
 }
+
+.register-page {
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* căn giữa theo chiều dọc */
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px 0;
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    /* ⭐ Fix căn giữa chữ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.go-login {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.go-login a {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.go-login a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* error message */
+.input-error {
+    border: 1px solid #ff4d4f !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.3);
+}
+
+.error-box {
+    margin-top: 4px;
+    background: #ffe6e6;
+    border-left: 4px solid #ff4d4f;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.error-text {
+    color: #d93025;
+    font-size: 13px;
+    margin: 0;
+}

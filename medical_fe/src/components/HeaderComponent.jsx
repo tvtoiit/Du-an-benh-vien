@@ -3,32 +3,47 @@ import { useNavigate } from "react-router-dom";
 import loginService from ".././services/loginService";
 import ".././styles/header.css";
 
-export default function Header({ menuItems, activeMenu, setActiveMenu, onRegisterClick }) {
+export default function Header({
+    menuItems = [],
+    activeMenu = "",
+    setActiveMenu = () => { },
+    onRegisterClick = null
+}) {
     const navigate = useNavigate();
     const [checkUser, setCheckUser] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
-
-    const headerButtons = [
-        { text: 'HỎI BÁC SĨ BỆNH VIỆN', className: 'btn btn-yellow' },
-        { text: 'ĐĂNG KÝ KHÁM', className: 'btn btn-blue', onClick: onRegisterClick },
-    ];
+    const [openMenu, setOpenMenu] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const syncUser = () => {
+            const token = localStorage.getItem("token");
 
-        if (!token) return;
+            if (!token) {
+                setCheckUser(false);
+                setUserInfo(null);
+                return;
+            }
 
-        setCheckUser(true);
+            setCheckUser(true);
 
-        // GỌI API LẤY THÔNG TIN USER
-        loginService.loginCheckUser(token)
-            .then(res => {
-                setUserInfo(res);
-            })
-            .catch(err => {
-                console.error("Lỗi load user:", err);
-            });
-    }, []);
+            loginService.loginCheckUser(token)
+                .then(res => setUserInfo(res))
+                .catch(() => {
+                    setCheckUser(false);
+                    setUserInfo(null);
+                });
+        };
+
+        syncUser();
+
+        window.addEventListener("storage", syncUser);
+        return () => window.removeEventListener("storage", syncUser);
+
+    }, [localStorage.getItem("token")]);
+
+    useEffect(() => {
+        setOpenMenu(false);
+    }, [userInfo]);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -36,7 +51,6 @@ export default function Header({ menuItems, activeMenu, setActiveMenu, onRegiste
         setUserInfo(null);
         navigate("/");
     };
-
 
     return (
         <>
@@ -46,60 +60,67 @@ export default function Header({ menuItems, activeMenu, setActiveMenu, onRegiste
                         width="200"
                         src="https://benhvienbinhdinh.com.vn/wp-content/uploads/2021/06/cropped-LogoXanhDuong-326x151.png.webp"
                         alt="Logo"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => navigate("/")}
                     />
                 </div>
 
                 <div className="header-actions">
-                    {headerButtons.map((btn, idx) => (
+                    {/* Chỉ hiện nút Đăng ký khám nếu onRegisterClick được truyền */}
+                    {userInfo && (
                         <button
-                            key={idx}
-                            className={btn.className}
-                            onClick={btn.onClick || null}
+                            className="btn btn-blue"
+                            onClick={() => navigate("/booking")}
                         >
-                            {btn.text}
+                            Đặt lịch khám
                         </button>
-                    ))}
+                    )}
 
-                    <button className="btn invoice-btn">🔍 Tra hóa đơn</button>
-
-                    {/* Nếu chưa login */}
-                    {!checkUser && (
+                    {!userInfo && (
                         <button onClick={() => navigate("/login")} className="btn notify-btn">
                             Đăng Nhập
                         </button>
                     )}
 
-                    {checkUser && userInfo && (
-                        <div className="user-box">
-                            <div className="user-avatar">
-                                {userInfo.fullName.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="user-name">{userInfo.fullName}</span>
-
-                            <button
-                                onClick={() => handleLogout()}
-                                className="logout-btn"
+                    {userInfo && (
+                        <div className="user-container">
+                            <div
+                                className="user-info"
+                                onClick={() => setOpenMenu(!openMenu)}
                             >
-                                Đăng Xuất
-                            </button>
+                                <div className="user-avatar">
+                                    {userInfo.fullName.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="user-name">{userInfo.fullName}</span>
+                                <span className="dropdown-icon">{openMenu ? "▲" : "▼"}</span>
+                            </div>
+
+                            {openMenu && (
+                                <div className="dropdown-menu">
+                                    <button onClick={handleLogout}>Đăng Xuất</button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </header>
 
-            <nav className="header-nav-container">
-                <ul className="header-nav-list">
-                    {menuItems.map((item, index) => (
-                        <li
-                            key={index}
-                            className={`nav-item ${activeMenu === item ? 'active' : ''}`}
-                            onClick={() => setActiveMenu(item)}
-                        >
-                            {item.toUpperCase()}
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+            {/* Chỉ hiển thị menu nếu menuItems.length > 0 */}
+            {menuItems.length > 0 && (
+                <nav className="header-nav-container">
+                    <ul className="header-nav-list">
+                        {menuItems.map((item, index) => (
+                            <li
+                                key={index}
+                                className={`nav-item ${activeMenu === item ? 'active' : ''}`}
+                                onClick={() => setActiveMenu(item)}
+                            >
+                                {item.toUpperCase()}
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+            )}
         </>
     );
 }

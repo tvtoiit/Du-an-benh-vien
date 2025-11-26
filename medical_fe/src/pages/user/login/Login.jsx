@@ -1,33 +1,43 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Header from "../../../components/HeaderComponent";
-import Footer from "../../../components/FooterComponent";
 import "../../../styles/Login.css";
 import "../../../styles/style.css";
 import loginService from "../../../services/loginService";
 import { toast } from "react-toastify";
 
+// React Hook Form + Yup
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+// Schema validate
+const schema = yup.object().shape({
+    username: yup.string().required("Bạn chưa nhập email / CCCD / SĐT"),
+    password: yup.string().required("Bạn chưa nhập mật khẩu")
+});
+
 export default function Login() {
-    let navigate = useNavigate();
-    const [formData, setFormData] = useState({ username: "", password: "" });
+    const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm({
+        resolver: yupResolver(schema)
+    });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
+    const onSubmit = async (data) => {
         try {
-            const res = await loginService.login(formData);
+            const res = await loginService.login(data);
             localStorage.setItem("token", res.accessToken);
 
-            // Kiểm tra vài trò của người dùng
-            // Get api user / admin
             const userlogin = await loginService.loginCheckUser(res.accessToken);
+
             if (userlogin.doctorId) {
                 localStorage.setItem("doctorId", userlogin.doctorId);
             }
+
             if (userlogin.role === "ROLE_USER") {
                 navigate("/");
             } else {
@@ -38,54 +48,58 @@ export default function Login() {
         }
     };
 
-    const menuItems = [
-        "Giới thiệu", "Chuyên khoa", "Đội ngũ bác sĩ", "Cơ sở vật chất",
-        "Dịch vụ", "Tin tức - Sự kiện", "Dành cho khách hàng", "Lịch trực - Lịch khám",
-        "Tuyển dụng - Đào tạo", "Đấu thầu mua sắm", "Thông tin"
-    ];
-
     return (
-        <div>
-            <Header menuItems={menuItems} activeMenu="" setActiveMenu={() => { }} />
+        <div className="login-page">
+            <div className="login-card">
+                <h2>Đăng Nhập Tài Khoản</h2>
 
-            <div className="login-page">
-                <div className="login-card">
-                    <h2>Đăng Nhập Bệnh Viện</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    {/* Username */}
+                    <div className="form-group">
+                        <label>Email / CCCD / SĐT</label>
+                        <input
+                            type="text"
+                            placeholder="Nhập Email hoặc SĐT"
+                            {...register("username")}
+                            className={errors.username ? "input-error" : ""}
+                        />
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Email / CCCD / SĐT</label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                placeholder="Nhập Email hoặc SĐT"
-                                required
-                            />
-                        </div>
+                        {errors.username && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.username.message}</p>
+                            </div>
+                        )}
+                    </div>
 
-                        <div className="form-group">
-                            <label>Mật khẩu</label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="Nhập mật khẩu"
-                                required
-                            />
-                        </div>
+                    {/* Password */}
+                    <div className="form-group">
+                        <label>Mật khẩu</label>
+                        <input
+                            type="password"
+                            placeholder="Nhập mật khẩu"
+                            {...register("password")}
+                            className={errors.password ? "input-error" : ""}
+                        />
 
-                        <button type="submit" className="btn btn-login">Đăng Nhập</button>
+                        {errors.password && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.password.message}</p>
+                            </div>
+                        )}
+                    </div>
 
-                        <p className="go-register">
-                            Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-                        </p>
-                    </form>
-                </div>
+                    <button type="submit" className="btn btn-login">
+                        Đăng Nhập
+                    </button>
+
+                    <p className="forgot-password">
+                        <Link to="/forgot-password">Quên mật khẩu?</Link>
+                    </p>
+                    <p className="go-register">
+                        Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+                    </p>
+                </form>
             </div>
-            <Footer />
         </div>
     );
 }
