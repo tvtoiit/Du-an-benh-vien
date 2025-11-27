@@ -76,11 +76,18 @@ export default function Header({
                         </button>
                     )}
 
-                    {!userInfo && (
-                        <button onClick={() => navigate("/login")} className="btn notify-btn">
-                            Đăng Nhập
-                        </button>
-                    )}
+                    <div className="auth-buttons">
+                        {!userInfo && (
+                            <>
+                                <button onClick={() => navigate("/register")} className="btn notify-btn">
+                                    Đăng ký
+                                </button>
+                                <button onClick={() => navigate("/login")} className="btn notify-btn">
+                                    Đăng Nhập
+                                </button>
+                            </>
+                        )}
+                    </div>
 
                     {userInfo && (
                         <div className="user-container">

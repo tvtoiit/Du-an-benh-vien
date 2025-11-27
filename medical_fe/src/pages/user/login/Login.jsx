@@ -38,7 +38,7 @@ export default function Login() {
                 localStorage.setItem("doctorId", userlogin.doctorId);
             }
 
-            if (userlogin.role === "ROLE_USER") {
+            if (userlogin.role === "ROLE_USER" || userlogin.role === "ROLE_BENHNHAN") {
                 navigate("/");
             } else {
                 navigate("/admin");
