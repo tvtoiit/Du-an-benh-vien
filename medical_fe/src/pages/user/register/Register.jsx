@@ -64,12 +64,12 @@ export default function Register() {
 
         try {
             await outthenService.register(requestData);
-            toast.success("Đăng ký thành công!");
             navigate("/login");
         } catch (err) {
-            console.log(err);
-            toast.error("Đăng ký thất bại!");
+            const message = err.response?.data?.message || "Đăng ký thất bại!";
+            toast.error(message);
         }
+
     };
 
     return (
@@ -113,7 +113,7 @@ export default function Register() {
                     <div className="form-group">
                         <label>Email</label>
                         <input
-                            type="email"
+                            type="text"
                             {...register("email")}
                             className={errors.email ? "input-error" : ""}
                         />

@@ -3,12 +3,18 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import outthenService from "../../../services/outthenService";
 import { toast } from "react-toastify";
+import "../../../styles/forgotPass.css";
 
 export default function ResetPassword() {
 
-    const { state } = useLocation();   // nhận email từ verify-otp
+    const { state } = useLocation();
     const navigate = useNavigate();
-    const { register, handleSubmit } = useForm();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm();
 
     const email = state?.email;
     const otp = state?.otp;
@@ -25,7 +31,8 @@ export default function ResetPassword() {
             navigate("/login");
 
         } catch (e) {
-            toast.error("Không thể đổi mật khẩu!");
+            const message = e.response?.data?.message || "Không thể đổi mật khẩu!";
+            toast.error(message);
         }
     };
 
@@ -36,9 +43,27 @@ export default function ResetPassword() {
 
                 <form onSubmit={handleSubmit(onSubmit)}>
 
+                    {/* Mật khẩu mới */}
                     <div className="form-group">
                         <label>Mật khẩu mới</label>
-                        <input type="password" {...register("newPassword")} />
+
+                        <input
+                            type="password"
+                            {...register("newPassword", {
+                                required: "Vui lòng nhập mật khẩu mới",
+                                minLength: {
+                                    value: 6,
+                                    message: "Mật khẩu phải ít nhất 6 ký tự"
+                                }
+                            })}
+                            className={errors.newPassword ? "input-error" : ""}
+                        />
+
+                        {errors.newPassword && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.newPassword.message}</p>
+                            </div>
+                        )}
                     </div>
 
                     <button className="btn btn-login">

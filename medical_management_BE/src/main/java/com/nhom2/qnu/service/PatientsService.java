@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.PatientRequest;
+import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.EHealthRecordsResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
@@ -27,4 +28,5 @@ public interface PatientsService {
 
     List<User> getPatientsNotAccepted();
 
+    Object getPatientByUserId(String userId);
 }

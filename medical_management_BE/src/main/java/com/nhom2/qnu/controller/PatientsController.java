@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nhom2.qnu.payload.request.PatientRequest;
+import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
 import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
@@ -63,6 +64,13 @@ public class PatientsController {
   public ResponseEntity<?> getNotAcceptedPatients() {
     return ResponseEntity.ok(
         patientsService.getPatientsNotAccepted());
+  }
+
+  @GetMapping("/by-user/{userId}")
+  public Object getPatientByUserId(@PathVariable String userId) {
+    Object response = patientsService.getPatientByUserId(userId);
+
+    return response;
   }
 
 }

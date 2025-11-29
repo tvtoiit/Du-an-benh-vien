@@ -17,6 +17,8 @@ import java.util.List;
 public interface PatientsRepository extends JpaRepository<Patients, String> {
     Optional<Patients> findByPatientId(String id);
 
+    List<Patients> findAllByUser_UserId(String userId);
+
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO medical_management.tbl_patient_service (patient_id, service_id) VALUES (:idPatient,:idSerivces)", nativeQuery = true)

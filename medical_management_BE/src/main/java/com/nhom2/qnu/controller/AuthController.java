@@ -31,12 +31,22 @@ public class AuthController {
 
     @PostMapping("/signupuser")
     public ResponseEntity<?> signUpUser(@RequestBody SignupRequest signupRequest) {
-        return new ResponseEntity<>(authService.signUpUser(signupRequest), HttpStatus.CREATED);
+
+        ApiResponse response = authService.signUpUser(signupRequest);
+
+        return ResponseEntity
+                .status(response.getStatus())
+                .body(response);
     }
 
     @PostMapping("/forgot-password")
-    public ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        return authService.forgotPassword(request.getEmail());
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+
+        ApiResponse response = authService.forgotPassword(body.get("email"));
+
+        return ResponseEntity
+                .status(response.getStatus())
+                .body(response);
     }
 
     // @PostMapping("/reset-password")
@@ -46,16 +56,27 @@ public class AuthController {
     // }
 
     @PostMapping("/reset-password")
-    public ApiResponse resetPass(@RequestBody Map<String, String> body) {
-        return authService.resetPassword(
+    public ResponseEntity<?> resetPass(@RequestBody Map<String, String> body) {
+
+        ApiResponse response = authService.resetPassword(
                 body.get("email"),
                 body.get("otp"),
                 body.get("newPassword"));
+
+        return ResponseEntity
+                .status(response.getStatus())
+                .body(response);
     }
 
     @PostMapping("/verify-otp")
-    public ApiResponse verifyOtp(@RequestBody Map<String, String> body) {
-        return authService.verifyOtp(body.get("email"), body.get("otp"));
-    }
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
 
+        ApiResponse response = authService.verifyOtp(
+                body.get("email"),
+                body.get("otp"));
+
+        return ResponseEntity
+                .status(response.getStatus())
+                .body(response);
+    }
 }

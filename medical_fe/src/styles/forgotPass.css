@@ -1,0 +1,18 @@
+.input-error {
+    border: 1px solid #ff4d4f !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.3);
+}
+
+.error-box {
+    margin-top: 4px;
+    background: #ffe6e6;
+    border-left: 4px solid #ff4d4f;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.error-text {
+    color: #d93025;
+    font-size: 13px;
+    margin: 0;
+}

@@ -68,12 +68,20 @@ export default function Header({
                 <div className="header-actions">
                     {/* Chỉ hiện nút Đăng ký khám nếu onRegisterClick được truyền */}
                     {userInfo && (
-                        <button
-                            className="btn btn-blue"
-                            onClick={() => navigate("/booking")}
-                        >
-                            Đặt lịch khám
-                        </button>
+                        <>
+                            <button
+                                className="btn btn-blue"
+                                onClick={() => navigate("/booking")}
+                            >
+                                Đặt lịch khám
+                            </button>
+                            <button
+                                className="btn btn-blue"
+                                onClick={() => navigate("/lichkham")}
+                            >
+                                Xem lịch khám
+                            </button>
+                        </>
                     )}
 
                     <div className="auth-buttons">

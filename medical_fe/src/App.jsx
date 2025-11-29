@@ -15,6 +15,7 @@ import ResetPassword from "./pages/user/reset/ResetPassword";
 import ForgotPassword from "./pages/user/forgot/ForgotPassword";
 import VerifyOtp from "./pages/user/reset/VerifyOtp";
 import BookingPage from "./pages/user/booking/BookingPage";
+import TraCuu from "./pages/user/tracuu/tracuu";
 
 function App() {
   return (
@@ -45,6 +46,15 @@ function App() {
           element={
             <MainLayout>
               <Register />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/lichkham"
+          element={
+            <MainLayout>
+              <TraCuu />
             </MainLayout>
           }
         />

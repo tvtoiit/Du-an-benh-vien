@@ -9,6 +9,7 @@ const parentService = {
         api.post(`/patients/add_service?idPatient=${idPatient}&idSerivces=${idServicesArray.join(",")}`),
     getPatientsWithServices: () => api.get("/patients/services"),
     getWaitingPatients: () => api.get("/patients/not-accepted"),
+    getPatientByUserId: (id) => api.get(`/patients/by-user/${id}`),
 };
 
 export default parentService;

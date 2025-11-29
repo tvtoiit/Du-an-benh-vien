@@ -1,0 +1,98 @@
+.tracuu-pro {
+    display: flex;
+    justify-content: center;
+    padding: 30px;
+    background: #eef4f8;
+}
+
+.pro-card {
+    width: 100%;
+    max-width: 950px;
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.title {
+    text-align: center;
+    font-size: 26px;
+    color: #0a4a6f;
+    font-weight: bold;
+}
+
+.title-icon {
+    font-size: 28px;
+    margin-right: 6px;
+}
+
+.subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #3f6e8b;
+}
+
+.btn-search {
+    background: #0a97d6;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-search:hover {
+    background: #087ab1;
+}
+
+.info-section {
+    margin-top: 25px;
+    background: #ffffff;
+    padding: 20px;
+    border-left: 6px solid #0a97d6;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+}
+
+.section-title {
+    font-size: 20px;
+    color: #0a4a6f;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    background: #f5fafd;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d3e3ed;
+}
+
+.subbox {
+    background: #f8fbff;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    border: 1px solid #dde8f0;
+}
+
+.subbox h4 {
+    color: #0a4a6f;
+    margin-bottom: 8px;
+}
+
+.empty {
+    color: #888;
+    font-style: italic;
+}

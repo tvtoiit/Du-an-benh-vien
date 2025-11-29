@@ -80,11 +80,11 @@ const ModalDoctor = ({ onClose, onSuccess }) => {
 
         try {
             await doctorService.create(form);
-            toast.success("✅ Thêm bác sĩ thành công!");
+            toast.success("Thêm bác sĩ thành công!");
             onSuccess?.();
             onClose();
         } catch (err) {
-            toast.error("❌ Không thể thêm bác sĩ");
+            toast.error("Không thể thêm bác sĩ");
         }
     };
 

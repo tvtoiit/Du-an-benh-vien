@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse signUpUser(SignupRequest signupRequest) {
         String username = signupRequest.getUsername();
         if (accountRepository.existsByusername(username)) {
-            throw new DataExistException("This user with username: " + username + " already exist");
+            throw new DataExistException("Tài khoản này đã tồn tại");
         } else {
             Account account = new Account();
             account.setUsername(signupRequest.getUsername());
@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
             userRepository.save(user);
         }
 
-        return new ApiResponse("Create successfully", HttpStatus.CREATED);
+        return new ApiResponse("Tạo thành công", HttpStatus.CREATED);
     }
 
     private void saveUserToken(Account account, String jwtToken) {

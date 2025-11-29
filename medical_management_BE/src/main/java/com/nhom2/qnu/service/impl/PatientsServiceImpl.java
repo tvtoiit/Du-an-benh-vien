@@ -1,5 +1,6 @@
 package com.nhom2.qnu.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.model.Patients;
@@ -223,4 +224,27 @@ public class PatientsServiceImpl implements PatientsService {
         .filter(Objects::nonNull)
         .toList();
   }
+
+  @Override
+  public Object getPatientByUserId(String userId) {
+
+    List<Patients> list = patientsRepository.findAllByUser_UserId(userId);
+
+    if (list.isEmpty()) {
+      return new ApiResponse("Không tìm thấy bệnh nhân!", HttpStatus.NOT_FOUND);
+    }
+
+    Patients p = list.get(0); // lấy dòng đầu tiên
+
+    return PatientResponse.builder()
+        .patientId(p.getPatientId())
+        .fullName(p.getUser().getFullName())
+        .contactNumber(p.getUser().getPhoneNumber())
+        .email(p.getUser().getEmail())
+        .dateOfBirth(p.getDateOfBirth())
+        .address(p.getUser().getAddress())
+        .otherInfo(p.getOtherInfo())
+        .build();
+  }
+
 }

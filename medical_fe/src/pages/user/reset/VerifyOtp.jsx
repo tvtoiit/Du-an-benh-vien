@@ -3,12 +3,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import outthenService from "../../../services/outthenService";
 import { toast } from "react-toastify";
+import "../../../styles/forgotPass.css";
 
 export default function VerifyOtp() {
 
     const { state } = useLocation();
     const navigate = useNavigate();
-    const { register, handleSubmit } = useForm();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm();
 
     const email = state?.email; // nhận email từ trang quên mật khẩu
 
@@ -19,13 +25,11 @@ export default function VerifyOtp() {
                 otp: data.otp,
             });
 
-            toast.success("OTP hợp lệ! Hãy đặt mật khẩu mới");
-
-            // ⭐ Chuyển sang trang reset password
             navigate("/reset-password", { state: { email, otp: data.otp } });
 
         } catch (e) {
-            toast.error("OTP không đúng!");
+            const message = e.response?.data?.message || "OTP không đúng!";
+            toast.error(message);
         }
     };
 
@@ -39,7 +43,24 @@ export default function VerifyOtp() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="form-group">
                         <label>Mã OTP</label>
-                        <input type="text" {...register("otp")} />
+
+                        <input
+                            type="text"
+                            {...register("otp", {
+                                required: "Vui lòng nhập mã OTP",
+                                pattern: {
+                                    value: /^[0-9]{6}$/,
+                                    message: "OTP phải gồm 6 số"
+                                }
+                            })}
+                            className={errors.otp ? "input-error" : ""}
+                        />
+
+                        {errors.otp && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.otp.message}</p>
+                            </div>
+                        )}
                     </div>
 
                     <button className="btn btn-login">Xác minh OTP</button>
