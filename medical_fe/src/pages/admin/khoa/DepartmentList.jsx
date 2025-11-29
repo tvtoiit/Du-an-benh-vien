@@ -67,10 +67,10 @@ const DepartmentList = () => {
         try {
             await departmentService.delete(id);
             setDepartments((prev) => prev.filter((d) => d.departmentId !== id));
-            toast.success("✅ Đã xoá khoa.");
+            toast.success("Đã xoá khoa.");
         } catch (err) {
             console.error(err);
-            toast.error("❌ Xoá khoa thất bại!");
+            toast.error("Xoá khoa thất bại!");
         }
     };
 

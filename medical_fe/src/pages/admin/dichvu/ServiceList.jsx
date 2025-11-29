@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import serviceService from "../../../services/servicesServices";
 import RegisterServiceModal from "./RegisterServiceModal";
 import EditServiceModal from "./EditServiceModal";
+import { toast } from "react-toastify";
+
 
 import {
     Box,
@@ -52,7 +54,7 @@ const ServiceList = () => {
     };
 
     const handleView = (s) => {
-        alert(
+        toast.info(
             `Thông tin dịch vụ:\n\n` +
             `Tên dịch vụ: ${s.serviceName}\n` +
             `Giá: ${s.price}\n` +

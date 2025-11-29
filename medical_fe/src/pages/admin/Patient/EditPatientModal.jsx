@@ -25,10 +25,10 @@ export default function EditPatientModal({ patient, onClose }) {
 
         try {
             await patientService.update(patient.patientId, formData);
-            toast.success("✅ Cập nhật thành công!");
+            toast.success("Cập nhật thành công!");
             onClose();
         } catch (error) {
-            toast.error("❌ Không thể cập nhật!");
+            toast.error("Không thể cập nhật!");
         }
     };
 

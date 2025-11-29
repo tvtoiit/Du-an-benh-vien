@@ -47,11 +47,11 @@ const ModalDoctorEdit = ({ doctor, onClose, onSuccess }) => {
     const handleSave = async () => {
         try {
             await doctorService.update(doctor.doctorId, form);
-            toast.success("✅ Cập nhật thành công!");
+            toast.success("Cập nhật thành công!");
             onSuccess?.();
             onClose();
         } catch (err) {
-            toast.error("❌ Lỗi cập nhật bác sĩ!");
+            toast.error("Lỗi cập nhật bác sĩ!");
             console.error(err);
         }
     };

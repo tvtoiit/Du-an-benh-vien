@@ -30,14 +30,14 @@ export default function RegisterModal({ onClose }) {
 
     try {
       await patientService.create(formData);
-      toast.success("✅ Đăng ký thành công!!");
+      toast.success("Đăng ký thành công!!");
       onClose(true);
     } catch (error) {
       console.error(error);
       if (error.response) {
         toast.error("Lỗi: " + (error.response.data.error || "Không xác định!"));
       } else {
-        toast.error("❌ Không thể kết nối server!");
+        toast.error("Không thể kết nối server!");
       }
     }
   };
