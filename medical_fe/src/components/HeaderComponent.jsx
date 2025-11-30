@@ -76,7 +76,15 @@ export default function Header({
                 </div>
 
                 <div className="header-actions">
-
+                    <div className="hotline-button" onClick={() => window.location.href = "tel:0987970309"}>
+                        <span className="phone-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M6.62 10.79a15.093 15.093 0 006.59 6.59l2.2-2.2a1 1 0 011-.24c1.12.37 2.33.57 3.59.57a1 1 0 011 1v3.5a1 1 0 01-1 1C10.07 21.01 3 13.94 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.26.2 2.47.57 3.59a1 1 0 01-.24 1.03l-2.2 2.17z"></path>
+                            </svg>
+                        </span>
+                        <span className="phone-number">19000123</span>
+                    </div>
                     {userInfo && (
                         <>
                             <button
@@ -93,6 +101,7 @@ export default function Header({
                             </button>
                         </>
                     )}
+
 
                     <div className="auth-buttons">
                         {!userInfo && (

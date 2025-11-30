@@ -116,8 +116,8 @@
 
 /* button đăng nhập, đăng kí */
 .notify-btn {
-    background-color: #f4a100;
-    color: white;
+    background: #2b77c9;
+    color: #fff;
     padding: 8px 20px;
     margin-left: 8px;
     font-size: 14px;
@@ -131,11 +131,11 @@
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
-.notify-btn:hover {
+/* .notify-btn:hover {
     background-color: #ffb300;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.20);
-}
+} */
 
 .notify-btn:active {
     transform: scale(0.97);
@@ -144,7 +144,7 @@
 /* css thanh bên trên */
 .main-menu-container {
     width: 100%;
-    background: #ffffff;
+    background: #1e5da9;
     border-top: 1px solid #dcdcdc;
     padding: 8px 0;
     display: flex;
@@ -154,21 +154,17 @@
 .main-menu-list {
     list-style: none;
     display: flex;
-    gap: 35px;
+    gap: 90px;
     margin: 0;
     padding: 0;
 }
 
 .main-menu-item {
     font-size: 15px;
-    color: #276dc4;
+    color: #dbf0fa;
     cursor: pointer;
     font-weight: 500;
     transition: 0.2s;
-}
-
-.main-menu-item:hover {
-    color: #0b4580;
 }
 
 .main-menu-item.active {
@@ -180,4 +176,37 @@
 
 .search-icon {
     font-size: 18px;
+}
+
+
+.hotline-button {
+    display: flex;
+    align-items: center;
+    background: #2b77c9;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: 0.2s;
+}
+
+.hotline-button:hover {
+    opacity: 0.85;
+}
+
+.phone-icon {
+    display: flex;
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.phone-number {
+    letter-spacing: 1px;
+}
+
+.btn-login__space {
+    padding-left: 5px;
 }

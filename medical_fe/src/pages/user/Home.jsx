@@ -2,7 +2,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import img1 from "../../assets/ad1.webp";
 import logo from "../../assets/logo.jpg";
 
 
@@ -21,7 +20,7 @@ export default function Home() {
         >
           <SwiperSlide>
             <img
-              src="../../../assets/ad1.jpg"
+              src=""
               alt="Slide 1"
               className="slide-img"
             />
@@ -37,7 +36,7 @@ export default function Home() {
 
           <SwiperSlide>
             <img
-              src={img1}
+              src=""
               alt="Slide 3"
               className="slide-img"
             />
