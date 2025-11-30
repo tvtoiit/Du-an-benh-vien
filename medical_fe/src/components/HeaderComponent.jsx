@@ -2,17 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import loginService from ".././services/loginService";
 import ".././styles/header.css";
+import logo from "../assets/logo.jpg";
 
 export default function Header({
-    menuItems = [],
     activeMenu = "",
     setActiveMenu = () => { },
-    onRegisterClick = null
 }) {
     const navigate = useNavigate();
     const [checkUser, setCheckUser] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
     const [openMenu, setOpenMenu] = useState(false);
+
+    // MENU CỐ ĐỊNH — KHÔNG ĐƯỢC TRÙNG TÊN VỚI PROP
+    const menuList = [
+        { label: "Giới thiệu", path: "/gioithieu" },
+        { label: "Chuyên khoa", path: "/chuyenkhoa" },
+        { label: "Chuyên gia – bác sĩ", path: "/chuyengia" },
+        { label: "Dịch vụ đặc biệt", path: "/dichvu" },
+        { label: "Tiện nghi", path: "/tiennghi" },
+        { label: "Thành tựu", path: "/thanhtuu" },
+        { label: "Tin tức", path: "/tintuc" }
+    ];
 
     useEffect(() => {
         const syncUser = () => {
@@ -58,7 +68,7 @@ export default function Header({
                 <div className="header-left">
                     <img
                         width="200"
-                        src="https://benhvienbinhdinh.com.vn/wp-content/uploads/2021/06/cropped-LogoXanhDuong-326x151.png.webp"
+                        src={logo}
                         alt="Logo"
                         style={{ cursor: "pointer" }}
                         onClick={() => navigate("/")}
@@ -66,7 +76,7 @@ export default function Header({
                 </div>
 
                 <div className="header-actions">
-                    {/* Chỉ hiện nút Đăng ký khám nếu onRegisterClick được truyền */}
+
                     {userInfo && (
                         <>
                             <button
@@ -120,22 +130,33 @@ export default function Header({
                 </div>
             </header>
 
-            {/* Chỉ hiển thị menu nếu menuItems.length > 0 */}
-            {menuItems.length > 0 && (
-                <nav className="header-nav-container">
-                    <ul className="header-nav-list">
-                        {menuItems.map((item, index) => (
-                            <li
-                                key={index}
-                                className={`nav-item ${activeMenu === item ? 'active' : ''}`}
-                                onClick={() => setActiveMenu(item)}
-                            >
-                                {item.toUpperCase()}
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-            )}
+            {/* MENU THANH NGANG DƯỚI HEADER - TÂM ANH */}
+            <div className="main-menu-container">
+                <ul className="main-menu-list">
+                    {menuList.map((item, index) => (
+                        <li
+                            key={index}
+                            className={`main-menu-item ${activeMenu === item.path ? "active" : ""}`}
+                            onClick={() => {
+                                setActiveMenu(item.path);
+
+                                const section = document.getElementById(item.path.replace("/", ""));
+                                if (section) {
+                                    section.scrollIntoView({ behavior: "smooth", block: "start" });
+                                } else {
+                                    navigate("/"); // nếu chưa ở trang home → quay về home rồi scroll
+                                    setTimeout(() => {
+                                        const sec = document.getElementById(item.path.replace("/", ""));
+                                        sec?.scrollIntoView({ behavior: "smooth" });
+                                    }, 300);
+                                }
+                            }}
+                        >
+                            {item.label.toUpperCase()}
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </>
     );
 }

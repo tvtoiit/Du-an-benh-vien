@@ -2,6 +2,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import img1 from "../../assets/ad1.webp";
+import logo from "../../assets/logo.jpg";
+
 
 export default function Home() {
   return (
@@ -18,7 +21,7 @@ export default function Home() {
         >
           <SwiperSlide>
             <img
-              src="https://benhvienbinhdinh.com.vn/benh-vien-binh-dinh-bv-moi-benh-vien-dai-hoc-y-ha-noi-hop-tac-doc-ket-qua-chup-ct-mri/"
+              src="../../../assets/ad1.jpg"
               alt="Slide 1"
               className="slide-img"
             />
@@ -34,7 +37,7 @@ export default function Home() {
 
           <SwiperSlide>
             <img
-              src="https://benhvienbinhdinh.com.vn/benh-vien-binh-dinh-bv-moi-thanh-lap-phong-kham-suc-khoe-tam-than-tu-ngay-04-3-2024/"
+              src={img1}
               alt="Slide 3"
               className="slide-img"
             />
@@ -44,13 +47,25 @@ export default function Home() {
 
       {/* Page content */}
       <div className="container">
-        <section className="hero-section">
+        <section className="hero-section" id="gioithieu">
           <div className="hero-content">
             <h1 className="hero-title">BỆNH VIỆN BÌNH ĐỊNH</h1>
             <h2 className="hero-subtitle">KHÁM CHỮA BỆNH TOÀN DIỆN</h2>
           </div>
         </section>
       </div>
+
+      <div className="logo" id="tiennghi">
+        <img
+          width="200"
+          src={logo}
+          alt="Logo"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        />
+      </div>
+
+      {/* Bỏ ảnh dô */}
 
     </div>
   );

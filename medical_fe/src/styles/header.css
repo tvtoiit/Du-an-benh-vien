@@ -140,3 +140,44 @@
 .notify-btn:active {
     transform: scale(0.97);
 }
+
+/* css thanh bên trên */
+.main-menu-container {
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid #dcdcdc;
+    padding: 8px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.main-menu-list {
+    list-style: none;
+    display: flex;
+    gap: 35px;
+    margin: 0;
+    padding: 0;
+}
+
+.main-menu-item {
+    font-size: 15px;
+    color: #276dc4;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.main-menu-item:hover {
+    color: #0b4580;
+}
+
+.main-menu-item.active {
+    color: #0b4580;
+    font-weight: 700;
+    border-bottom: 2px solid #0b4580;
+    padding-bottom: 4px;
+}
+
+.search-icon {
+    font-size: 18px;
+}

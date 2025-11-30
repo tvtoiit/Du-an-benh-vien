@@ -12,6 +12,7 @@ import ServiceList from '../admin/dichvu/ServiceList';
 import DepartmentList from '../admin/khoa/DepartmentList';
 import RoomList from '../admin/phong/RoomList'
 import ThongKeDashboard from './thongke/ThongKeDashboard';
+import logo from "../../assets/logo.jpg";
 
 const MedicalDashboard = () => {
     const [role, setRole] = useState(null);
@@ -158,7 +159,15 @@ const MedicalDashboard = () => {
     return (
         <div className="app-container">
             <header className="header-container">
-                <div className="logo">LOGO</div>
+                <div className="logo">
+                    <img
+                        width="200"
+                        src={logo}
+                        alt="Logo"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => navigate("/")}
+                    />
+                </div>
                 <nav className="header-nav">
                     <ul className="logout-list">
                         <li className="logout-btn" onClick={handleLogout}>
