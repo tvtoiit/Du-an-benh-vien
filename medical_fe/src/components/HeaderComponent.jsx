@@ -19,9 +19,7 @@ export default function Header({
         { label: "Chuyên khoa", path: "/chuyenkhoa" },
         { label: "Chuyên gia – bác sĩ", path: "/chuyengia" },
         { label: "Dịch vụ đặc biệt", path: "/dichvu" },
-        { label: "Tiện nghi", path: "/tiennghi" },
-        { label: "Thành tựu", path: "/thanhtuu" },
-        { label: "Tin tức", path: "/tintuc" }
+        { label: "Tiện nghi", path: "/tiennghi" }
     ];
 
     useEffect(() => {
