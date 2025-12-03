@@ -7,7 +7,7 @@ import com.nhom2.qnu.payload.response.JwtResponse;
 
 public interface AuthService {
 
-    JwtResponse signin(LoginRequest loginRequest);
+    Object signin(LoginRequest loginRequest);
 
     ApiResponse signUpUser(SignupRequest signupRequest);
 

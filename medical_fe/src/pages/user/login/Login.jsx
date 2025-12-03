@@ -30,6 +30,14 @@ export default function Login() {
     const onSubmit = async (data) => {
         try {
             const res = await loginService.login(data);
+
+            // Nếu BE trả về dạng lỗi ApiResponse
+            if (res.success === false) {
+                toast.error(res.message || "Đăng nhập thất bại!");
+                return;
+            }
+
+            // --- THÀNH CÔNG ---
             localStorage.setItem("token", res.accessToken);
 
             const userlogin = await loginService.loginCheckUser(res.accessToken);
@@ -43,10 +51,17 @@ export default function Login() {
             } else {
                 navigate("/admin");
             }
+
         } catch (err) {
-            toast.error("Sai tài khoản hoặc mật khẩu!");
+            // Nếu BE trả về lỗi dạng Axios response
+            if (err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error("Sai tài khoản hoặc mật khẩu!");
+            }
         }
     };
+
 
     return (
         <div className="login-page">

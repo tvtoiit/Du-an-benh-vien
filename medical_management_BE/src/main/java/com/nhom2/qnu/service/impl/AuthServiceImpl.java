@@ -63,16 +63,34 @@ public class AuthServiceImpl implements AuthService {
     private EmailService emailService;
 
     @Override
-    public JwtResponse signin(LoginRequest loginRequest) {
+    public Object signin(LoginRequest loginRequest) {
+
+        // 1. Lấy account trước
+        Account account = accountRepository.findByusername(loginRequest.getUsername());
+        if (account == null) {
+            return new ApiResponse("Tài khoản không tồn tại!", HttpStatus.BAD_REQUEST);
+        }
+
+        // 2. Kiểm tra trạng thái user
+        User user = account.getUser();
+        if (user != null && Boolean.FALSE.equals(user.getStatus())) {
+            return new ApiResponse("Tài khoản của bạn đã bị khóa!", HttpStatus.FORBIDDEN);
+        }
+
+        // 3. Xác thực mật khẩu
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(), loginRequest.getPassword()));
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // 4. Tạo JWT token
         String jwt = tokenProvider.generateTokenUsingUserName(loginRequest.getUsername());
 
-        var account = accountRepository.findByusername(loginRequest.getUsername());
         revokeAllUserTokens(account);
         saveUserToken(account, jwt);
 
+        // 5. Trả về token
         return new JwtResponse(jwt);
     }
 

@@ -25,8 +25,20 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtResponse> signIn(@RequestBody LoginRequest loginRequest) {
-        return new ResponseEntity<>(authService.signin(loginRequest), HttpStatus.OK);
+    public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest) {
+
+        Object result = authService.signin(loginRequest);
+
+        // Nếu là ApiResponse → trả status theo ApiResponse
+        if (result instanceof ApiResponse) {
+            ApiResponse res = (ApiResponse) result;
+            return ResponseEntity
+                    .status(res.getStatus())
+                    .body(res);
+        }
+
+        // Nếu là JwtResponse → login OK
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/signupuser")

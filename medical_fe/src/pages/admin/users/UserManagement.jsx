@@ -92,6 +92,8 @@ const UserManagement = ({ currentRole }) => {
         "ROLE_LETAN": "Lễ tân",
         "ROLE_BACSI": "Bác sĩ",
         "ROLE_THUNGAN": "Thu ngân",
+        "ROLE_CANLAMSANG": "Cận lâm sàng",
+        "ROLE_BENHNHAN": "Bệnh nhân"
     };
 
     const handleChange = (e) => {
@@ -213,9 +215,8 @@ const UserManagement = ({ currentRole }) => {
                                 <TableCell>{u.phoneNumber}</TableCell>
                                 <TableCell>{u.address}</TableCell>
                                 <TableCell>{roleText[u.role] || u.role}</TableCell>
-                                <TableCell>
+                                <TableCell sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                     {currentRole !== "ROLE_LETAN" || u.role === "ROLE_USER" ? (
-
                                         <Button
                                             color="primary"
                                             onClick={() => handleOpen(u)}
@@ -228,17 +229,18 @@ const UserManagement = ({ currentRole }) => {
                                             Sửa
                                         </Button>
                                     )}
+
                                     {currentRole !== "ROLE_LETAN" && (
                                         <Button
                                             color="error"
                                             onClick={() => handleDelete(u.userId)}
                                             startIcon={<Delete />}
-                                            style={{ marginLeft: "8px" }}
                                         >
                                             Xoá
                                         </Button>
                                     )}
                                 </TableCell>
+
                             </TableRow>
                         ))}
 
