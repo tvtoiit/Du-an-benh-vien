@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import medicineService from "../../../services/medicinesService";
 import RegisterMedicineModal from "./RegisterMedicineModal";
 import EditMedicineModal from "./EditMedicineModal";
+import DetailModal from "../../../components/DetailModal";
+
 
 import {
     Box,
@@ -29,6 +31,11 @@ const MedicineList = () => {
     const [medicines, setMedicines] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // model detail
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [detailData, setDetailData] = useState({});
+
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMedicine, setEditingMedicine] = useState(null);
 
@@ -52,15 +59,16 @@ const MedicineList = () => {
         if (reload) loadMedicines();
     };
 
-    const handleView = (m) => {
-        toast.info(
-            `Thông tin thuốc:\n\n` +
-            `Tên thuốc: ${m.name}\n` +
-            `Số lượng: ${m.quantity}\n` +
-            `Đơn vị: ${m.unit}\n` +
-            `Giá: ${m.price}`
-        );
+    const handleView = (s) => {
+        setDetailData({
+            "Tên thuốc": s.name,
+            "Số lượng": s.quantity,
+            "Đơn vị": s.unit,
+            "Giá": s.price
+        });
+        setDetailOpen(true);
     };
+
 
     const handleEdit = (m) => {
         setEditingMedicine(m);
@@ -139,8 +147,16 @@ const MedicineList = () => {
                     }}
                 />
             )}
+
+            <DetailModal
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+                title="Thông tin thuốc"
+                data={detailData}
+            />
         </Box>
     );
 };
+
 
 export default MedicineList;

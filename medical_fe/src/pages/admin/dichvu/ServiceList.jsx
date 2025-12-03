@@ -3,6 +3,7 @@ import serviceService from "../../../services/servicesServices";
 import RegisterServiceModal from "./RegisterServiceModal";
 import EditServiceModal from "./EditServiceModal";
 import { toast } from "react-toastify";
+import DetailModal from "../../../components/DetailModal";
 
 
 import {
@@ -30,6 +31,10 @@ const ServiceList = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // model detail
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [detailData, setDetailData] = useState({});
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingService, setEditingService] = useState(null);
 
@@ -54,12 +59,12 @@ const ServiceList = () => {
     };
 
     const handleView = (s) => {
-        toast.info(
-            `Thông tin dịch vụ:\n\n` +
-            `Tên dịch vụ: ${s.serviceName}\n` +
-            `Giá: ${s.price}\n` +
-            `Mô tả: ${s.description ?? ""}`
-        );
+        setDetailData({
+            "Tên dịch vụ": s.serviceName,
+            "Giá": s.price,
+            "Mô tả:": s.description,
+        });
+        setDetailOpen(true);
     };
 
     const handleEdit = (s) => {
@@ -137,6 +142,13 @@ const ServiceList = () => {
                     }}
                 />
             )}
+
+            <DetailModal
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+                title="Thông tin dịch vụ"
+                data={detailData}
+            />
         </Box>
     );
 };

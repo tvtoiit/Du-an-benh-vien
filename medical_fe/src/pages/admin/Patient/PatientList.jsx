@@ -4,6 +4,7 @@ import parentService from "../../../services/parentService";
 import "../Patient/ModalPatient.css";
 import EditPatientModal from "./EditPatientModal";
 import patientService from "../../../services/parentService";
+import DetailModal from "../../../components/DetailModal";
 import { toast } from "react-toastify";
 import {
     Box,
@@ -30,6 +31,9 @@ const PatientList = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState([]);
+    // model detail
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [detailData, setDetailData] = useState({});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPatient, setEditingPatient] = useState(null);
@@ -67,14 +71,15 @@ const PatientList = () => {
     };
 
     // Xem chi tiết
-    const handleView = (p) => {
-        toast.info(
-            `Họ tên: ${p.fullName}
-            Email: ${p.email}
-            Địa chỉ: ${p.address}
-            Ngày sinh: ${formatDate(p.dateOfBirth)}`,
-            { autoClose: 4000 }
-        );
+    const handleView = (s) => {
+        setDetailData({
+            "Họ tên ": s.fullName,
+            "Email ": s.email,
+            "Địa chỉ ": s.address,
+            "Ngày sinh ": formatDate(s.dateOfBirth),
+            "Triệu chứng ": s.otherInfo,
+        });
+        setDetailOpen(true);
     };
 
     // Sửa thông tin bệnh nhân
@@ -156,8 +161,14 @@ const PatientList = () => {
                     }}
                 />
             )}
-
+            <DetailModal
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+                title="Thông tin bệnh nhân"
+                data={detailData}
+            />
         </Box>
+
     );
 };
 
