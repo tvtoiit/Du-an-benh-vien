@@ -69,6 +69,7 @@ public class UserAdminServiceImpl implements UserAdminService {
           .fullName(user.getFullName())
           .status(user.getStatus())
           .phoneNumber(user.getPhoneNumber())
+          .role(user.getAccount().getRole().getName())
           .build();
       response.add(respon);
     }
@@ -166,6 +167,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         .phoneNumber(userCreate.getPhoneNumber())
         .address(userCreate.getAddress())
         .status(userCreate.getStatus())
+        .role(userCreate.getAccount().getRole().getName())
         .build();
 
     return ResponseEntity.ok(respon);

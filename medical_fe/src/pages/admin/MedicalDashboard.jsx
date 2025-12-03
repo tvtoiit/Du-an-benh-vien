@@ -82,7 +82,7 @@ const MedicalDashboard = () => {
                 if (!can("quanLyUser")) return <p>Bạn không có quyền truy cập chức năng Quản lý người dùng.</p>;
                 return (
                     <div className="main-content-box">
-                        <UserManagement />
+                        <UserManagement currentRole={role} />
                     </div>
                 );
 

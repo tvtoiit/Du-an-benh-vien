@@ -22,7 +22,7 @@ import userService from "../../../services/userService";
 import roleService from "../../../services/roleService";
 import { toast } from "react-toastify";
 
-const UserManagement = () => {
+const UserManagement = ({ currentRole }) => {
     const [users, setUsers] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
@@ -44,7 +44,7 @@ const UserManagement = () => {
             .catch((err) => console.error(err));
     }, []);
 
-    /// lấy all role 
+    /// lấy all role
     useEffect(() => {
         roleService.getAllRole()
             .then(data => setRoles(data))
@@ -55,6 +55,10 @@ const UserManagement = () => {
     const handleOpen = (user = null) => {
         setEditingUser(user);
 
+        const defaultRole = currentRole === "ROLE_LETAN"
+            ? "ROLE_USER"
+            : roles[0]?.name;
+
         setFormData(
             user
                 ? {
@@ -63,15 +67,14 @@ const UserManagement = () => {
                     phone_number: user.phoneNumber,
                     address: user.address,
                     status: user.status,
-                    roleName: user.roleName
-                }
-                : {
+                    roleName: user.role
+                } : {
                     full_name: "",
                     email: "",
                     phone_number: "",
                     address: "",
                     status: true,
-                    roleName: roles[0]?.name ?? ""
+                    roleName: defaultRole
                 }
         );
 
@@ -83,12 +86,23 @@ const UserManagement = () => {
         setEditingUser(null);
     };
 
+    const roleText = {
+        "ROLE_USER": "Người dùng",
+        "ROLE_ADMIN": "Quản trị viên",
+        "ROLE_LETAN": "Lễ tân",
+        "ROLE_BACSI": "Bác sĩ",
+        "ROLE_THUNGAN": "Thu ngân",
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSave = async () => {
         try {
+            if (editingUser && currentRole === "ROLE_LETAN") {
+                formData.roleName = editingUser.role;
+            }
             if (editingUser) {
                 // UPDATE USER
                 await userService.update(editingUser.userId, {
@@ -108,8 +122,8 @@ const UserManagement = () => {
                                 email: formData.email,
                                 phoneNumber: formData.phone_number,
                                 address: formData.address,
-                                status: formData.status === "active",
-                                roleName: formData.roleName
+                                status: formData.status,
+                                role: formData.roleName
                             }
                             : u
                     )
@@ -187,7 +201,7 @@ const UserManagement = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>Số điện thoại</TableCell>
                             <TableCell>Địa chỉ</TableCell>
-                            <TableCell>Trạng thái</TableCell>
+                            <TableCell>Vai trò</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
@@ -198,24 +212,32 @@ const UserManagement = () => {
                                 <TableCell>{u.email}</TableCell>
                                 <TableCell>{u.phoneNumber}</TableCell>
                                 <TableCell>{u.address}</TableCell>
+                                <TableCell>{roleText[u.role] || u.role}</TableCell>
                                 <TableCell>
-                                    {u.status ? "Hoạt động" : "Không hoạt động"}
-                                </TableCell>
-                                <TableCell>
-                                    <Button
-                                        color="primary"
-                                        onClick={() => handleOpen(u)}
-                                        startIcon={<Edit />}
-                                    >
-                                        Sửa
-                                    </Button>
-                                    <Button
-                                        color="error"
-                                        onClick={() => handleDelete(u.userId)}
-                                        startIcon={<Delete />}
-                                    >
-                                        Xoá
-                                    </Button>
+                                    {currentRole !== "ROLE_LETAN" || u.role === "ROLE_USER" ? (
+
+                                        <Button
+                                            color="primary"
+                                            onClick={() => handleOpen(u)}
+                                            startIcon={<Edit />}
+                                        >
+                                            Sửa
+                                        </Button>
+                                    ) : (
+                                        <Button color="inherit" disabled startIcon={<Edit />}>
+                                            Sửa
+                                        </Button>
+                                    )}
+                                    {currentRole !== "ROLE_LETAN" && (
+                                        <Button
+                                            color="error"
+                                            onClick={() => handleDelete(u.userId)}
+                                            startIcon={<Delete />}
+                                            style={{ marginLeft: "8px" }}
+                                        >
+                                            Xoá
+                                        </Button>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -271,6 +293,7 @@ const UserManagement = () => {
                         value={formData.address}
                         onChange={handleChange}
                     />
+                    {/* Quyền */}
                     <TextField
                         select
                         margin="dense"
@@ -279,6 +302,7 @@ const UserManagement = () => {
                         fullWidth
                         value={formData.roleName ?? ""}
                         onChange={handleChange}
+                        disabled={currentRole === "ROLE_LETAN"}
                     >
                         {roles.map(r => (
                             <MenuItem key={r.roleId} value={r.roleName}>
@@ -286,6 +310,7 @@ const UserManagement = () => {
                             </MenuItem>
                         ))}
                     </TextField>
+                    {/* Quyền */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Hủy</Button>
