@@ -90,6 +90,7 @@ const BacSiList = () => {
                             <TableCell>Kinh nghiệm</TableCell>
                             <TableCell>SĐT</TableCell>
                             <TableCell>Email</TableCell>
+                            <TableCell>Khoa</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -102,6 +103,7 @@ const BacSiList = () => {
                                 <TableCell>{d.experience}</TableCell>
                                 <TableCell>{d.contactNumber}</TableCell>
                                 <TableCell>{d.email}</TableCell>
+                                <TableCell>{d.departmentName}</TableCell>
 
                                 <TableCell align="center">
                                     <Stack direction="row" spacing={1} justifyContent="center">
