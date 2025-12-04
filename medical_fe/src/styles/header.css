@@ -101,7 +101,7 @@
 }
 
 .dropdown-menu button {
-    width: 160px;
+    width: 100%;
     padding: 10px 15px;
     background: white;
     border: none;
