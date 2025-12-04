@@ -3,7 +3,11 @@ package com.nhom2.qnu.utils;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.security.core.Authentication;
 
 import java.util.Date;
 
@@ -42,4 +46,29 @@ public class JwtProviderUtils {
         }
         return false;
     }
+
+    public String getTokenFromContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
+            return null;
+
+        String token = (String) authentication.getCredentials();
+        return token;
+    }
+
+    public String getTokenFromHeader() {
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        if (attr == null)
+            return null;
+
+        String bearerToken = attr.getRequest().getHeader("Authorization");
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+
+    }
+
 }

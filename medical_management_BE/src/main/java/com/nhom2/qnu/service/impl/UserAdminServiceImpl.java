@@ -16,6 +16,7 @@ import com.nhom2.qnu.model.Doctor;
 import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.RequestUpdateUser;
+import com.nhom2.qnu.payload.request.UpdateMyProfileRequest;
 import com.nhom2.qnu.payload.request.UserAdminRequest;
 import com.nhom2.qnu.payload.response.UserAdminResponse;
 import com.nhom2.qnu.repository.AccountRepository;
@@ -182,6 +183,75 @@ public class UserAdminServiceImpl implements UserAdminService {
     user.get().setStatus(false);
     userRepositories.save(user.get());
     return ResponseEntity.ok().body("Delete Success");
+  }
+
+  @Override
+  public ResponseEntity<?> updateMyProfile(UpdateMyProfileRequest request) {
+
+    // Lấy token từ HEADER (CHUẨN)
+    String token = jwtProviderUtils.getTokenFromHeader();
+    if (token == null) {
+      return ResponseEntity.status(401).body("Token không hợp lệ hoặc thiếu Authorization Header");
+    }
+
+    // Lấy username từ JWT
+    String username = jwtProviderUtils.getUserNameFromJwtToken(token);
+
+    Account account = accountRepository.findByusername(username);
+    if (account == null) {
+      return ResponseEntity.status(404).body("Tài khoản không tồn tại");
+    }
+
+    User user = account.getUser();
+
+    // Update info
+    if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+      user.setFullName(request.getFullName());
+    }
+
+    if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+      user.setPhoneNumber(request.getPhoneNumber());
+    }
+
+    if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+      user.setAddress(request.getAddress());
+    }
+
+    userRepositories.save(user);
+
+    return ResponseEntity.ok(Map.of("message", "Cập nhật thành công!"));
+  }
+
+  @Override
+  public ResponseEntity<?> getMyProfile() {
+
+    // Lấy token từ HEADER
+    String token = jwtProviderUtils.getTokenFromHeader();
+    if (token == null) {
+      return ResponseEntity.status(401).body("Token không hợp lệ hoặc thiếu Authorization Header");
+    }
+
+    String username = jwtProviderUtils.getUserNameFromJwtToken(token);
+
+    Account account = accountRepository.findByusername(username);
+    if (account == null) {
+      return ResponseEntity.status(404).body("Không tìm thấy tài khoản!");
+    }
+
+    User user = account.getUser();
+
+    UserAdminResponse response = UserAdminResponse.builder()
+        .userId(user.getUserId())
+        .accountId(account.getAccountId())
+        .email(user.getEmail())
+        .fullName(user.getFullName())
+        .phoneNumber(user.getPhoneNumber())
+        .address(user.getAddress())
+        .status(user.getStatus())
+        .role(account.getRole().getName())
+        .build();
+
+    return ResponseEntity.ok(response);
   }
 
   @Override

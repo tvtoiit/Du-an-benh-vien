@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.RequestUpdateUser;
+import com.nhom2.qnu.payload.request.UpdateMyProfileRequest;
 import com.nhom2.qnu.payload.request.UserAdminRequest;
 
 @Service
@@ -23,4 +24,9 @@ public interface UserAdminService {
   ResponseEntity<Object> updateUser(String id, RequestUpdateUser request);
 
   List<User> getPatients();
+
+  ResponseEntity<?> updateMyProfile(UpdateMyProfileRequest request);
+
+  ResponseEntity<?> getMyProfile();
+
 }

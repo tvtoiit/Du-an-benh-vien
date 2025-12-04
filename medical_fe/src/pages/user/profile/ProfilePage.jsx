@@ -18,13 +18,11 @@ export default function ProfilePage() {
     const [info, setInfo] = useState(null);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        loginService.loginCheckUser(token)
+        userService.getMyProfile()
             .then(res => setInfo(res))
             .catch(() => toast.error("Không thể tải thông tin người dùng"));
     }, []);
+
 
     const handleChange = (e) => {
         setInfo({ ...info, [e.target.name]: e.target.value });
@@ -33,11 +31,14 @@ export default function ProfilePage() {
     const handleSave = async () => {
         try {
             await userService.updateMyProfile({
-                userId: info.userId,
                 fullName: info.fullName,
                 phoneNumber: info.phoneNumber,
                 address: info.address
             });
+
+            // gọi lại API sau khi update thành công
+            const newInfo = await userService.getMyProfile();
+            setInfo(newInfo);
 
             toast.success("Cập nhật thông tin thành công!");
         } catch (err) {

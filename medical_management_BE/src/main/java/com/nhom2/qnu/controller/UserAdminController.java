@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.nhom2.qnu.payload.request.RequestUpdateUser;
+import com.nhom2.qnu.payload.request.UpdateMyProfileRequest;
 import com.nhom2.qnu.payload.request.UserAdminRequest;
 import com.nhom2.qnu.service.UserAdminService;
 
@@ -56,4 +57,15 @@ public class UserAdminController {
   public ResponseEntity<?> getPatients() {
     return ResponseEntity.ok(userAdminService.getPatients());
   }
+
+  @PutMapping("/me")
+  public ResponseEntity<?> updateMyProfile(@RequestBody UpdateMyProfileRequest request) {
+    return userAdminService.updateMyProfile(request);
+  }
+
+  @GetMapping("/me")
+  public ResponseEntity<?> getMyProfile() {
+    return userAdminService.getMyProfile();
+  }
+
 }

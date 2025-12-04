@@ -6,7 +6,10 @@ const userService = {
     getById: (id) => api.get(`/user_admin/${id}`),
     create: (data) => api.post("/user_admin/create", data),
     update: (id, data) => api.put(`/user_admin/${id}`, data),
-    delete: (id) => api.delete(`/user_admin/${id}`)
+    delete: (id) => api.delete(`/user_admin/${id}`),
+    updateMyProfile: (data) => api.put("/user_admin/me", data),
+    getMyProfile: () => api.get("/user_admin/me")
+
 };
 
 export default userService;
