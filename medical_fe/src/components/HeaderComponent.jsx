@@ -129,7 +129,15 @@ export default function Header({
 
                             {openMenu && (
                                 <div className="dropdown-menu">
-                                    <button onClick={handleLogout}>Đăng Xuất</button>
+                                    <button onClick={() => navigate("/profile")}>
+                                        Quản lý tài khoản
+                                    </button>
+                                    <button onClick={() => navigate("/forgot-password")}>
+                                        Đổi mật khẩu
+                                    </button>
+                                    <button onClick={handleLogout}>
+                                        Đăng Xuất
+                                    </button>
                                 </div>
                             )}
                         </div>

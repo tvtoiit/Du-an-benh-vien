@@ -2,7 +2,14 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import logo from "../../assets/logo.jpg";
+import slide1 from "../../assets/slide1.jpg";
+import slide2 from "../../assets/slide2.jpg";
+import slide3 from "../../assets/slide3.jpg";
+import gioithieu from "../../assets/gioithieu.jpg";
+import dichvudatbiet from "../../assets/dichvudatbiet.jpg";
+import chuyenkhoa from "../../assets/chuyenkhoa.jpg";
+import chuyengiabacsi from "../../assets/chuyengiabacsi.jpg";
+import tiennghi from "../../assets/tiennghi.jpg";
 
 
 export default function Home() {
@@ -15,12 +22,13 @@ export default function Home() {
           modules={[Navigation, Autoplay]}
           navigation
           autoplay={{ delay: 3000 }}
+          pagination={{ clickable: true }}
           loop={true}
           className="mySwiper"
         >
           <SwiperSlide>
             <img
-              src=""
+              src={slide1}
               alt="Slide 1"
               className="slide-img"
             />
@@ -28,7 +36,7 @@ export default function Home() {
 
           <SwiperSlide>
             <img
-              src="https://bachmai.gov.vn/_next/image?url=%2Fassets%2Fimages%2Fad3.jpg&w=3840&q=75"
+              src={slide2}
               alt="Slide 2"
               className="slide-img"
             />
@@ -36,7 +44,7 @@ export default function Home() {
 
           <SwiperSlide>
             <img
-              src=""
+              src={slide3}
               alt="Slide 3"
               className="slide-img"
             />
@@ -52,20 +60,37 @@ export default function Home() {
             <h2 className="hero-subtitle">KHÁM CHỮA BỆNH TOÀN DIỆN</h2>
           </div>
         </section>
+
+        <div className="hero-section" id="gioithieu">
+          <div className="section-card">
+            <img src={gioithieu} alt="Giới thiệu" />
+          </div>
+        </div>
+
+        <div className="hero-section" id="chuyenkhoa">
+          <div className="section-card">
+            <img src={chuyenkhoa} alt="Chuyên khoa" />
+          </div>
+        </div>
+
+        <div className="hero-section" id="chuyengia">
+          <div className="section-card">
+            <img src={chuyengiabacsi} alt="Chuyên gia" />
+          </div>
+        </div>
+
+        <div className="hero-section" id="dichvu">
+          <div className="section-card">
+            <img src={dichvudatbiet} alt="Dịch vụ đặc biệt" />
+          </div>
+        </div>
+
+        <div className="hero-section" id="tiennghi">
+          <div className="section-card">
+            <img src={tiennghi} alt="Tiện nghi" />
+          </div>
+        </div>
       </div>
-
-      <div className="logo" id="tiennghi">
-        <img
-          width="200"
-          src={logo}
-          alt="Logo"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/")}
-        />
-      </div>
-
-      {/* Bỏ ảnh dô */}
-
     </div>
   );
 }

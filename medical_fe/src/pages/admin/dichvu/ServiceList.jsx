@@ -62,7 +62,7 @@ const ServiceList = () => {
         setDetailData({
             "Tên dịch vụ": s.serviceName,
             "Giá": s.price,
-            "Mô tả:": s.description,
+            "Mô tả": s.description,
         });
         setDetailOpen(true);
     };

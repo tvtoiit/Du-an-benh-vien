@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/user/forgot/ForgotPassword";
 import VerifyOtp from "./pages/user/reset/VerifyOtp";
 import BookingPage from "./pages/user/booking/BookingPage";
 import TraCuu from "./pages/user/tracuu/tracuu";
+import ProfilePage from "./pages/user/profile/ProfilePage";
 
 function App() {
   return (
@@ -31,6 +32,13 @@ function App() {
             </MainLayout>
           }
         />
+
+        <Route
+          path="/profile"
+          element={
+            <MainLayout>
+              <ProfilePage />
+            </MainLayout>} />
 
         <Route
           path="/login"
