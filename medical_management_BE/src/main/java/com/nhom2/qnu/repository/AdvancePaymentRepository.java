@@ -16,6 +16,22 @@ public interface AdvancePaymentRepository extends JpaRepository<AdvancePayment, 
     @Query("SELECT COALESCE(SUM(a.amount), 0) FROM AdvancePayment a WHERE a.patient.patientId = :patientId")
     Double sumAmountByPatientId(@Param("patientId") String patientId);
 
+    // @Query("""
+    // SELECT new com.nhom2.qnu.dto.PatientAdvanceDTO(
+    // p.patientId,
+    // u.fullName,
+    // u.phoneNumber,
+    // u.address,
+    // COALESCE(SUM(ap.amount), 0)
+    // )
+    // FROM Patients p
+    // JOIN p.user u
+    // JOIN AppointmentSchedules a ON a.patients = p
+    // LEFT JOIN AdvancePayment ap ON ap.patient = p
+    // GROUP BY p.patientId, u.fullName, u.phoneNumber, u.address
+    // """)
+    // List<PatientAdvanceDTO> findAllRegisteredPatients();
+
     @Query("""
                 SELECT new com.nhom2.qnu.dto.PatientAdvanceDTO(
                     p.patientId,
@@ -27,7 +43,13 @@ public interface AdvancePaymentRepository extends JpaRepository<AdvancePayment, 
                 FROM Patients p
                 JOIN p.user u
                 JOIN AppointmentSchedules a ON a.patients = p
-                LEFT JOIN AdvancePayment ap ON ap.patient = p
+                LEFT JOIN AdvancePayment ap ON ap.appointment = a
+                WHERE a.appointmentDatetime = (
+                    SELECT MAX(a2.appointmentDatetime)
+                    FROM AppointmentSchedules a2
+                    WHERE a2.patients = p
+                )
+                AND a.status <> 'Đã thanh toán'
                 GROUP BY p.patientId, u.fullName, u.phoneNumber, u.address
             """)
     List<PatientAdvanceDTO> findAllRegisteredPatients();

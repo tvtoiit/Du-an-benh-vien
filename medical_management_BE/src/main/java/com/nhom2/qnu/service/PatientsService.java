@@ -11,6 +11,7 @@ import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.EHealthRecordsResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
+import com.nhom2.qnu.payload.response.PatientWaitingResponse;
 import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 
 public interface PatientsService {
@@ -29,4 +30,8 @@ public interface PatientsService {
     List<User> getPatientsNotAccepted();
 
     Object getPatientByUserId(String userId);
+
+    // get cho tiep nhan
+    List<PatientWaitingResponse> getWaitingPatients();
+
 }

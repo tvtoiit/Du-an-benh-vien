@@ -1,6 +1,7 @@
 package com.nhom2.qnu.service;
 
 import com.nhom2.qnu.model.Patients;
+import com.nhom2.qnu.payload.request.AppointmentRequest;
 import com.nhom2.qnu.payload.request.AppointmentSchedulesRequest;
 import com.nhom2.qnu.payload.response.AppointmentSchedulesResponse;
 
@@ -22,5 +23,8 @@ public interface AppointmentService {
     AppointmentSchedulesResponse updateStatusFailed(String AppointmentSchedulesId);
 
     AppointmentSchedulesResponse updateStatusSuccessful(String AppointmentSchedulesId);
+
+    // Tạo phiếu khám
+    Object createAppointment(AppointmentRequest req);
 
 }

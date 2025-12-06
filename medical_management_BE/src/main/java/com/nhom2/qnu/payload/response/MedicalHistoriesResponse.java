@@ -1,9 +1,12 @@
 package com.nhom2.qnu.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.nhom2.qnu.payload.response.ServiceResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 import java.util.Date;
 
@@ -13,8 +16,12 @@ import java.util.Date;
 public class MedicalHistoriesResponse {
     private String medicalHistoryId;
     private String testResults;
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date admissionDate;
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dischargeDate;
+
+    private DoctorResponse doctor;
+    private List<ServiceResponse> services;
+
 }

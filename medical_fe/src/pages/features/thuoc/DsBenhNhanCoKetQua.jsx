@@ -25,7 +25,7 @@ const DsBenhNhanCoKetQua = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const res = await serviceResultService.getPatientsWithResults();
+                const res = await serviceResultService.getPatientsWithResultsKeDon();
                 const list = Array.isArray(res) ? res : res.data ?? [];
                 setPatients(list);
             } catch (e) {
@@ -47,7 +47,7 @@ const DsBenhNhanCoKetQua = () => {
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h5" fontWeight="bold" mb={3} color="primary">
-                Bệnh nhân đã có kết quả cận lâm sàng
+                Danh sách bệnh nhân chờ kê đơn
             </Typography>
 
             <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
@@ -95,7 +95,7 @@ const DsBenhNhanCoKetQua = () => {
                         {patients.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={7} align="center">
-                                    Không có bệnh nhân nào đã có kết quả cận lâm sàng
+                                    Không có bệnh nhân chờ kê đơn
                                 </TableCell>
                             </TableRow>
                         )}

@@ -10,6 +10,8 @@ const parentService = {
     getPatientsWithServices: () => api.get("/patients/services"),
     getWaitingPatients: () => api.get("/patients/not-accepted"),
     getPatientByUserId: (id) => api.get(`/patients/by-user/${id}`),
+    getWaitingPatients1: () => api.get("/patients/waiting"),
+
 };
 
 export default parentService;

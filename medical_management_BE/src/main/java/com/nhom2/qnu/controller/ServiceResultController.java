@@ -54,6 +54,13 @@ public class ServiceResultController {
                                 serviceResultService.getPatientsWithCompletedResults());
         }
 
+        // GET /api/v1/service-results/patients-with-results?doctorId=xxx(ke don)
+        @GetMapping("/patients-with-results-kedon")
+        public ResponseEntity<List<PatientWithResultResponse>> getPatientsWithResultsKeDon() {
+                return ResponseEntity.ok(
+                                serviceResultService.getPatientsWithCompletedResultsKeDon());
+        }
+
         // GET /api/v1/service-results/patient/{patientId}
         @GetMapping("/patient/{patientId}")
         public ResponseEntity<List<ServiceResultResponse>> getResultsByPatient(

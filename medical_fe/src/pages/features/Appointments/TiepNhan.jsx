@@ -1,7 +1,4 @@
-import React, { useEffect, useState } from "react";
-import departmentService from "../../../services/departmentService";
-import appointmentService from "../../../services/appointmentService";
-import doctorService from "../../../services/doctorService";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Box,
     Typography,
@@ -12,6 +9,10 @@ import {
     Stack,
     Alert,
 } from "@mui/material";
+
+import departmentService from "../../../services/departmentService";
+import doctorService from "../../../services/doctorService";
+import appointmentService from "../../../services/appointmentService";
 import { toast } from "react-toastify";
 
 const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
@@ -25,10 +26,13 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
     const [departments, setDepartments] = useState([]);
     const [doctors, setDoctors] = useState([]);
 
-    // trạng thái lịch hiện tại của bệnh nhân
+    // Lịch khám gần nhất chưa hoàn tất
     const [currentAppointment, setCurrentAppointment] = useState(null);
     const [loadingAppointment, setLoadingAppointment] = useState(true);
 
+    // ============================
+    //  VALIDATION INPUT PATIENT
+    // ============================
     if (!selectedPatient) {
         return (
             <Box sx={{ p: 4 }}>
@@ -39,89 +43,97 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
         );
     }
 
-    // 1. load khoa
-    useEffect(() => {
-        const fetchDepartments = async () => {
-            try {
-                const res = await departmentService.getAll();
-                const list = res.data ?? res;
-                setDepartments(list || []);
-            } catch (error) {
-                console.error("Lỗi gọi API khoa phòng:", error);
-            }
-        };
-        fetchDepartments();
+    // ============================
+    // LOAD KHOA
+    // ============================
+    const loadDepartments = useCallback(async () => {
+        try {
+            const res = await departmentService.getAll();
+            const list = res.data ?? res;
+            setDepartments(list || []);
+        } catch (err) {
+            console.error("Lỗi load khoa:", err);
+        }
     }, []);
 
-    // 2. load bác sĩ theo khoa
     useEffect(() => {
-        const fetchDoctors = async () => {
-            if (!formData.department) return;
-            try {
-                const res = await doctorService.getByIdDepartment(formData.department);
-                const list = res.data ?? res;
-                setDoctors(list || []);
-            } catch (error) {
-                console.error("Lỗi load bác sĩ:", error);
-            }
-        };
-        fetchDoctors();
+        loadDepartments();
+    }, [loadDepartments]);
+
+    // ============================
+    // LOAD BÁC SĨ THEO KHOA
+    // ============================
+    const loadDoctors = useCallback(async () => {
+        if (!formData.department) return;
+        try {
+            const res = await doctorService.getByIdDepartment(formData.department);
+            const list = res.data ?? res;
+            setDoctors(list || []);
+        } catch (err) {
+            console.error("Lỗi load bác sĩ:", err);
+        }
     }, [formData.department]);
 
-    // reset room khi đổi doctor
+    useEffect(() => {
+        loadDoctors();
+    }, [loadDoctors]);
+
+    // Reset room khi đổi doctor
     useEffect(() => {
         setFormData((prev) => ({ ...prev, room: "" }));
     }, [formData.doctor]);
 
-    // 3. load lịch khám hiện tại của bệnh nhân
-    useEffect(() => {
-        const fetchAppointments = async () => {
-            try {
-                setLoadingAppointment(true);
-                // giả sử service này map tới GET /appointments/patient/{id}
-                const res = await appointmentService.getByPatient(
-                    selectedPatient.patientId
-                );
-                const list = res.data ?? res ?? [];
+    // ============================
+    // LOAD LỊCH KHÁM GẦN NHẤT
+    // ============================
+    const loadCurrentAppointment = useCallback(async () => {
+        try {
+            setLoadingAppointment(true);
 
-                // chọn lịch gần nhất chưa "kết thúc"
-                const active = list
-                    .filter(
-                        (a) =>
-                            a.status !== "Successful" &&
-                            a.status !== "Failed" &&
-                            a.status !== "done"
-                    )
-                    .sort(
-                        (a, b) =>
-                            new Date(b.appointmentDatetime) -
-                            new Date(a.appointmentDatetime)
-                    )[0];
+            const res = await appointmentService.getByPatient(
+                selectedPatient.patientId
+            );
 
-                setCurrentAppointment(active || null);
-            } catch (error) {
-                console.error("Lỗi lấy lịch khám hiện tại:", error);
-            } finally {
-                setLoadingAppointment(false);
-            }
-        };
+            const list = res.data ?? res ?? [];
 
-        fetchAppointments();
+            // Lọc history → bỏ qua "Đã thanh toán" (vì đó là khám lại)
+            const active = list
+                .filter((a) => a.status !== "Đã thanh toán")
+                .sort(
+                    (a, b) =>
+                        new Date(b.appointmentDatetime) -
+                        new Date(a.appointmentDatetime)
+                )[0];
+
+            setCurrentAppointment(active || null);
+        } catch (err) {
+            console.error("Lỗi lấy lịch khám:", err);
+        } finally {
+            setLoadingAppointment(false);
+        }
     }, [selectedPatient.patientId]);
 
+    useEffect(() => {
+        loadCurrentAppointment();
+    }, [loadCurrentAppointment]);
+
+    // ============================
+    // FORM CHANGE
+    // ============================
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // ============================
+    // SUBMIT TẠO LỊCH KHÁM
+    // ============================
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // nếu đã có lịch đang chờ thì không cho tạo mới
         if (currentAppointment) {
-            toast.warning("Bệnh nhân đang có lịch khám chưa hoàn tất, không thể tạo thêm.");
+            toast.warning(
+                "Bệnh nhân đang có lịch khám chưa hoàn tất, không thể tạo thêm lịch mới."
+            );
             return;
         }
 
@@ -137,13 +149,13 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                 note: formData.note,
             };
 
-            const res = await appointmentService.create(payload);
-            console.log("Tạo lịch thành công:", res);
-            onBack(true);
+            await appointmentService.create(payload);
 
-        } catch (error) {
-            console.error("Lỗi khi tạo chỉ định FULL:", error);
-            toast.error(error?.response?.data?.message || "Lỗi khi tạo chỉ định khám!");
+            toast.success("Tạo lịch khám thành công!");
+            onBack(true);
+        } catch (err) {
+            console.error("Lỗi tạo lịch khám:", err);
+            toast.error("Không thể tạo lịch khám!");
         }
     };
 
@@ -156,18 +168,15 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
         });
     };
 
-    const isCreateDisabled = !!currentAppointment; // đã có lịch active thì disable
+    const disableCreate = !!currentAppointment;
 
+    // ============================
+    // UI
+    // ============================
     return (
         <Box sx={{ p: 4 }}>
-            <Typography
-                variant="h5"
-                fontWeight="bold"
-                mb={3}
-                color="primary"
-                sx={{ textAlign: "center" }}
-            >
-                Tiếp nhận & chỉ định khám
+            <Typography variant="h5" fontWeight="bold" mb={3} color="primary" align="center">
+                Tiếp nhận & Chỉ định khám
             </Typography>
 
             <Typography mb={2}>
@@ -175,29 +184,22 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                 <b>{selectedPatient.patientId}</b>)
             </Typography>
 
-            {/* Thông báo trạng thái lịch hiện tại */}
+            {/* cảnh báo nếu có lịch đang active */}
             {!loadingAppointment && currentAppointment && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
                     Bệnh nhân đang có lịch khám trạng thái{" "}
                     <b>{currentAppointment.status}</b> với bác sĩ{" "}
-                    <b>{currentAppointment.doctor?.doctorName}</b> ở phòng{" "}
+                    <b>{currentAppointment.doctor?.doctorName}</b> tại phòng{" "}
                     <b>{currentAppointment.room}</b> lúc{" "}
                     <b>{currentAppointment.appointmentDatetime}</b>.
-                    Vui lòng xử lý lịch này (khám / huỷ) trước khi tạo lịch mới.
+                    Vui lòng xử lý lịch này trước khi tạo lịch mới.
                 </Alert>
             )}
 
-            <Paper
-                sx={{
-                    p: 4,
-                    borderRadius: 3,
-                    boxShadow: 3,
-                    maxWidth: 600,
-                    mx: "auto",
-                }}
-            >
+            <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, maxWidth: 600, mx: "auto" }}>
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={3}>
+                        {/* Chọn khoa */}
                         <TextField
                             select
                             label="Khoa khám"
@@ -206,7 +208,7 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                             onChange={handleChange}
                             fullWidth
                             required
-                            disabled={isCreateDisabled}
+                            disabled={disableCreate}
                         >
                             {departments.map((dep) => (
                                 <MenuItem key={dep.departmentId} value={dep.departmentId}>
@@ -215,15 +217,16 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                             ))}
                         </TextField>
 
+                        {/* Chọn bác sĩ */}
                         <TextField
                             select
-                            label="Bác sĩ chỉ định"
+                            label="Bác sĩ"
                             name="doctor"
                             value={formData.doctor}
                             onChange={handleChange}
                             fullWidth
                             required
-                            disabled={isCreateDisabled}
+                            disabled={disableCreate}
                         >
                             {doctors.map((doc) => (
                                 <MenuItem key={doc.doctorId} value={doc.doctorId}>
@@ -232,53 +235,53 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                             ))}
                         </TextField>
 
-                        {formData.doctor &&
-                            doctors.find((doc) => doc.doctorId === formData.doctor) && (
-                                <TextField
-                                    select
-                                    label="Phòng"
-                                    name="room"
-                                    value={formData.room}
-                                    onChange={handleChange}
-                                    fullWidth
-                                    required
-                                    disabled={isCreateDisabled}
-                                >
-                                    {doctors
-                                        .find((doc) => doc.doctorId === formData.doctor)
-                                        .roomNames.map((room) => (
-                                            <MenuItem key={room} value={room}>
-                                                {room}
-                                            </MenuItem>
-                                        ))}
-                                </TextField>
-                            )}
+                        {/* Chọn phòng */}
+                        {formData.doctor && (
+                            <TextField
+                                select
+                                label="Phòng khám"
+                                name="room"
+                                value={formData.room}
+                                onChange={handleChange}
+                                fullWidth
+                                required
+                                disabled={disableCreate}
+                            >
+                                {doctors
+                                    .find((doc) => doc.doctorId === formData.doctor)
+                                    ?.roomNames.map((room) => (
+                                        <MenuItem key={room} value={room}>
+                                            {room}
+                                        </MenuItem>
+                                    ))}
+                            </TextField>
+                        )}
 
+                        {/* Ghi chú */}
                         <TextField
-                            label="Ghi chú / Triệu chứng ban đầu"
+                            label="Ghi chú"
                             name="note"
                             value={formData.note}
                             onChange={handleChange}
                             fullWidth
                             multiline
                             rows={3}
-                            disabled={isCreateDisabled}
+                            disabled={disableCreate}
                         />
 
+                        {/* Nút */}
                         <Box display="flex" justifyContent="flex-end" gap={2}>
                             <Button
                                 variant="outlined"
-                                color="secondary"
                                 onClick={handleReset}
-                                disabled={isCreateDisabled}
+                                disabled={disableCreate}
                             >
                                 Làm mới
                             </Button>
                             <Button
                                 type="submit"
                                 variant="contained"
-                                color="primary"
-                                disabled={isCreateDisabled}
+                                disabled={disableCreate}
                             >
                                 Tạo chỉ định khám
                             </Button>

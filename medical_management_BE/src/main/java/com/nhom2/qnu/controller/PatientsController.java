@@ -18,6 +18,7 @@ import com.nhom2.qnu.payload.request.PatientRequest;
 import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
+import com.nhom2.qnu.payload.response.PatientWaitingResponse;
 import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 import com.nhom2.qnu.service.PatientsService;
 
@@ -71,6 +72,12 @@ public class PatientsController {
     Object response = patientsService.getPatientByUserId(userId);
 
     return response;
+  }
+
+  // get cho tiep nhan
+  @GetMapping("/waiting")
+  public List<PatientWaitingResponse> getWaitingPatients() {
+    return patientsService.getWaitingPatients();
   }
 
 }

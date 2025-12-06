@@ -96,3 +96,72 @@
     color: #888;
     font-style: italic;
 }
+
+/*  */
+
+.subbox {
+    background: #f7fbff;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #1e88e5;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.subbox h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1565c0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.subbox ul {
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+.subbox li {
+    margin-bottom: 10px;
+}
+
+.subbox strong {
+    color: #0d47a1;
+}
+
+.empty {
+    color: #777;
+    font-style: italic;
+}
+
+/* Card bệnh nhân + hồ sơ */
+.info-section {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0d47a1;
+    margin-bottom: 16px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 12px;
+    column-gap: 20px;
+}
+
+.info-item strong {
+    color: #0a3d91;
+}

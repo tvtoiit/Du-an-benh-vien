@@ -2,9 +2,11 @@ package com.nhom2.qnu.service.impl;
 
 import com.nhom2.qnu.dto.PatientAdvanceDTO;
 import com.nhom2.qnu.model.AdvancePayment;
+import com.nhom2.qnu.model.AppointmentSchedules;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.payload.request.AdvancePaymentRequest;
 import com.nhom2.qnu.repository.AdvancePaymentRepository;
+import com.nhom2.qnu.repository.AppointmentRepository;
 import com.nhom2.qnu.repository.PatientsRepository;
 import com.nhom2.qnu.service.AdvancePaymentService;
 import com.nhom2.qnu.dto.PatientAdvanceDTO;
@@ -21,30 +23,41 @@ public class AdvancePaymentServiceImpl implements AdvancePaymentService {
 
     private final AdvancePaymentRepository advancePaymentRepository;
     private final PatientsRepository patientsRepository;
+    private final AppointmentRepository appointmentRepository;
 
     public AdvancePaymentServiceImpl(AdvancePaymentRepository advancePaymentRepository,
-            PatientsRepository patientsRepository) {
+            PatientsRepository patientsRepository, AppointmentRepository appointmentRepository) {
         this.advancePaymentRepository = advancePaymentRepository;
         this.patientsRepository = patientsRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Override
     public AdvancePayment createAdvancePayment(AdvancePaymentRequest req) {
+
         // 1. Tìm bệnh nhân
         Patients patient = patientsRepository.findById(req.getPatientId())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Patient not found with id: " + req.getPatientId()));
 
-        // 2. Map request -> entity
+        // 2. Tìm lịch khám gần nhất (lần khám hiện tại)
+        AppointmentSchedules latestAppt = appointmentRepository
+                .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(req.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Bệnh nhân chưa có lịch khám — không thể ứng tiền"));
+
+        // 3. Map request → entity
         AdvancePayment ap = new AdvancePayment();
         ap.setPatient(patient);
+        ap.setAppointment(latestAppt);
         ap.setAmount(req.getAmount());
         ap.setNote(req.getNote());
         ap.setCreatedBy(req.getCreatedBy());
         ap.setCreatedAt(LocalDateTime.now());
 
-        // 3. Lưu DB
+        // 4. Lưu DB
         return advancePaymentRepository.save(ap);
     }
 

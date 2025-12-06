@@ -7,6 +7,7 @@ import com.nhom2.qnu.payload.request.PatientRequest;
 import com.nhom2.qnu.payload.response.*;
 import com.nhom2.qnu.repository.EHealthRecordsRepository;
 import com.nhom2.qnu.repository.PatientsRepository;
+import com.nhom2.qnu.repository.ServiceResultRepository;
 import com.nhom2.qnu.service.EHealthRecordsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,25 +23,25 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
     private PatientsRepository patientsRepository;
 
     @Autowired
+    private ServiceResultRepository serviceResultRepository;
+
+    @Autowired
     private EHealthRecordsRepository eHealthRecordsRepository;
 
     @Override
     public EHealthRecordsResponse getEHealthRecordByPatient(String patientId) {
-
         EHealthRecords eHealthRecords = eHealthRecordsRepository.findByPatientPatientId(patientId);
-
         return setupResponse(eHealthRecords);
     }
 
     @Override
     public List<EHealthRecordsResponse> getAllEHealthRecord() {
-
         List<EHealthRecords> eHealthRecords = eHealthRecordsRepository.findAll();
-        List<EHealthRecordsResponse> eHealthRecordsResponses = new ArrayList<>();
+        List<EHealthRecordsResponse> responses = new ArrayList<>();
         for (EHealthRecords item : eHealthRecords) {
-            eHealthRecordsResponses.add(setupResponse(item));
+            responses.add(setupResponse(item));
         }
-        return eHealthRecordsResponses;
+        return responses;
     }
 
     @Override
@@ -49,91 +50,149 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
         Patients patient = patientsRepository.findByPatientId(patientId)
                 .orElseThrow(() -> new DataNotFoundException("patient does not exist"));
 
-        EHealthRecords eHealthRecords = new EHealthRecords();
-        eHealthRecords.setPatient(patient);
-        eHealthRecords.setOtherInfo(request.getOtherInfoEHealth());
+        EHealthRecords record = new EHealthRecords();
+        record.setPatient(patient);
+        record.setOtherInfo(request.getOtherInfoEHealth());
 
-        EHealthRecords newEHealthRecords = eHealthRecordsRepository.save(eHealthRecords);
-
-        return setupResponse(newEHealthRecords);
+        return setupResponse(eHealthRecordsRepository.save(record));
     }
 
     @Override
-    public EHealthRecordsResponse updateEHealthRecord(EHealthRecordsRequest request, String eHealthRecordId) {
+    public EHealthRecordsResponse updateEHealthRecord(EHealthRecordsRequest request, String id) {
 
-        EHealthRecords eHealthRecords = eHealthRecordsRepository.findById(eHealthRecordId)
-                .orElseThrow(() -> new DataNotFoundException("EHealthRecords does not exist"));
-        eHealthRecords.setOtherInfo(request.getOtherInfo());
-        EHealthRecords updateEHealthRecords = eHealthRecordsRepository.save(eHealthRecords);
+        EHealthRecords record = eHealthRecordsRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Record not found"));
 
-        return setupResponse(updateEHealthRecords);
+        record.setOtherInfo(request.getOtherInfo());
+
+        return setupResponse(eHealthRecordsRepository.save(record));
     }
 
-    public EHealthRecordsResponse setupResponse(EHealthRecords eHealthRecords) {
+    // ========================================================================
+    // MAIN RESPONSE BUILDER
+    // ========================================================================
+    public EHealthRecordsResponse setupResponse(EHealthRecords record) {
 
-        PatientResponse patientResponse = new PatientResponse();
-        patientResponse.setPatientId(eHealthRecords.getPatient().getPatientId());
-        patientResponse.setFullName(eHealthRecords.getPatient().getUser().getFullName());
-        patientResponse.setDateOfBirth(eHealthRecords.getPatient().getDateOfBirth());
-        patientResponse.setContactNumber(eHealthRecords.getPatient().getUser().getPhoneNumber());
-        patientResponse.setAddress(eHealthRecords.getPatient().getUser().getAddress());
-        patientResponse.setEmail(eHealthRecords.getPatient().getUser().getEmail());
-        patientResponse.setOtherInfo(eHealthRecords.getPatient().getOtherInfo());
+        // -------------------------------------
+        // PATIENT INFO
+        // -------------------------------------
+        PatientResponse patient = new PatientResponse();
+        patient.setPatientId(record.getPatient().getPatientId());
+        patient.setFullName(record.getPatient().getUser().getFullName());
+        patient.setDateOfBirth(record.getPatient().getDateOfBirth());
+        patient.setContactNumber(record.getPatient().getUser().getPhoneNumber());
+        patient.setAddress(record.getPatient().getUser().getAddress());
+        patient.setEmail(record.getPatient().getUser().getEmail());
+        patient.setOtherInfo(record.getPatient().getOtherInfo());
 
-        List<MedicalHistoriesResponse> medicalHistoriesResponseList = new ArrayList<>();
-        if (Objects.nonNull(eHealthRecords.getMedicalHistories())) {
+        // -------------------------------------
+        // MEDICAL HISTORIES
+        // -------------------------------------
+        List<MedicalHistoriesResponse> medicalResponses = new ArrayList<>();
 
-            for (MedicalHistories item : eHealthRecords.getMedicalHistories()) {
-                MedicalHistoriesResponse medicalHistoriesResponse = new MedicalHistoriesResponse();
-                medicalHistoriesResponse.setMedicalHistoryId(item.getMedicalHistoryId());
-                medicalHistoriesResponse.setTestResults(item.getTestResults());
-                medicalHistoriesResponse.setAdmissionDate(item.getAdmissionDate());
-                medicalHistoriesResponse.setDischargeDate(item.getDischargeDate());
+        if (Objects.nonNull(record.getMedicalHistories())) {
+            for (MedicalHistories mh : record.getMedicalHistories()) {
 
-                medicalHistoriesResponseList.add(medicalHistoriesResponse);
+                MedicalHistoriesResponse mhRes = new MedicalHistoriesResponse();
+                mhRes.setMedicalHistoryId(mh.getMedicalHistoryId());
+                mhRes.setTestResults(mh.getTestResults());
+                mhRes.setAdmissionDate(mh.getAdmissionDate());
+                mhRes.setDischargeDate(mh.getDischargeDate());
+
+                // DOCTOR of this medical history
+                if (mh.getDoctor() != null && mh.getDoctor().getUser() != null) {
+                    DoctorResponse dr = new DoctorResponse();
+                    dr.setDoctorId(mh.getDoctor().getDoctorId());
+                    dr.setDoctorName(mh.getDoctor().getUser().getFullName());
+                    dr.setEmail(mh.getDoctor().getUser().getEmail());
+                    dr.setContactNumber(mh.getDoctor().getUser().getPhoneNumber());
+                    dr.setExperience(mh.getDoctor().getExperience());
+                    mhRes.setDoctor(dr);
+                }
+
+                // SERVICES USED
+                List<ServiceResult> serviceResults = serviceResultRepository.findByMedicalHistory(mh);
+
+                List<ServiceResponse> serviceResponses = new ArrayList<>();
+
+                for (ServiceResult sr : serviceResults) {
+
+                    if (sr.getService() != null) {
+
+                        ServiceResponse s = new ServiceResponse();
+                        s.setServiceId(sr.getService().getServiceId());
+                        s.setServiceName(sr.getService().getServiceName());
+                        s.setDescription(sr.getService().getDescription());
+
+                        serviceResponses.add(s);
+                    }
+                }
+
+                mhRes.setServices(serviceResponses);
+
+                medicalResponses.add(mhRes);
             }
         }
 
-        List<DoctorResponse> doctorResponseList = new ArrayList<>();
-        if (Objects.nonNull(eHealthRecords.getDoctors())) {
+        // -------------------------------------
+        // DOCTORS OF RECORD
+        // -------------------------------------
+        List<DoctorResponse> doctorResponses = new ArrayList<>();
+        if (Objects.nonNull(record.getDoctors())) {
+            for (Doctor item : record.getDoctors()) {
 
-            for (Doctor item : eHealthRecords.getDoctors()) {
-                DoctorResponse doctorResponse = new DoctorResponse();
-                doctorResponse.setDoctorId(item.getDoctorId());
-                doctorResponse.setDoctorName(item.getUser().getFullName());
-                doctorResponse.setExperience(item.getExperience());
-                doctorResponse.setContactNumber(item.getUser().getPhoneNumber());
-                doctorResponse.setEmail(item.getUser().getEmail());
+                if (item.getUser() == null)
+                    continue;
 
-                doctorResponseList.add(doctorResponse);
+                DoctorResponse dr = new DoctorResponse();
+                dr.setDoctorId(item.getDoctorId());
+                dr.setDoctorName(item.getUser().getFullName());
+                dr.setExperience(item.getExperience());
+                dr.setContactNumber(item.getUser().getPhoneNumber());
+                dr.setEmail(item.getUser().getEmail());
+
+                doctorResponses.add(dr);
             }
         }
 
-        List<AppointmentSchedulesResponse> schedulesResponses = new ArrayList<>();
-        if (Objects.nonNull(eHealthRecords.getPatient().getAppointmentSchedules())) {
+        // -------------------------------------
+        // APPOINTMENT SCHEDULES
+        // -------------------------------------
+        List<AppointmentSchedulesResponse> scheduleResponses = new ArrayList<>();
 
-            for (AppointmentSchedules item : eHealthRecords.getPatient().getAppointmentSchedules()) {
-                AppointmentSchedulesResponse appointmentSchedulesResponse = new AppointmentSchedulesResponse();
-                appointmentSchedulesResponse.setAppointmentScheduleId(item.getAppointmentScheduleId());
-                appointmentSchedulesResponse.setAppointmentDatetime(item.getAppointmentDatetime());
+        if (record.getPatient().getAppointmentSchedules() != null) {
+            for (AppointmentSchedules item : record.getPatient().getAppointmentSchedules()) {
 
-                DoctorResponse doctorResponse = new DoctorResponse();
-                doctorResponse.setDoctorId(item.getDoctor().getDoctorId());
-                doctorResponse.setDoctorName(item.getDoctor().getUser().getFullName());
-                doctorResponse.setExperience(item.getDoctor().getExperience());
-                doctorResponse.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
-                doctorResponse.setEmail(item.getDoctor().getUser().getEmail());
+                AppointmentSchedulesResponse res = new AppointmentSchedulesResponse();
+                res.setAppointmentScheduleId(item.getAppointmentScheduleId());
+                res.setAppointmentDatetime(item.getAppointmentDatetime());
+                res.setStatus(item.getStatus());
 
-                appointmentSchedulesResponse.setDoctor(doctorResponse);
-                appointmentSchedulesResponse.setStatus(item.getStatus());
+                if (item.getDoctor() != null && item.getDoctor().getUser() != null) {
 
-                schedulesResponses.add(appointmentSchedulesResponse);
+                    DoctorResponse dr = new DoctorResponse();
+                    dr.setDoctorId(item.getDoctor().getDoctorId());
+                    dr.setDoctorName(item.getDoctor().getUser().getFullName());
+                    dr.setExperience(item.getDoctor().getExperience());
+                    dr.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
+                    dr.setEmail(item.getDoctor().getUser().getEmail());
+
+                    res.setDoctor(dr);
+                }
+
+                scheduleResponses.add(res);
             }
         }
 
-        EHealthRecordsResponse response = new EHealthRecordsResponse(eHealthRecords.getRecordId(),
-                patientResponse, eHealthRecords.getOtherInfo(), medicalHistoriesResponseList, doctorResponseList,
-                schedulesResponses);
-        return response;
+        // -------------------------------------
+        // FINAL RETURN OBJECT
+        // -------------------------------------
+        return new EHealthRecordsResponse(
+                record.getRecordId(),
+                patient,
+                record.getOtherInfo(),
+                medicalResponses,
+                doctorResponses,
+                scheduleResponses);
     }
 }

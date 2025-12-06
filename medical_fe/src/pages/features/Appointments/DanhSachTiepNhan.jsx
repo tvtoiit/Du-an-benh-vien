@@ -13,38 +13,51 @@ import {
 } from "@mui/material";
 import patientService from "../../../services/parentService";
 
+// Component Badge hiển thị trạng thái
+const StatusBadge = ({ status }) => {
+    const colors = {
+        "Khám lại": "#0d6efd",
+        "Chờ khám": "#ffc107",
+        "Đợi thanh toán": "#dc3545",
+        "Đang khám": "#6610f2",
+        "Chưa khám": "#6c757d",
+    };
+
+    return (
+        <span
+            style={{
+                padding: "4px 8px",
+                borderRadius: "6px",
+                color: "white",
+                backgroundColor: colors[status] || "#6c757d",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+            }}
+        >
+            {status}
+        </span>
+    );
+};
+
 const DanhSachTiepNhan = ({ onSelectPatient }) => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const fetchPatients = async () => {
+        const loadWaitingPatients = async () => {
             try {
                 setLoading(true);
-
-                let res;
-                // Nếu bạn có API riêng cho danh sách chờ tiếp nhận thì dùng:
-                if (patientService.getWaitingPatients1) {
-                    res = await patientService.getWaitingPatients1();
-                } else {
-                    // fallback: lấy toàn bộ bệnh nhân
-                    res = await patientService.getAll();
-                }
-
-                // tuỳ patientService viết thế nào:
-                // nếu dùng axios mà bạn đã return response.data thì list = res
-                // nếu return nguyên response thì list = res.data
+                const res = await patientService.getWaitingPatients1();
                 const list = res.data ?? res;
-
                 setPatients(Array.isArray(list) ? list : []);
             } catch (error) {
-                console.error("Lỗi load danh sách bệnh nhân:", error);
+                console.error("Lỗi load danh sách bệnh nhân chờ tiếp nhận:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPatients();
+        loadWaitingPatients();
     }, []);
 
     return (
@@ -59,8 +72,9 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                         <TableRow>
                             <TableCell>STT</TableCell>
                             <TableCell>Họ tên</TableCell>
-                            <TableCell>CCCD</TableCell>
                             <TableCell>SĐT</TableCell>
+                            <TableCell>ghi chu</TableCell>
+                            <TableCell>Trạng thái</TableCell>
                             <TableCell align="right">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -68,13 +82,13 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={5} align="center">
+                                <TableCell colSpan={6} align="center">
                                     Đang tải dữ liệu...
                                 </TableCell>
                             </TableRow>
                         ) : patients.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} align="center">
+                                <TableCell colSpan={6} align="center">
                                     Không có bệnh nhân nào đang chờ tiếp nhận.
                                 </TableCell>
                             </TableRow>
@@ -83,8 +97,14 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                                 <TableRow key={p.patientId}>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>{p.fullName}</TableCell>
-                                    <TableCell>{p.address}</TableCell>
-                                    <TableCell>{p.contactNumber}</TableCell>
+                                    <TableCell>{p.phone}</TableCell>
+                                    <TableCell>{p.cccd}</TableCell>
+
+                                    {/* HIỂN THỊ TRẠNG THÁI */}
+                                    <TableCell>
+                                        <StatusBadge status={p.status} />
+                                    </TableCell>
+
                                     <TableCell align="right">
                                         <Button
                                             variant="contained"

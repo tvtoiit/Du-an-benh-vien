@@ -196,9 +196,6 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             </Box>
 
             <Box display="flex" justifyContent="flex-end" gap={2}>
-                <Button variant="outlined" color="secondary">
-                    In phiếu
-                </Button>
                 <Button variant="contained" color="primary" onClick={handleSubmit}>
                     Lưu phiếu khám
                 </Button>

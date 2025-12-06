@@ -43,4 +43,35 @@ public interface PatientsRepository extends JpaRepository<Patients, String> {
                 WHERE r.roleId = 'USER'
             """)
     List<User> findUsersWithUserRole();
+
+    // get cho tiep nhan
+    @Query("""
+                SELECT p
+                FROM Patients p
+                WHERE
+                    NOT EXISTS (
+                        SELECT a1
+                        FROM AppointmentSchedules a1
+                        WHERE a1.patients = p
+                    )
+                    OR EXISTS (
+                        SELECT a2
+                        FROM AppointmentSchedules a2
+                        WHERE a2.patients = p
+                          AND a2.appointmentDatetime = (
+                                SELECT MAX(a3.appointmentDatetime)
+                                FROM AppointmentSchedules a3
+                                WHERE a3.patients = p
+                          )
+                          AND a2.status <> 'Đã thanh toán'
+                    )
+            """)
+    List<Patients> findActivePatients();
+
+    @Query("""
+            SELECT p
+            FROM Patients p
+            """)
+    List<Patients> findAllPatientsBasic();
+
 }
