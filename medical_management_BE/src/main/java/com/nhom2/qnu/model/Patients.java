@@ -59,8 +59,10 @@ public class Patients implements Serializable {
     @JsonIgnore
     private Set<PaymentDetails> paymentDetails = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "tbl_patient_service", joinColumns = @JoinColumn(name = "patient_id", referencedColumnName = "patient_id"), inverseJoinColumns = @JoinColumn(name = "service_id", referencedColumnName = "service_id"))
-    @JsonIgnore
-    private Set<Services> services = new HashSet<>();
+    // @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    // @JoinTable(name = "tbl_patient_service", joinColumns = @JoinColumn(name =
+    // "patient_id", referencedColumnName = "patient_id"), inverseJoinColumns =
+    // @JoinColumn(name = "service_id", referencedColumnName = "service_id"))
+    // @JsonIgnore
+    // private Set<Services> services = new HashSet<>();
 }

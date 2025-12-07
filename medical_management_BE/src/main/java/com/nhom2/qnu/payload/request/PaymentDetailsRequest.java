@@ -12,9 +12,16 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentDetailsRequest {
+
     @NotBlank(message = "patientId is required")
     private String patientId;
 
-    // prescriptionId có thể null nếu bạn muốn chỉ tính dịch vụ của bệnh nhân
+    @NotBlank(message = "appointmentId is required")
+    private String appointmentId;
+
+    /**
+     * prescriptionId là tùy chọn.
+     * Nếu FE không gửi, BE sẽ tự tìm đơn thuốc gắn với appointment đó.
+     */
     private String prescriptionId;
 }

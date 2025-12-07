@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -48,7 +51,11 @@ public class Services implements Serializable {
   @Column(name = "price", nullable = false, length = 18)
   private BigDecimal price;
 
-  @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
-  @JsonIgnore
-  private Set<Patients> patients = new HashSet<>();
+  // @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)
+  // @JsonIgnore
+  // private Set<Patients> patients = new HashSet<>();
+
+  @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+  private java.util.List<AppointmentServiceItem> appointmentAppointments = new java.util.ArrayList<>();
+
 }

@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
             account.setUsername(signupRequest.getUsername());
             account.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
             Role role = roleRepository.findByName(NameRoleEnum.ROLE_USER.name())
-                    .orElseThrow(() -> new DataNotFoundException("Role not found"));
+                    .orElseThrow(() -> new DataNotFoundException("Không tìm thấy vai trò người dùng"));
 
             account.setRole(role);
             accountRepository.save(account);

@@ -1,37 +1,33 @@
 package com.nhom2.qnu.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
+import com.nhom2.qnu.model.AppointmentSchedules;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.Role;
-import com.nhom2.qnu.model.Services;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.PatientRequest;
-import com.nhom2.qnu.payload.response.AddServiceForPatientResponse;
 import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.EHealthRecordsResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
-import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
+import com.nhom2.qnu.payload.response.PatientWaitingResponse;
+import com.nhom2.qnu.repository.AppointmentRepository;
 import com.nhom2.qnu.repository.PatientsRepository;
 import com.nhom2.qnu.repository.RoleRepository;
-import com.nhom2.qnu.repository.ServicesRepository;
 import com.nhom2.qnu.repository.ServiceResultRepository;
 import com.nhom2.qnu.repository.UserRepository;
 import com.nhom2.qnu.service.EHealthRecordsService;
 import com.nhom2.qnu.service.PatientsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.nhom2.qnu.model.User;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class PatientsServiceImpl implements PatientsService {
@@ -46,185 +42,129 @@ public class PatientsServiceImpl implements PatientsService {
   private RoleRepository roleRepository;
 
   @Autowired
-  private ServicesRepository servicesRepository;
+  private ServiceResultRepository serviceResultRepository;
 
   @Autowired
-  private ServiceResultRepository serviceResultRepository;
+  private AppointmentRepository appointmentRepository;
 
   @Autowired
   private EHealthRecordsService eHealthRecordsService;
 
+  // ================================
+  // LẤY USER CHƯA ĐƯỢC CHUYỂN THÀNH BỆNH NHÂN
+  // ================================
   @Override
   public List<User> getPatientsNotAccepted() {
     return patientsRepository.findUsersWithUserRole();
   }
 
+  // ================================
+  // CẬP NHẬT THÔNG TIN BỆNH NHÂN
+  // ================================
   @Override
   public PatientResponse updatePatients(PatientRequest newPatients, String id) {
+
     Patients patients = patientsRepository.findById(id)
         .orElseThrow(() -> new AccessDeniedException(
-            new ApiResponse(Boolean.FALSE, "You can't update patient!")));
+            new ApiResponse(false, "You can't update patient!")));
 
     patients.setDateOfBirth(newPatients.getDateOfBirth());
     patients.setOtherInfo(newPatients.getOtherInfo());
 
     Patients updatedPatient = patientsRepository.save(patients);
 
-    PatientResponse patientResponse = new PatientResponse();
-    patientResponse.setPatientId(updatedPatient.getPatientId());
-
-    // Lấy từ User (không update)
-    if (updatedPatient.getUser() != null) {
-      patientResponse.setFullName(updatedPatient.getUser().getFullName());
-      patientResponse.setAddress(updatedPatient.getUser().getAddress());
-      patientResponse.setContactNumber(updatedPatient.getUser().getPhoneNumber());
-      patientResponse.setEmail(updatedPatient.getUser().getEmail());
-    }
-
-    patientResponse.setDateOfBirth(updatedPatient.getDateOfBirth());
-    patientResponse.setOtherInfo(updatedPatient.getOtherInfo());
-
-    return patientResponse;
+    return PatientResponse.builder()
+        .patientId(updatedPatient.getPatientId())
+        .fullName(updatedPatient.getUser().getFullName())
+        .address(updatedPatient.getUser().getAddress())
+        .contactNumber(updatedPatient.getUser().getPhoneNumber())
+        .email(updatedPatient.getUser().getEmail())
+        .dateOfBirth(updatedPatient.getDateOfBirth())
+        .otherInfo(updatedPatient.getOtherInfo())
+        .build();
   }
 
+  // ================================
+  // LẤY TOÀN BỘ DANH SÁCH BỆNH NHÂN
+  // ================================
   @Override
   public List<PatientResponse> findAllPatients() {
-    List<Patients> patientsList = patientsRepository.findAll();
-    List<PatientResponse> patientResponses = new ArrayList<>();
 
-    for (Patients patient : patientsList) {
-      PatientResponse patientResponse = new PatientResponse();
-      patientResponse.setPatientId(patient.getPatientId());
-      patientResponse.setFullName(patient.getUser().getFullName());
-      patientResponse.setAddress(patient.getUser().getAddress());
-      patientResponse.setContactNumber(patient.getUser().getPhoneNumber());
-      patientResponse.setDateOfBirth(patient.getDateOfBirth());
-      patientResponse.setEmail(patient.getUser().getEmail());
-      patientResponse.setOtherInfo(patient.getOtherInfo());
-      patientResponses.add(patientResponse);
+    List<Patients> patientsList = patientsRepository.findAll();
+    List<PatientResponse> responses = new ArrayList<>();
+
+    for (Patients p : patientsList) {
+      responses.add(PatientResponse.builder()
+          .patientId(p.getPatientId())
+          .fullName(p.getUser().getFullName())
+          .address(p.getUser().getAddress())
+          .contactNumber(p.getUser().getPhoneNumber())
+          .email(p.getUser().getEmail())
+          .dateOfBirth(p.getDateOfBirth())
+          .otherInfo(p.getOtherInfo())
+          .build());
     }
-    return patientResponses;
+
+    return responses;
   }
 
+  // ================================
+  // LẤY BỆNH NHÂN THEO ID
+  // ================================
   @Override
   public PatientResponse findByPatients(String id) {
-    Patients patient = patientsRepository.findById(id).get();
-    PatientResponse patientResponse = new PatientResponse();
-    patientResponse.setPatientId(patient.getPatientId());
-    patientResponse.setFullName(patient.getUser().getFullName());
-    patientResponse.setAddress(patient.getUser().getAddress());
-    patientResponse.setContactNumber(patient.getUser().getPhoneNumber());
-    patientResponse.setDateOfBirth(patient.getDateOfBirth());
-    patientResponse.setEmail(patient.getUser().getEmail());
-    patientResponse.setOtherInfo(patient.getOtherInfo());
-    return patientResponse;
+
+    Patients p = patientsRepository.findById(id)
+        .orElseThrow(() -> new DataNotFoundException("Patient not found"));
+
+    return PatientResponse.builder()
+        .patientId(p.getPatientId())
+        .fullName(p.getUser().getFullName())
+        .address(p.getUser().getAddress())
+        .contactNumber(p.getUser().getPhoneNumber())
+        .email(p.getUser().getEmail())
+        .dateOfBirth(p.getDateOfBirth())
+        .otherInfo(p.getOtherInfo())
+        .build();
   }
 
+  // ================================
+  // TẠO BỆNH NHÂN + HỒ SƠ SỨC KHỎE
+  // ================================
   @Override
   @Transactional
-  public EHealthRecordsResponse createPatients(PatientRequest patientRequest) {
+  public EHealthRecordsResponse createPatients(PatientRequest req) {
 
-    Patients patients = new Patients();
+    Patients p = new Patients();
 
-    // --- 1. GÁN USER CHO BỆNH NHÂN ---
-    if (patientRequest.getUserId() != null) {
-      User user = userRepository.findById(patientRequest.getUserId())
+    // Gán user cho bệnh nhân
+    if (req.getUserId() != null) {
+
+      User user = userRepository.findById(req.getUserId())
           .orElseThrow(() -> new DataNotFoundException("User not found"));
 
-      patients.setUser(user);
+      p.setUser(user);
 
-      // SET ROLE = BENHNHAN
       Role role = roleRepository.findById("BENHNHAN")
           .orElseThrow(() -> new DataNotFoundException("Role BENHNHAN not found"));
 
       user.getAccount().setRole(role);
-
-      // LƯU LẠI USER (vì user thay đổi)
       userRepository.save(user);
     }
 
-    // --- 2. SET THÔNG TIN PATIENT ---
-    patients.setDateOfBirth(patientRequest.getDateOfBirth());
-    patients.setOtherInfo(patientRequest.getOtherInfo());
+    p.setDateOfBirth(req.getDateOfBirth());
+    p.setOtherInfo(req.getOtherInfo());
 
-    // --- 3. LƯU PATIENT ---
-    Patients newPatients = patientsRepository.save(patients);
+    Patients newPatient = patientsRepository.save(p);
 
-    // --- 4. TẠO HỒ SƠ SỨC KHỎE ---
     return eHealthRecordsService.createEHealthRecord(
-        patientRequest, newPatients.getPatientId());
+        req,
+        newPatient.getPatientId());
   }
 
-  @Override
-  public ResponseEntity<?> addServiceForPatient(String idPatient, String idSerivces) {
-    Optional<Services> service = servicesRepository.findById(idSerivces);
-    Optional<Patients> patient = patientsRepository.findById(idPatient);
-
-    if (service.isPresent() && patient.isPresent()) {
-      patientsRepository.addServiceForPatient(idPatient, idSerivces);
-      return new ResponseEntity<>(
-          AddServiceForPatientResponse.builder()
-              .status("201")
-              .massage("Add Success")
-              .build(),
-          HttpStatus.CREATED);
-    }
-    return new ResponseEntity<>(
-        AddServiceForPatientResponse.builder()
-            .status("400")
-            .massage("Add Failed")
-            .build(),
-        HttpStatus.BAD_REQUEST);
-  }
-
-  @Override
-  public List<PatientServiceResponse> getAllPatientsWithServices() {
-    List<Patients> allPatients = patientsRepository.findAll();
-
-    return allPatients.stream()
-        .map(p -> {
-          // Không có dịch vụ nào thì bỏ qua
-          if (p.getServices() == null || p.getServices().isEmpty()) {
-            return null;
-          }
-
-          // Lọc services: chỉ giữ những dịch vụ CHƯA có ServiceResult.status = "Hoàn
-          // thành"
-          List<PatientServiceResponse.ServiceResponse> serviceResponses = p.getServices().stream()
-              .filter(s -> !serviceResultRepository
-                  .existsByPatient_PatientIdAndService_ServiceIdAndStatus(
-                      p.getPatientId(),
-                      s.getServiceId(),
-                      "Hoàn thành" // phải đúng với status khi lưu
-          ))
-              .map(s -> PatientServiceResponse.ServiceResponse.builder()
-                  .patientId(p.getPatientId())
-                  .fullName(p.getUser().getFullName())
-                  .contactNumber(p.getUser().getPhoneNumber())
-                  .email(p.getUser().getEmail())
-                  .dateOfBirth(p.getDateOfBirth())
-                  .address(p.getUser().getAddress())
-                  .otherInfo(p.getOtherInfo())
-                  .serviceId(s.getServiceId())
-                  .serviceName(s.getServiceName())
-                  .build())
-              .toList();
-
-          // Nếu bệnh nhân không còn dịch vụ nào "chờ làm" thì bỏ luôn
-          if (serviceResponses.isEmpty()) {
-            return null;
-          }
-
-          return PatientServiceResponse.builder()
-              .patientId(p.getPatientId())
-              .fullName(p.getUser().getFullName())
-              .services(serviceResponses)
-              .build();
-        })
-        .filter(Objects::nonNull)
-        .toList();
-  }
-
+  // ================================
+  // LẤY BỆNH NHÂN THEO USERID
+  // ================================
   @Override
   public Object getPatientByUserId(String userId) {
 
@@ -234,17 +174,101 @@ public class PatientsServiceImpl implements PatientsService {
       return new ApiResponse("Không tìm thấy bệnh nhân!", HttpStatus.NOT_FOUND);
     }
 
-    Patients p = list.get(0); // lấy dòng đầu tiên
+    Patients p = list.get(0);
 
     return PatientResponse.builder()
         .patientId(p.getPatientId())
         .fullName(p.getUser().getFullName())
+        .address(p.getUser().getAddress())
         .contactNumber(p.getUser().getPhoneNumber())
         .email(p.getUser().getEmail())
         .dateOfBirth(p.getDateOfBirth())
-        .address(p.getUser().getAddress())
         .otherInfo(p.getOtherInfo())
         .build();
+  }
+
+  // ================================
+  // LẤY DANH SÁCH BỆNH NHÂN + DỊCH VỤ THEO PHIẾU KHÁM
+  // ================================
+  @Override
+  public List<PatientServiceResponse> getAllPatientsWithServices() {
+
+    // chỉ lấy các lịch đang "Chờ khám"
+    List<AppointmentSchedules> appointments = appointmentRepository.findAllByStatus("Chỉ định CLS");
+
+    return appointments.stream().map(app -> {
+
+      // dịch vụ trong phiếu khám
+      var serviceResponses = app.getAppointmentServices().stream()
+          .map(as -> PatientServiceResponse.ServiceResponse.builder()
+              .patientId(app.getPatients().getPatientId())
+              .fullName(app.getPatients().getUser().getFullName())
+              .serviceId(as.getService().getServiceId())
+              .serviceName(as.getService().getServiceName())
+              .build())
+          .toList();
+
+      return PatientServiceResponse.builder()
+          .patientId(app.getPatients().getPatientId())
+          .fullName(app.getPatients().getUser().getFullName())
+          .services(serviceResponses)
+          .build();
+
+    }).toList();
+  }
+
+  @Override
+  public List<PatientWaitingResponse> getWaitingPatients() {
+
+    List<Patients> list = patientsRepository.findActivePatients();
+    List<PatientWaitingResponse> responses = new ArrayList<>();
+
+    for (Patients p : list) {
+
+      AppointmentSchedules latest = appointmentRepository
+          .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(p.getPatientId())
+          .orElse(null);
+
+      String status;
+      LocalDateTime appointmentTime = null;
+      String room = null;
+      String appointmentId = null;
+
+      // Chưa có lịch khám nào → Chờ tiếp nhận
+      if (latest == null) {
+        status = "Chờ tiếp nhận";
+      }
+      // Đã thanh toán → phải hiển thị để khám lại
+      else if ("Đã thanh toán".equalsIgnoreCase(latest.getStatus())) {
+        status = "Khám lại";
+      }
+      // Chờ khám → hiển thị
+      else if ("Chờ khám".equalsIgnoreCase(latest.getStatus())) {
+        status = "Chờ khám";
+        appointmentTime = latest.getAppointmentDatetime();
+        appointmentId = latest.getAppointmentScheduleId();
+        room = latest.getRoom();
+      }
+      // Các trạng thái khác → không hiển thị
+      else {
+        continue;
+      }
+
+      responses.add(
+          PatientWaitingResponse.builder()
+              .patientId(p.getPatientId())
+              .fullName(p.getUser().getFullName())
+              .cccd(p.getOtherInfo())
+              .phone(p.getUser().getPhoneNumber())
+              .appointmentTime(appointmentTime)
+              .status(status)
+              .note(p.getOtherInfo())
+              .room(room)
+              .appointmentId(appointmentId)
+              .build());
+    }
+
+    return responses;
   }
 
 }

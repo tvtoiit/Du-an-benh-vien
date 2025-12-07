@@ -2,49 +2,38 @@ package com.nhom2.qnu.repository;
 
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.User;
-import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
-
-import java.util.Optional;
-import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PatientsRepository extends JpaRepository<Patients, String> {
+
     Optional<Patients> findByPatientId(String id);
 
     List<Patients> findAllByUser_UserId(String userId);
 
-    @Transactional
-    @Modifying
-    @Query(value = "INSERT INTO medical_management.tbl_patient_service (patient_id, service_id) VALUES (:idPatient,:idSerivces)", nativeQuery = true)
-    void addServiceForPatient(@Param("idPatient") String idPatient,
-            @Param("idSerivces") String idSerivces);
-
-    @Query("SELECT DISTINCT p FROM Patients p JOIN FETCH p.services")
-    List<Patients> findAllWithServices();
-
-    // @Query("""
-    // SELECT p FROM Patients p
-    // WHERE NOT EXISTS (
-    // SELECT a FROM AppointmentSchedules a
-    // )
-    // """)
-    // List<Patients> findPatientsNotAccepted();s
-
+    /**
+     * Lấy danh sách User có role = USER
+     * (dùng cho màn phê duyệt tạo bệnh nhân từ user thường).
+     */
     @Query("""
-                SELECT u FROM User u
-                JOIN u.account acc
-                JOIN acc.role r
-                WHERE r.roleId = 'USER'
+            SELECT u FROM User u
+            JOIN u.account acc
+            JOIN acc.role r
+            WHERE r.roleId = 'USER'
             """)
     List<User> findUsersWithUserRole();
 
-    // get cho tiep nhan
+    /**
+     * Bệnh nhân đang "active" cho tiếp nhận:
+     * - Chưa từng có lịch khám nào
+     * HOẶC
+     * - Có lịch khám mới nhất nhưng chưa "Đã thanh toán"
+     */
     @Query("""
                 SELECT p
                 FROM Patients p
@@ -63,15 +52,14 @@ public interface PatientsRepository extends JpaRepository<Patients, String> {
                                 FROM AppointmentSchedules a3
                                 WHERE a3.patients = p
                           )
-                          AND a2.status <> 'Đã thanh toán'
+                          AND a2.status IN ('Đã thanh toán', 'Chờ khám')
                     )
             """)
     List<Patients> findActivePatients();
 
-    @Query("""
-            SELECT p
-            FROM Patients p
-            """)
+    /**
+     * Lấy tất cả bệnh nhân (basic) – dùng khi không cần fetch thêm quan hệ.
+     */
+    @Query("SELECT p FROM Patients p")
     List<Patients> findAllPatientsBasic();
-
 }

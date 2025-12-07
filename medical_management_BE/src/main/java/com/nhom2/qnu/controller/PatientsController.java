@@ -5,21 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.nhom2.qnu.payload.request.PatientRequest;
-import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
 import com.nhom2.qnu.payload.response.PatientWaitingResponse;
-import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 import com.nhom2.qnu.service.PatientsService;
 
 @RestController
@@ -30,24 +21,21 @@ public class PatientsController {
   private PatientsService patientsService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> getPatient(@PathVariable(value = "id") String id) {
+  public ResponseEntity<?> getPatient(@PathVariable String id) {
     return ResponseEntity.ok(patientsService.findByPatients(id));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> updatePatient(@RequestBody PatientRequest request,
-      @PathVariable(value = "id") String id) {
+  public ResponseEntity<?> updatePatient(
+      @RequestBody PatientRequest request,
+      @PathVariable String id) {
+
     return new ResponseEntity<>(patientsService.updatePatients(request, id), HttpStatus.CREATED);
   }
 
   @PostMapping("")
   public ResponseEntity<?> createPatients(@RequestBody PatientRequest request) {
     return new ResponseEntity<>(patientsService.createPatients(request), HttpStatus.CREATED);
-  }
-
-  @PostMapping("/add_service")
-  public ResponseEntity<?> addServiceForPatient(@RequestParam String idPatient, String idSerivces) {
-    return patientsService.addServiceForPatient(idPatient, idSerivces);
   }
 
   @GetMapping("/get_All")
@@ -57,27 +45,21 @@ public class PatientsController {
 
   @GetMapping("/services")
   public ResponseEntity<List<PatientServiceResponse>> getAllPatientsWithServices() {
-    List<PatientServiceResponse> response = patientsService.getAllPatientsWithServices();
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(patientsService.getAllPatientsWithServices());
   }
 
   @GetMapping("/not-accepted")
   public ResponseEntity<?> getNotAcceptedPatients() {
-    return ResponseEntity.ok(
-        patientsService.getPatientsNotAccepted());
+    return ResponseEntity.ok(patientsService.getPatientsNotAccepted());
   }
 
   @GetMapping("/by-user/{userId}")
   public Object getPatientByUserId(@PathVariable String userId) {
-    Object response = patientsService.getPatientByUserId(userId);
-
-    return response;
+    return patientsService.getPatientByUserId(userId);
   }
 
-  // get cho tiep nhan
   @GetMapping("/waiting")
   public List<PatientWaitingResponse> getWaitingPatients() {
     return patientsService.getWaitingPatients();
   }
-
 }

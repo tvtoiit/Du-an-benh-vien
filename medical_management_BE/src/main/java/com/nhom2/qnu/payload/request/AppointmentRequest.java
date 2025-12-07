@@ -1,6 +1,8 @@
 package com.nhom2.qnu.payload.request;
 
 import lombok.Data;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,4 +15,9 @@ public class AppointmentRequest {
 
     // danh sách dịch vụ FE gửi lên
     private List<String> serviceIds;
+
+    public LocalDateTime getDatetime() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDatetime'");
+    }
 }

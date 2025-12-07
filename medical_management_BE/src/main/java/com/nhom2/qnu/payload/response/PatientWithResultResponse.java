@@ -14,4 +14,5 @@ public class PatientWithResultResponse {
     private Date dateOfBirth;
     private String contactNumber;
     private String status;
+    private String appointmentScheduleId;
 }

@@ -1,9 +1,6 @@
 package com.nhom2.qnu.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -28,15 +25,20 @@ public class PaymentDetails implements Serializable {
     private String paymentDetailId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", referencedColumnName = "patient_id")
+    @JoinColumn(name = "patient_id")
     private Patients patient;
 
     @OneToOne
     @JoinColumn(name = "prescription_id")
     private PrescriptionHistory prescriptionHistory;
 
-    @Column(name = "total_amount", nullable = false, length = 18)
-    private BigDecimal total_amount;
+    /** ⭐ Thanh toán phải gắn với lần khám */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_schedule_id")
+    private AppointmentSchedules appointment;
+
+    @Column(name = "total_amount", nullable = false)
+    private BigDecimal totalAmount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -44,6 +46,6 @@ public class PaymentDetails implements Serializable {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = new Date();
+        createdAt = new Date();
     }
 }

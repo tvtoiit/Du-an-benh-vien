@@ -1,17 +1,25 @@
 package com.nhom2.qnu.payload.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import java.util.List;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@Getter
+@Setter
 public class PrescriptionHistoryRequest {
+
     private String patientId;
-    private String medicineId;
-    private String dosage;
-    private String duration;
+    private String appointmentId;
+    private String note;
+
+    private List<Detail> details;
+
+    @Data
+    public static class Detail {
+        private String medicineId;
+        private String dosage;
+        private String duration;
+        private Integer quantity;
+    }
 }

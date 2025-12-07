@@ -1,7 +1,8 @@
 package com.nhom2.qnu.payload.response.services;
 
+import com.nhom2.qnu.payload.response.ServiceResponse;
+
 import java.util.List;
-import com.nhom2.qnu.model.Services;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,5 +11,5 @@ import lombok.Data;
 public class GetAllListServiceResponse {
   private String status;
   private String massage;
-  private List<Services> data;
+  private List<ServiceResponse> data;
 }

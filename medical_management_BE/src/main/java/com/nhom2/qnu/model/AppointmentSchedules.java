@@ -9,6 +9,8 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,4 +47,7 @@ public class AppointmentSchedules implements Serializable {
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AppointmentServiceItem> appointmentServices = new ArrayList<>();
 }

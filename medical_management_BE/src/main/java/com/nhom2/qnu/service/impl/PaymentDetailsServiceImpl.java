@@ -1,21 +1,19 @@
 package com.nhom2.qnu.service.impl;
 
+import com.nhom2.qnu.model.AppointmentSchedules;
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PrescriptionHistory;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
-import com.nhom2.qnu.payload.response.DepartmentResponse;
 import com.nhom2.qnu.payload.response.PatientPaymentResponse;
-import com.nhom2.qnu.payload.response.PaymentDetailsResponse;
 import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
-import com.nhom2.qnu.repository.AdvancePaymentRepository;
 import com.nhom2.qnu.repository.AppointmentRepository;
 import com.nhom2.qnu.repository.PaymentDetailsRepository;
-import com.nhom2.qnu.payload.response.PaymentDetailsResponse;
 import com.nhom2.qnu.repository.PatientsRepository;
-import com.nhom2.qnu.payload.response.PatientPaymentResponse;
 import com.nhom2.qnu.repository.PrescriptionHistoryRepository;
 import com.nhom2.qnu.service.PaymentDetailsService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -24,261 +22,328 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class PaymentDetailsServiceImpl implements PaymentDetailsService {
 
-        private static final long DEFAULT_EXAM_FEE = 100_000L; // tiền khám mặc định, bạn có thể đổi sau
+        private static final long DEFAULT_EXAM_FEE = 100_000L;
 
-        private final PaymentDetailsRepository paymentDetailsRepository;
-        private final PatientsRepository patientsRepository;
-        private final PrescriptionHistoryRepository prescriptionHistoryRepository;
-        private final AdvancePaymentRepository advancePaymentRepository;
-        private final AppointmentRepository appointmentRepository;
-        private final JdbcTemplate jdbcTemplate;
+        @Autowired
+        private PaymentDetailsRepository paymentDetailsRepository;
 
-        public PaymentDetailsServiceImpl(PaymentDetailsRepository paymentDetailsRepository,
-                        PatientsRepository patientsRepository,
-                        PrescriptionHistoryRepository prescriptionHistoryRepository,
-                        AdvancePaymentRepository advancePaymentRepository,
-                        AppointmentRepository appointmentRepository,
-                        JdbcTemplate jdbcTemplate) {
-                this.paymentDetailsRepository = paymentDetailsRepository;
-                this.patientsRepository = patientsRepository;
-                this.prescriptionHistoryRepository = prescriptionHistoryRepository;
-                this.advancePaymentRepository = advancePaymentRepository;
-                this.appointmentRepository = appointmentRepository;
-                this.jdbcTemplate = jdbcTemplate;
-        }
+        @Autowired
+        private PatientsRepository patientsRepository;
+
+        @Autowired
+        private PrescriptionHistoryRepository prescriptionHistoryRepository;
+
+        @Autowired
+        private AppointmentRepository appointmentRepository;
+
+        @Autowired
+        private JdbcTemplate jdbcTemplate;
 
         /**
-         * Tạo PaymentDetails (hóa đơn) cho một bệnh nhân.
-         * total_amount = examFee + serviceFee + medicineFee (chưa trừ tạm ứng).
+         * Tạo hóa đơn cho MỘT LẦN KHÁM (appointment)
          */
         @Override
         public PaymentDetails createPaymentDetails(PaymentDetailsRequest req) {
 
-                // 1) Tìm bệnh nhân
+                // 1. Bệnh nhân
                 Patients patient = patientsRepository.findById(req.getPatientId())
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Patient not found with id: " + req.getPatientId()));
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Patient not found"));
 
-                // 2) Tìm prescription
-                PrescriptionHistory prescription = null;
+                // 2. Lần khám
+                AppointmentSchedules appointment = appointmentRepository.findById(req.getAppointmentId())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Appointment not found"));
 
-                // Nếu FE có gửi prescriptionId → ưu tiên dùng
-                if (req.getPrescriptionId() != null && !req.getPrescriptionId().isBlank()) {
-                        prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
-                                        .orElseThrow(() -> new ResponseStatusException(
-                                                        HttpStatus.NOT_FOUND,
-                                                        "Prescription not found with id: " + req.getPrescriptionId()));
-                } else {
-                        // Nếu không gửi → lấy đơn mới nhất của bệnh nhân
-                        prescription = prescriptionHistoryRepository
-                                        .findTopByPatient_PatientIdOrderByPrescriptionIdDesc(req.getPatientId())
-                                        .orElse(null);
+                // 3. Check đã có hóa đơn chưa
+                boolean exists = paymentDetailsRepository
+                                .existsByAppointment_AppointmentScheduleId(appointment.getAppointmentScheduleId());
+                if (exists) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                        "Lần khám này đã được thanh toán");
                 }
 
-                // 3) Tính tiền khám / dịch vụ / thuốc
-                long examFee = DEFAULT_EXAM_FEE;
+                // 4. Đơn thuốc (nếu có)
+                Optional<PrescriptionHistory> prescriptionOpt = prescriptionHistoryRepository
+                                .findFirstByAppointment(appointment);
+                PrescriptionHistory prescription = prescriptionOpt.orElse(null);
 
-                BigDecimal servicesTotal = sumServicesForPatient(req.getPatientId());
-
-                BigDecimal medicinesTotal = (prescription != null)
+                // 5. Tính tiền
+                BigDecimal examFee = BigDecimal.valueOf(DEFAULT_EXAM_FEE);
+                BigDecimal serviceFee = sumServicesForAppointment(appointment.getAppointmentScheduleId());
+                BigDecimal medicineFee = (prescription != null)
                                 ? sumMedicinesForPrescription(prescription.getPrescriptionId())
                                 : BigDecimal.ZERO;
 
-                BigDecimal totalAmount = BigDecimal.valueOf(examFee)
-                                .add(servicesTotal)
-                                .add(medicinesTotal);
+                BigDecimal total = examFee.add(serviceFee).add(medicineFee);
 
-                // 4) Tạo entity
-                PaymentDetails entity = new PaymentDetails();
-                entity.setPatient(patient);
-                entity.setPrescriptionHistory(prescription);
-                entity.setTotal_amount(totalAmount);
+                // 6. Tạo bill
+                PaymentDetails bill = new PaymentDetails();
+                bill.setPatient(patient);
+                bill.setAppointment(appointment);
+                bill.setPrescriptionHistory(prescription);
+                bill.setTotalAmount(total);
 
-                // 5) Update appointment status -> "Đã thanh toán"
-                appointmentRepository
-                                .findByPatients_PatientIdAndStatus(req.getPatientId(), "Hoàn thành")
-                                .forEach(a -> {
-                                        a.setStatus("Đã thanh toán");
-                                        appointmentRepository.save(a);
-                                });
+                PaymentDetails saved = paymentDetailsRepository.save(bill);
 
-                // 6) Lưu DB
-                return paymentDetailsRepository.save(entity);
+                // 7. Update status lần khám
+                appointment.setStatus("Đã thanh toán");
+                appointmentRepository.save(appointment);
+
+                return saved;
         }
 
         /**
-         * Cập nhật PaymentDetails:
-         * - Có thể đổi patient / prescription
-         * - Tính lại total_amount theo dữ liệu mới nhất.
+         * Cập nhật PaymentDetails: tính lại tổng tiền dựa trên appointment/prescription
+         * mới.
          */
         @Override
         public PaymentDetails updatePaymentDetails(String paymentDetailId, PaymentDetailsRequest req) {
 
                 PaymentDetails existing = paymentDetailsRepository.findById(paymentDetailId)
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "PaymentDetails not found with id: " + paymentDetailId));
 
-                // 1) Cập nhật patient nếu có gửi lên
+                // Nếu FE muốn đổi patient
                 if (req.getPatientId() != null && !req.getPatientId().isBlank()) {
                         Patients patient = patientsRepository.findById(req.getPatientId())
-                                        .orElseThrow(() -> new ResponseStatusException(
-                                                        HttpStatus.NOT_FOUND,
-                                                        "Patient not found with id: " + req.getPatientId()));
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                        "Patient not found"));
                         existing.setPatient(patient);
                 }
 
-                // 2) Xử lý prescription (ưu tiên FE → nếu không có thì lấy mới nhất)
-                PrescriptionHistory prescription = null;
-
-                if (req.getPrescriptionId() != null && !req.getPrescriptionId().isBlank()) {
-                        prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
-                                        .orElseThrow(() -> new ResponseStatusException(
-                                                        HttpStatus.NOT_FOUND,
-                                                        "Prescription not found with id: " + req.getPrescriptionId()));
-                } else if (existing.getPatient() != null) {
-                        prescription = prescriptionHistoryRepository
-                                        .findTopByPatient_PatientIdOrderByPrescriptionIdDesc(
-                                                        existing.getPatient().getPatientId())
-                                        .orElse(null);
+                // Nếu FE muốn đổi appointment
+                AppointmentSchedules appointment = existing.getAppointment();
+                if (req.getAppointmentId() != null && !req.getAppointmentId().isBlank()) {
+                        appointment = appointmentRepository.findById(req.getAppointmentId())
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                        "Appointment not found"));
+                        existing.setAppointment(appointment);
                 }
 
+                // Xử lý prescription
+                PrescriptionHistory prescription = null;
+                if (req.getPrescriptionId() != null && !req.getPrescriptionId().isBlank()) {
+                        prescription = prescriptionHistoryRepository.findById(req.getPrescriptionId())
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                        "Prescription not found with id: " + req.getPrescriptionId()));
+                } else if (appointment != null) {
+                        prescription = prescriptionHistoryRepository.findFirstByAppointment(appointment)
+                                        .orElse(null);
+                }
                 existing.setPrescriptionHistory(prescription);
 
-                // 3) Tính lại total_amount
-                String patientId = existing.getPatient().getPatientId();
-
-                long examFee = DEFAULT_EXAM_FEE;
-                BigDecimal serviceTotal = sumServicesForPatient(patientId);
-
-                BigDecimal medicineTotal = (prescription != null)
+                // Tính lại tổng tiền
+                BigDecimal examFee = BigDecimal.valueOf(DEFAULT_EXAM_FEE);
+                BigDecimal serviceFee = (appointment != null)
+                                ? sumServicesForAppointment(appointment.getAppointmentScheduleId())
+                                : BigDecimal.ZERO;
+                BigDecimal medicineFee = (prescription != null)
                                 ? sumMedicinesForPrescription(prescription.getPrescriptionId())
                                 : BigDecimal.ZERO;
 
-                BigDecimal totalAmount = BigDecimal.valueOf(examFee)
-                                .add(serviceTotal)
-                                .add(medicineTotal);
+                BigDecimal total = examFee.add(serviceFee).add(medicineFee);
+                existing.setTotalAmount(total);
 
-                existing.setTotal_amount(totalAmount);
-
-                PaymentDetails updated = paymentDetailsRepository.save(existing);
-
-                // 4) UPDATE APPOINTMENT STATUS -> "Đã thanh toán"
-                appointmentRepository
-                                .findByPatients_PatientIdAndStatus(patientId, "Hoàn thành")
-                                .forEach(a -> {
-                                        a.setStatus("Đã thanh toán");
-                                        appointmentRepository.save(a);
-                                });
-
-                return updated;
+                return paymentDetailsRepository.save(existing);
         }
 
         /**
-         * Tính summary cho màn hình thanh toán (FE PaymentForm).
+         * Danh sách bệnh nhân chờ thanh toán (đơn giản: tất cả appointment "Hoàn thành"
+         * nhưng chưa có PaymentDetails).
          */
+        @Override
+        public List<PaymentSummaryResponse> getWaitingPayments() {
+
+                // Tìm các lần khám "Hoàn thành"
+                List<AppointmentSchedules> finishedAppointments = appointmentRepository.findAllByStatus("Hoàn thành");
+
+                // Chỉ lấy những lần khám chưa có bill
+                List<AppointmentSchedules> waiting = finishedAppointments.stream()
+                                .filter(a -> !paymentDetailsRepository
+                                                .existsByAppointment_AppointmentScheduleId(
+                                                                a.getAppointmentScheduleId()))
+                                .collect(Collectors.toList());
+
+                return waiting.stream()
+                                .map(a -> {
+                                        String patientId = a.getPatients().getPatientId();
+                                        // summary theo bệnh nhân + lần khám
+                                        return getPaymentSummary(patientId, null);
+                                })
+                                .collect(Collectors.toList());
+        }
+
         @Override
         public PaymentSummaryResponse getPaymentSummary(String patientId, String prescriptionId) {
 
+                // 1️⃣ Lấy thông tin bệnh nhân
                 Patients patient = patientsRepository.findById(patientId)
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Patient not found with id: " + patientId));
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Patient not found"));
 
-                // 1. Tiền khám
+                // 2️⃣ Lấy lần khám gần nhất
+                AppointmentSchedules latestAppointment = appointmentRepository
+                                .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(patientId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "No appointment found for patient"));
+
+                String appointmentId = latestAppointment.getAppointmentScheduleId();
+
+                // 3️⃣ Tính tiền khám (cố định)
                 long examFee = DEFAULT_EXAM_FEE;
 
-                // 2. Tiền dịch vụ CLS
-                long serviceFee = sumServicesForPatient(patientId).longValue();
+                // 4️⃣ Tính tiền dịch vụ
+                long serviceFee = sumServicesForAppointment(appointmentId).longValue();
 
-                // 3. Tìm prescription mới nhất nếu FE không gửi lên
+                // 5️⃣ Xác định đơn thuốc
                 if (prescriptionId == null || prescriptionId.isBlank()) {
                         prescriptionId = prescriptionHistoryRepository
-                                        .findTopByPatient_PatientIdOrderByPrescriptionIdDesc(patientId)
+                                        .findFirstByAppointment(latestAppointment)
                                         .map(PrescriptionHistory::getPrescriptionId)
                                         .orElse(null);
                 }
 
-                // 4. Tính tiền thuốc nếu có đơn
+                // 6️⃣ Tính tiền thuốc
                 long medicineFee = 0L;
                 if (prescriptionId != null) {
                         medicineFee = sumMedicinesForPrescription(prescriptionId).longValue();
                 }
 
-                // 5. Tổng tạm ứng
-                Double advance = advancePaymentRepository.sumAmountByPatientId(patientId);
-                long advanceTotal = (advance != null) ? advance.longValue() : 0L;
-
-                // 6. Tổng chi phí
+                // 7️⃣ Tính tổng chi phí
                 long totalCost = examFee + serviceFee + medicineFee;
-                long amountToPay = Math.max(totalCost - advanceTotal, 0L);
 
+                // 8️⃣ Lấy tổng số tiền tạm ứng
+                long advanceTotal = sumAdvanceForAppointment(appointmentId).longValue();
+
+                // 9️⃣ Tính tiền cần thu thêm
+                long amountToPay = Math.max(totalCost - advanceTotal, 0);
+
+                // 🔟 Xác định trạng thái hiển thị
+                String rawStatus = latestAppointment.getStatus();
+                String paymentStatus;
+
+                if ("Đã kết luận".equalsIgnoreCase(rawStatus) ||
+                                "Đã kê đơn".equalsIgnoreCase(rawStatus)) {
+
+                        paymentStatus = "Chưa thanh toán";
+
+                } else {
+                        paymentStatus = rawStatus;
+                }
+
+                // 1️⃣1️⃣ Trả về response đầy đủ
                 return PaymentSummaryResponse.builder()
                                 .patientId(patient.getPatientId())
                                 .fullName(patient.getUser().getFullName())
+                                .status(paymentStatus)
+                                .appointmentId(appointmentId)
+
                                 .examFee(examFee)
                                 .serviceFee(serviceFee)
                                 .medicineFee(medicineFee)
+
                                 .advanceTotal(advanceTotal)
                                 .totalCost(totalCost)
                                 .amountToPay(amountToPay)
                                 .build();
         }
 
-        /**
-         * Sum tiền dịch vụ dựa trên:
-         * - tbl_patient_service(patient_id, service_id)
-         * - tbl_service(service_id, price)
-         */
-        private BigDecimal sumServicesForPatient(String patientId) {
-                String sql = "SELECT COALESCE(SUM(s.price), 0) " +
-                                "FROM tbl_patient_service ps " +
-                                "JOIN tbl_service s ON ps.service_id = s.service_id " +
-                                "WHERE ps.patient_id = ?";
+        @Override
+        public List<PaymentSummaryResponse> getPatientsForPayment() {
 
-                BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, patientId);
-                return result != null ? result : BigDecimal.ZERO;
+                // Lấy danh sách bệnh nhân đủ điều kiện thanh toán
+                List<PatientPaymentResponse> rawList = paymentDetailsRepository.findPatientsReadyForPayment();
+
+                return rawList.stream().map(item -> {
+
+                        // lấy appointment gần nhất
+                        AppointmentSchedules latestAppt = appointmentRepository
+                                        .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(item.getPatientId())
+                                        .orElse(null);
+
+                        if (latestAppt == null)
+                                return null;
+
+                        // lấy prescription tương ứng lần khám
+                        String prescriptionId = prescriptionHistoryRepository
+                                        .findFirstByAppointment(latestAppt)
+                                        .map(PrescriptionHistory::getPrescriptionId)
+                                        .orElse(null);
+
+                        PaymentSummaryResponse summary = getPaymentSummary(item.getPatientId(), prescriptionId);
+
+                        // xử lý trạng thái hiển thị
+                        String rawStatus = latestAppt.getStatus();
+                        String paymentStatus;
+
+                        if ("Đã kết luận".equalsIgnoreCase(rawStatus) ||
+                                        "Đã kê đơn".equalsIgnoreCase(rawStatus)) {
+
+                                paymentStatus = "Chưa thanh toán";
+
+                        } else {
+                                paymentStatus = rawStatus;
+                        }
+
+                        summary.setStatus(paymentStatus);
+
+                        return summary;
+
+                }).filter(x -> x != null).toList();
+        }
+
+        // ================== HÀM HỖ TRỢ ==================
+
+        /**
+         * SUM tiền dịch vụ theo bảng tbl_appointment_service
+         */
+        private BigDecimal sumServicesForAppointment(String appointmentId) {
+
+                String sql = """
+                                SELECT COALESCE(SUM(s.price), 0)
+                                FROM tbl_appointment_service aps
+                                JOIN tbl_service s ON aps.service_id = s.service_id
+                                WHERE aps.appointment_id = ?
+                                """;
+
+                BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, appointmentId);
+                return (result != null) ? result : BigDecimal.ZERO;
         }
 
         /**
-         * Sum tiền thuốc cho một đơn kê (prescriptionId) dựa trên:
-         * - tbl_prescription_history (prescription_id, medicine_id)
-         * - tbl_medicines (medicine_id, price)
-         *
-         * Lưu ý: với schema hiện tại, mỗi prescription_id tương ứng 1 medicine_id,
-         * nên SUM(m.price) thực tế chỉ là 1 dòng. Nếu sau này có bảng chi tiết toa,
-         * bạn có thể chỉnh SQL cho phù hợp.
+         * SUM tiền thuốc theo prescription (theo schema hiện tại của bạn)
          */
         private BigDecimal sumMedicinesForPrescription(String prescriptionId) {
+
                 String sql = """
-                                    SELECT COALESCE(SUM(m.price * ph.dosage * ph.duration), 0)
-                                    FROM tbl_prescription_history ph
-                                    JOIN tbl_medicines m ON ph.medicine_id = m.medicine_id
-                                    WHERE ph.prescription_id = ?
+                                    SELECT COALESCE(SUM(m.price * pd.quantity), 0)
+                                    FROM tbl_prescription_detail pd
+                                    JOIN tbl_medicines m ON pd.medicine_id = m.medicine_id
+                                    WHERE pd.prescription_id = ?
                                 """;
 
                 BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, prescriptionId);
-                return result != null ? result : BigDecimal.ZERO;
+                return (result != null) ? result : BigDecimal.ZERO;
         }
 
-        @Override
-        public List<PaymentSummaryResponse> getWaitingPayments() {
-                // ví dụ: tạm thời lấy tất cả bệnh nhân rồi map sang summary
-                return patientsRepository.findAll()
-                                .stream()
-                                .map(p -> getPaymentSummary(p.getPatientId(), null))
-                                .collect(Collectors.toList());
+        private BigDecimal sumAdvanceForAppointment(String appointmentId) {
+
+                String sql = """
+                                    SELECT COALESCE(SUM(ap.amount), 0)
+                                    FROM tbl_advance_payment ap
+                                    WHERE ap.appointment_id = ?
+                                """;
+
+                BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, appointmentId);
+                return (result != null) ? result : BigDecimal.ZERO;
         }
 
-        @Override
-        public List<PatientPaymentResponse> getPatientsForPayment() {
-                return paymentDetailsRepository.findPatientsReadyForPayment();
-        }
 }

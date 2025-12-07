@@ -1,50 +1,37 @@
 package com.nhom2.qnu.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "tbl_prescription_history")
-@Builder
-public class PrescriptionHistory implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class PrescriptionHistory {
 
     @Id
     @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "prescription_id", length = 36, nullable = false)
     private String prescriptionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patients patient;
 
-    @Column(name = "medicine_id", length = 36, nullable = false)
-    private String medicineId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_schedule_id")
+    private AppointmentSchedules appointment;
 
-    @Column(name = "dosage", length = 20, nullable = false)
-    private String dosage;
+    @Column(columnDefinition = "TEXT")
+    private String note;
 
-    @Column(name = "duration", length = 20, nullable = false)
-    private String duration;
-
-    @OneToMany(mappedBy = "prescriptionHistory")
-    private Set<Medicines> medicines = new HashSet<>();
-
-    @OneToOne(mappedBy = "prescriptionHistory")
-    private PaymentDetails paymentDetails;
+    // ⬇⬇⬇ THÊM / SỬA TẠI ĐÂY ⬇⬇⬇
+    @OneToMany(mappedBy = "prescriptionHistory", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PrescriptionDetail> details = new ArrayList<>();
 }

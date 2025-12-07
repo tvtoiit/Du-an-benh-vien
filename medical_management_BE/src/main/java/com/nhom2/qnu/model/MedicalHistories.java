@@ -37,6 +37,10 @@ public class MedicalHistories implements Serializable {
     @Column(name = "discharge_date", nullable = false)
     private Date dischargeDate;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
     @ManyToMany(mappedBy = "medicalHistories", fetch = FetchType.LAZY)
     private Set<EHealthRecords> eHealthRecords = new HashSet<>();
 }

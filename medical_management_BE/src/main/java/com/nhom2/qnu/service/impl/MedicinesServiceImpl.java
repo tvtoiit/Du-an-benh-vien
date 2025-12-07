@@ -8,11 +8,11 @@ import com.nhom2.qnu.payload.response.MedicinesResponse;
 import com.nhom2.qnu.repository.MedicinesRepository;
 import com.nhom2.qnu.service.MedicinesService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicinesServiceImpl implements MedicinesService {
@@ -20,69 +20,92 @@ public class MedicinesServiceImpl implements MedicinesService {
     @Autowired
     private MedicinesRepository medicinesRepository;
 
-    @Override
-    public MedicinesResponse updateMedicines(MedicinesRequest request, String id)  {
-        if (medicinesRepository.findById(id).isEmpty()) {
-            ApiResponse apiResponse = new ApiResponse(Boolean.FALSE, "You can't update medicines!");
-            throw new AccessDeniedException(apiResponse);
-        }
-
-        Medicines medicines = medicinesRepository.findById(id).get();
-        medicines.setName(request.getName());
-        medicines.setQuantity(request.getQuantity());
-        medicines.setUnit(request.getUnit());
-        medicines.setPrice(request.getPrice());
-
-        Medicines newMedicines = medicinesRepository.save(medicines);
-
-        MedicinesResponse medicinesResponse = new MedicinesResponse();
-        medicinesResponse.setName(newMedicines.getName());
-        medicinesResponse.setQuantity(newMedicines.getQuantity());
-        medicinesResponse.setUnit(newMedicines.getUnit());
-        medicinesResponse.setPrice(newMedicines.getPrice());
-        
-        return medicinesResponse;
-    }
-    
+    // ============================================
+    // CREATE – thêm thuốc mới vào kho
+    // ============================================
     @Override
     public MedicinesResponse createMedicins(MedicinesRequest request) {
-        Medicines medicines = new Medicines();
-        medicines.setName(request.getName());
-        medicines.setQuantity(request.getQuantity());
-        medicines.setUnit(request.getUnit());
-        medicines.setPrice(request.getPrice());
-        Medicines newMedicines = medicinesRepository.save(medicines);
-        MedicinesResponse response = new MedicinesResponse(newMedicines.getMedicineId(),
-        newMedicines.getName(), newMedicines.getUnit(), newMedicines.getQuantity(), newMedicines.getPrice());
-        return response;
+
+        // Kiểm tra trùng tên thuốc
+        if (medicinesRepository.existsByName(request.getName())) {
+            throw new RuntimeException("Thuốc đã tồn tại trong kho!");
+        }
+
+        Medicines med = new Medicines();
+        med.setName(request.getName());
+        med.setUnit(request.getUnit());
+        med.setPrice(request.getPrice());
+        med.setQuantity(request.getQuantity()); // tồn kho ban đầu
+
+        Medicines saved = medicinesRepository.save(med);
+
+        return new MedicinesResponse(
+                saved.getMedicineId(),
+                saved.getName(),
+                saved.getUnit(),
+                saved.getQuantity(),
+                saved.getPrice());
     }
 
+    // ============================================
+    // UPDATE – nhập thêm thuốc vào kho
+    // ============================================
+    @Override
+    public MedicinesResponse updateMedicines(MedicinesRequest request, String id) {
+
+        Medicines med = medicinesRepository.findById(id)
+                .orElseThrow(() -> new AccessDeniedException(
+                        new ApiResponse(false, "Thuốc không tồn tại!")));
+
+        // cập nhật thông tin thuốc
+        med.setName(request.getName());
+        med.setUnit(request.getUnit());
+        med.setPrice(request.getPrice());
+
+        // Tăng tồn kho → không ghi đè số lượng cũ!
+        int newQuantity = med.getQuantity() + request.getQuantity();
+        med.setQuantity(newQuantity);
+
+        Medicines saved = medicinesRepository.save(med);
+
+        return new MedicinesResponse(
+                saved.getMedicineId(),
+                saved.getName(),
+                saved.getUnit(),
+                saved.getQuantity(),
+                saved.getPrice());
+    }
+
+    // ============================================
+    // GET ONE
+    // ============================================
     @Override
     public MedicinesResponse getMedicines(String id) {
-        Medicines medicines = medicinesRepository.findById(id).get();
-        MedicinesResponse response = new MedicinesResponse();
-        response.setMedicineId(medicines.getMedicineId());
-        response.setName(medicines.getName());
-        response.setUnit(medicines.getUnit());
-        response.setQuantity(medicines.getQuantity());
-        response.setPrice(medicines.getPrice());
-        return response;
+
+        Medicines med = medicinesRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
+
+        return new MedicinesResponse(
+                med.getMedicineId(),
+                med.getName(),
+                med.getUnit(),
+                med.getQuantity(),
+                med.getPrice());
     }
 
+    // ============================================
+    // GET ALL
+    // ============================================
     @Override
     public List<MedicinesResponse> getAllMedicines() {
-    List<Medicines> medicinesList = medicinesRepository.findAll();
-    List<MedicinesResponse> medicinesResponses = new ArrayList<>();
-    
-    for (Medicines medicines : medicinesList) {
-        MedicinesResponse response = new MedicinesResponse();
-        response.setMedicineId(medicines.getMedicineId());
-        response.setName(medicines.getName());
-        response.setUnit(medicines.getUnit());
-        response.setQuantity(medicines.getQuantity());
-        response.setPrice(medicines.getPrice());
-        medicinesResponses.add(response);
-    }
-        return medicinesResponses;
+
+        return medicinesRepository.findAll().stream()
+                .map(m -> new MedicinesResponse(
+                        m.getMedicineId(),
+                        m.getName(),
+                        m.getUnit(),
+                        m.getQuantity(),
+                        m.getPrice()))
+                .collect(Collectors.toList());
     }
 }

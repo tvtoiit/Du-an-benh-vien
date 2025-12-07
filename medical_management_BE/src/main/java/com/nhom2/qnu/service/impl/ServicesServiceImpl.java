@@ -2,6 +2,8 @@ package com.nhom2.qnu.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,8 @@ import com.nhom2.qnu.model.Services;
 import com.nhom2.qnu.payload.request.ServiceRequest;
 import com.nhom2.qnu.payload.response.services.CreateServicesResponse;
 import com.nhom2.qnu.payload.response.services.GetAllListServiceResponse;
+import com.nhom2.qnu.payload.response.ServiceResponse;
+
 import com.nhom2.qnu.payload.response.services.UpdateServiceResponse;
 import com.nhom2.qnu.repository.ServicesRepository;
 import com.nhom2.qnu.service.ServicesService;
@@ -21,13 +25,30 @@ public class ServicesServiceImpl implements ServicesService {
 
   @Override
   public ResponseEntity<GetAllListServiceResponse> getAll() {
+
     List<Services> list = servicesRepository.findAll();
+
     if (list.isEmpty()) {
-      return new ResponseEntity<GetAllListServiceResponse>(HttpStatus.NO_CONTENT);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    GetAllListServiceResponse response = GetAllListServiceResponse.builder().status("200")
-        .massage("successfully retrieved data").data(list).build();
-    return new ResponseEntity<GetAllListServiceResponse>(response, HttpStatus.OK);
+
+    // ⭐ Dùng Collectors.toList() và ép kiểu rõ ràng
+    List<ServiceResponse> dtoList = list.stream()
+        .map((Services s) -> ServiceResponse.builder()
+            .serviceId(s.getServiceId())
+            .serviceName(s.getServiceName())
+            .description(s.getDescription())
+            .price(s.getPrice())
+            .build())
+        .collect(Collectors.toList());
+
+    GetAllListServiceResponse response = GetAllListServiceResponse.builder()
+        .status("200")
+        .massage("successfully retrieved data")
+        .data(dtoList)
+        .build();
+
+    return ResponseEntity.ok(response);
   }
 
   @Override
@@ -49,8 +70,8 @@ public class ServicesServiceImpl implements ServicesService {
       services.get().setDescription(request.getDescription());
       servicesRepository.save(services.get());
 
-      UpdateServiceResponse response =
-          UpdateServiceResponse.builder().massage("update successfully").status("200").build();
+      UpdateServiceResponse response = UpdateServiceResponse.builder().massage("update successfully").status("200")
+          .build();
       return new ResponseEntity<UpdateServiceResponse>(response, HttpStatus.OK);
     }
     return new ResponseEntity<UpdateServiceResponse>(HttpStatus.NOT_FOUND);

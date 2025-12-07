@@ -20,5 +20,6 @@ public interface PaymentDetailsService {
     // summary cho 1 bệnh nhân (PaymentForm)
     PaymentSummaryResponse getPaymentSummary(String patientId, String prescriptionId);
 
-    List<PatientPaymentResponse> getPatientsForPayment();
+    List<PaymentSummaryResponse> getPatientsForPayment();
+
 }

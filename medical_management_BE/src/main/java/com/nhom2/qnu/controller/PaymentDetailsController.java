@@ -25,7 +25,7 @@ public class PaymentDetailsController {
     private PaymentDetailsService paymentDetailsService;
 
     @GetMapping("/waiting")
-    public ResponseEntity<List<PatientPaymentResponse>> getPatientsForPayment() {
+    public ResponseEntity<List<PaymentSummaryResponse>> getPatientsForPayment() {
         return ResponseEntity.ok(
                 paymentDetailsService.getPatientsForPayment());
     }

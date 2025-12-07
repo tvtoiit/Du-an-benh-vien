@@ -21,8 +21,8 @@ public class PrescriptionHistoryController {
 
   @PostMapping("/create")
   public ResponseEntity<CreatePrescriptionHistoryResponse> save(
-      @RequestBody PrescriptionHistoryRequest prescriptionHistoryRequest) {
-    return prescriptionHistoryService.save(prescriptionHistoryRequest);
+      @RequestBody PrescriptionHistoryRequest req) {
+    return prescriptionHistoryService.save(req);
   }
 
   @PutMapping("/{id}")

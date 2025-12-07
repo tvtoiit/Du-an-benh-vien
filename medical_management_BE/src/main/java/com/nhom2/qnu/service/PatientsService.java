@@ -4,18 +4,16 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
-import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.User;
 import com.nhom2.qnu.payload.request.PatientRequest;
-import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.EHealthRecordsResponse;
 import com.nhom2.qnu.payload.response.PatientResponse;
 import com.nhom2.qnu.payload.response.PatientServiceResponse;
 import com.nhom2.qnu.payload.response.PatientWaitingResponse;
-import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
 
 public interface PatientsService {
-    PatientResponse findByPatients(String username);
+
+    PatientResponse findByPatients(String id);
 
     List<PatientResponse> findAllPatients();
 
@@ -23,15 +21,26 @@ public interface PatientsService {
 
     EHealthRecordsResponse createPatients(PatientRequest patientRequest);
 
-    ResponseEntity<?> addServiceForPatient(String idPatient, String idSerivces);
-
+    /**
+     * Danh sách bệnh nhân + dịch vụ (dùng cho cận lâm sàng, nếu bạn còn dùng flow
+     * này).
+     * Lưu ý: implement nên lấy dịch vụ qua Appointment/AppointmentService,
+     * KHÔNG lấy qua ManyToMany Patients–Services nữa.
+     */
     List<PatientServiceResponse> getAllPatientsWithServices();
 
+    /**
+     * Lấy danh sách user có role "USER" – để phê duyệt thành bệnh nhân.
+     */
     List<User> getPatientsNotAccepted();
 
+    /**
+     * Lấy thông tin bệnh nhân theo userId (dùng cho app bệnh nhân).
+     */
     Object getPatientByUserId(String userId);
 
-    // get cho tiep nhan
+    /**
+     * Danh sách bệnh nhân đang chờ tiếp nhận.
+     */
     List<PatientWaitingResponse> getWaitingPatients();
-
 }
