@@ -185,42 +185,42 @@ const MedicalDashboard = () => {
                     <ul>
                         {can("quanLyUser") && (
                             <li className={activeRole === 'Người dùng' ? 'active' : ''} onClick={() => setActiveRole('Người dùng')}>
-                                [Quản lí người dùng]
+                                [Quản lý người dùng]
                             </li>
                         )}
                         {can("quanLyBenhNhan") && (
                             <li className={activeRole === 'Bệnh nhân' ? 'active' : ''} onClick={() => setActiveRole('Bệnh nhân')}>
-                                [Quản lí bệnh nhân]
+                                [Quản lý bệnh nhân]
                             </li>
                         )}
                         {can("quanLyBacSi") && (
                             <li className={activeRole === 'Bác Sĩ' ? 'active' : ''} onClick={() => setActiveRole('Bác Sĩ')}>
-                                [Quản lí bác sĩ]
+                                [Quản lý bác sĩ]
                             </li>
                         )}
                         {(can("tiepNhan") || can("phieuKham") || can("canLamSang") || can("keDonThuoc") || can("thanhToan")) && (
                             <li className={activeRole === 'Khám bệnh' ? 'active' : ''} onClick={() => setActiveRole('Khám bệnh')}>
-                                [Quản lí khám bệnh]
+                                [Quản lý khám bệnh]
                             </li>
                         )}
                         {can("Thuoc") && (
                             <li className={activeRole === 'Thuoc' ? 'active' : ''} onClick={() => setActiveRole('Thuoc')}>
-                                [Quản lí thuốc]
+                                [Quản lý thuốc]
                             </li>
                         )}
                         {can("dichVu") && (
                             <li className={activeRole === 'dichVu' ? 'active' : ''} onClick={() => setActiveRole('dichVu')}>
-                                [Quản lí dịch vụ]
+                                [Quản lý dịch vụ]
                             </li>
                         )}
                         {can("Khoa") && (
                             <li className={activeRole === 'Khoa' ? 'active' : ''} onClick={() => setActiveRole('Khoa')}>
-                                [Quản lí khoa]
+                                [Quản lý khoa]
                             </li>
                         )}
                         {can("Phong") && (
                             <li className={activeRole === 'Phong' ? 'active' : ''} onClick={() => setActiveRole('Phong')}>
-                                [Quản lí phòng]
+                                [Quản lý phòng]
                             </li>
                         )}
                         {can("Thongke") && (
