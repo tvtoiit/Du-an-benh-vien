@@ -85,7 +85,7 @@ const BacSiList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã BS</TableCell>
+                            {/* <TableCell>Mã BS</TableCell> */}
                             <TableCell>Họ và tên</TableCell>
                             <TableCell>Kinh nghiệm</TableCell>
                             <TableCell>SĐT</TableCell>
@@ -98,7 +98,7 @@ const BacSiList = () => {
                     <TableBody>
                         {doctors.map((d) => (
                             <TableRow key={d.doctorId} hover>
-                                <TableCell>{d.doctorId}</TableCell>
+                                {/* <TableCell>{d.doctorId}</TableCell> */}
                                 <TableCell>{d.doctorName}</TableCell>
                                 <TableCell>{d.experience}</TableCell>
                                 <TableCell>{d.contactNumber}</TableCell>

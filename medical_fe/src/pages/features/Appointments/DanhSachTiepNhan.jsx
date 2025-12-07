@@ -17,10 +17,7 @@ import patientService from "../../../services/parentService";
 const StatusBadge = ({ status }) => {
     const colors = {
         "Khám lại": "#0d6efd",
-        "Chờ khám": "#ffc107",
-        "Đợi thanh toán": "#dc3545",
-        "Đang khám": "#6610f2",
-        "Chưa khám": "#6c757d",
+        "Chờ khám": "#ffc107"
     };
 
     return (

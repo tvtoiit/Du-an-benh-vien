@@ -1,4 +1,3 @@
-// DsBenhNhanThanhToan.jsx
 import React, { useState, useEffect } from "react";
 import {
     Box,
@@ -25,11 +24,10 @@ const DsBenhNhanThanhToan = () => {
             try {
                 setLoading(true);
                 const res = await paymentService.getWaitingList();
-                // giả sử BE trả list dạng:
-                // [{ patientId, fullName, totalCost, status, prescriptionId }]
-                setPatients(res);
+                const list = Array.isArray(res) ? res : res.data ?? [];
+                setPatients(list);
             } catch (error) {
-                console.error("Error fetching waiting payments: ", error);
+                console.error("Error fetching waiting payments:", error);
             } finally {
                 setLoading(false);
             }
@@ -38,11 +36,15 @@ const DsBenhNhanThanhToan = () => {
         fetchPatients();
     }, []);
 
+    // Khi click thanh toán → mở PaymentForm
     if (selectedPatient) {
         return (
             <PaymentForm
                 patient={selectedPatient}
-                onBack={() => setSelectedPatient(null)}
+                onBack={() => {
+                    setSelectedPatient(null);
+                    fetchPatients();
+                }}
             />
         );
     }
@@ -57,26 +59,17 @@ const DsBenhNhanThanhToan = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>
-                                <b>Tên bệnh nhân</b>
-                            </TableCell>
-                            <TableCell align="right">
-                                <b>Tổng tiền (VNĐ)</b>
-                            </TableCell>
-                            <TableCell>
-                                <b>Trạng thái</b>
-                            </TableCell>
-                            <TableCell align="center">
-                                <b>Thao tác</b>
-                            </TableCell>
+                            <TableCell><b>Tên bệnh nhân</b></TableCell>
+                            <TableCell align="right"><b>Tổng tiền (VNĐ)</b></TableCell>
+                            <TableCell><b>Trạng thái</b></TableCell>
+                            <TableCell align="center"><b>Thao tác</b></TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {loading && (
                             <TableRow>
-                                <TableCell colSpan={4} align="center">
-                                    Đang tải...
-                                </TableCell>
+                                <TableCell colSpan={4} align="center">Đang tải...</TableCell>
                             </TableRow>
                         )}
 
@@ -92,10 +85,15 @@ const DsBenhNhanThanhToan = () => {
                             patients.map((p) => (
                                 <TableRow key={p.patientId}>
                                     <TableCell>{p.fullName}</TableCell>
+
                                     <TableCell align="right">
                                         {(p.totalCost || 0).toLocaleString()}
                                     </TableCell>
-                                    <TableCell>{p.status || "Chưa thanh toán"}</TableCell>
+
+                                    <TableCell>
+                                        {p.status || "Chưa thanh toán"}
+                                    </TableCell>
+
                                     <TableCell align="center">
                                         {p.status === "Đã thanh toán" ? (
                                             <Button variant="outlined" disabled>

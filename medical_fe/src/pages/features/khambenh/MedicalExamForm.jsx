@@ -75,7 +75,7 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             const doctorId = localStorage.getItem("doctorId");
 
             if (!doctorId) {
-                toast.error("Không tìm thấy doctorId, vui lòng đăng nhập lại.");
+                toast.error("Vui lòng, đăng nhập tài khoản của bác sĩ.");
                 return;
             }
 
@@ -96,8 +96,8 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             await medicalHistoryService.create(historyPayload);
 
             // 2. Gán các dịch vụ cận lâm sàng cho bệnh nhân (API của bạn)
-            await parentService.addServicesForPatient(patient.patientId, selectedServices);
 
+            await parentService.addServicesForPatient(patient.patientId, selectedServices);
             toast.success(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
             onBack(true);
         } catch (error) {

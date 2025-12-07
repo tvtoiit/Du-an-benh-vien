@@ -15,9 +15,6 @@ import {
 import PrescriptionForm from "./KeDonForm";
 import serviceResultService from "../../../services/serviceResultService";
 
-// Nếu còn muốn giữ mock để test offline thì để riêng, đừng dùng trong render
-// const mockPatientsWithResults = [...]
-
 const DsBenhNhanCoKetQua = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [patients, setPatients] = useState([]);
@@ -33,12 +30,15 @@ const DsBenhNhanCoKetQua = () => {
             }
         };
         fetchPatients();
-    }, []);
+    }, [selectedPatient]);
 
+
+    // Nếu đã chọn bệnh nhân để kê đơn -> hiển thị form kê đơn
     if (selectedPatient) {
         return (
             <PrescriptionForm
-                patient={selectedPatient}
+                patient={selectedPatient.patient}
+                appointmentId={selectedPatient.appointmentId}
                 onBack={() => setSelectedPatient(null)}
             />
         );
@@ -81,11 +81,16 @@ const DsBenhNhanCoKetQua = () => {
                                     />
                                 </TableCell>
                                 <TableCell align="center">
-                                    {/* Nếu sau này có flag đã kê đơn thì check ở đây */}
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={() => setSelectedPatient(p)}
+                                        disabled={p.status === "Đã kê đơn"}
+                                        onClick={() =>
+                                            setSelectedPatient({
+                                                patient: p,
+                                                appointmentId: p.appointmentScheduleId,
+                                            })
+                                        }
                                     >
                                         Kê đơn
                                     </Button>

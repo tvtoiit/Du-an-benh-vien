@@ -5,24 +5,18 @@ import {
     Paper,
     Button,
     Divider,
-    Grid,
-    TextField,
-    Chip,
+    Grid
 } from "@mui/material";
 import { toast } from "react-toastify";
 
 import paymentService from "../../../services/paymentService";
-import advancePaymentService from "../../../services/advancePaymentService";
 
 const PaymentForm = ({ patient, onBack }) => {
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(false);
-
-    const [advanceAmount, setAdvanceAmount] = useState("");
-    const [advanceNote, setAdvanceNote] = useState("");
-    const [submittingAdvance, setSubmittingAdvance] = useState(false);
     const [confirming, setConfirming] = useState(false);
 
+    // ✔ Lấy từ patient truyền từ danh sách
     const patientId = patient.patientId;
     const prescriptionId = patient.prescriptionId || null;
 
@@ -30,24 +24,36 @@ const PaymentForm = ({ patient, onBack }) => {
         const fetchSummary = async () => {
             try {
                 setLoading(true);
+
+                // ✔ Lấy thông tin tổng hợp từ API
                 const res = await paymentService.getSummary(patientId, prescriptionId);
                 setSummary(res);
+
             } catch (error) {
                 console.error("Error fetching payment summary: ", error);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchSummary();
     }, [patientId, prescriptionId]);
 
     const handleConfirmPayment = async () => {
         try {
             setConfirming(true);
-            await paymentService.createPaymentDetails({ patientId, prescriptionId });
+
+            // ❌ SAU sửa: BE yêu cầu appointmentId
+            // summary sẽ trả về appointmentId nên ta lấy từ đây
+            await paymentService.createPaymentDetails({
+                patientId,
+                appointmentId: summary.appointmentId, // ⭐ BẮT BUỘC
+                prescriptionId
+            });
 
             toast.success(`Thanh toán thành công!`);
             onBack();
+
         } catch (error) {
             toast.error("Thanh toán thất bại!");
         } finally {
@@ -63,6 +69,7 @@ const PaymentForm = ({ patient, onBack }) => {
         );
     }
 
+    // destructuring dữ liệu từ summary
     const { examFee, serviceFee, medicineFee, totalCost, advanceTotal, amountToPay } =
         summary;
 
@@ -137,12 +144,10 @@ const PaymentForm = ({ patient, onBack }) => {
                             px: 4,
                             backgroundColor: "#2F3E4F",
                             color: "#fff",
-                            "&:hover": {
-                                backgroundColor: "#243543",
-                            },
+                            "&:hover": { backgroundColor: "#243543" },
                             "&.Mui-disabled": {
                                 backgroundColor: "#7a8791",
-                                color: "#e0e0e0",
+                                color: "#e0e0e0"
                             }
                         }}
                     >

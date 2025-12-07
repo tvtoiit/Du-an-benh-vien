@@ -97,7 +97,7 @@ const MedicineList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã thuốc</TableCell>
+                            {/* <TableCell>Mã thuốc</TableCell> */}
                             <TableCell>Tên thuốc</TableCell>
                             <TableCell>Số lượng</TableCell>
                             <TableCell>Đơn vị</TableCell>
@@ -109,7 +109,7 @@ const MedicineList = () => {
                     <TableBody>
                         {medicines.map((m) => (
                             <TableRow key={m.medicineId} hover>
-                                <TableCell>{m.medicineId}</TableCell>
+                                {/* <TableCell>{m.medicineId}</TableCell> */}
                                 <TableCell>{m.name}</TableCell>
                                 <TableCell>{m.quantity}</TableCell>
                                 <TableCell>{m.unit}</TableCell>
