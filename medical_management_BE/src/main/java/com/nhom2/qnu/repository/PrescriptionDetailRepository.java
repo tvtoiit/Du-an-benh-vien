@@ -15,4 +15,7 @@ public interface PrescriptionDetailRepository extends JpaRepository<Prescription
 
     // Xóa tất cả khi cập nhật đơn thuốc
     void deleteByPrescriptionHistory(PrescriptionHistory prescription);
+
+    boolean existsByMedicine_MedicineId(String medicineId);
+
 }

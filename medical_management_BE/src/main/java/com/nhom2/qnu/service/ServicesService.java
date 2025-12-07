@@ -14,4 +14,7 @@ public interface ServicesService {
   public ResponseEntity<CreateServicesResponse> save(ServiceRequest serviceRequest);
 
   public ResponseEntity<UpdateServiceResponse> update(ServiceRequest request, String id);
+
+  void delete(String id);
+
 }

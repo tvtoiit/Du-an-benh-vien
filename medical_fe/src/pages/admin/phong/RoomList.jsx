@@ -78,7 +78,7 @@ const RoomList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã phòng</TableCell>
+                            {/* <TableCell>Mã phòng</TableCell> */}
                             <TableCell>Tên phòng</TableCell>
                             <TableCell>Khoa</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -88,7 +88,7 @@ const RoomList = () => {
                     <TableBody>
                         {rooms.map((r) => (
                             <TableRow key={r.roomId} hover>
-                                <TableCell>{r.roomId}</TableCell>
+                                {/* <TableCell>{r.roomId}</TableCell> */}
                                 <TableCell>{r.roomName}</TableCell>
                                 <TableCell>{r.department?.name}</TableCell>
 

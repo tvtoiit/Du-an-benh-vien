@@ -14,34 +14,40 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@ExceptionHandler(DataNotFoundException.class)
-	public ResponseEntity<ErrorDetails> handleDataNotFoundException(DataNotFoundException e, WebRequest request) {
+	/*
+	 * --------------------------
+	 * HÀM DÙNG CHUNG CHO TẤT CẢ LỖI
+	 * --------------------------
+	 */
+	private ResponseEntity<Map<String, Object>> buildResponse(String message, HttpStatus status) {
+		Map<String, Object> body = new HashMap<>();
+		body.put("success", false);
+		body.put("message", message);
+		return new ResponseEntity<>(body, status);
+	}
 
-		ErrorDetails errorDetails = new ErrorDetails(new Date(),
-				e.getMessage(), request.getDescription(false));
-		return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+	@ExceptionHandler(DataNotFoundException.class)
+	public ResponseEntity<?> handleDataNotFoundException(DataNotFoundException e, WebRequest request) {
+		return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(DataExistException.class)
-	public ResponseEntity<ErrorDetails> handleDataExistException(DataExistException e, WebRequest request) {
-
-		ErrorDetails errorDetails = new ErrorDetails(new Date(),
-				e.getMessage(), request.getDescription(false));
-		return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+	public ResponseEntity<?> handleDataExistException(DataExistException e, WebRequest request) {
+		return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(AccessDenyException.class)
-	public ResponseEntity<ErrorDetails> accessDenyException(AccessDenyException e, WebRequest request) {
-
-		ErrorDetails errorDetails = new ErrorDetails(new Date(),
-				e.getMessage(), request.getDescription(false));
-		return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+	public ResponseEntity<?> handleAccessDenyException(AccessDenyException e, WebRequest request) {
+		return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
 	}
 
+	/*
+	 * --------------------------
+	 * RuntimeException (bao gồm lỗi throw new RuntimeException())
+	 * --------------------------
+	 */
 	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
-		Map<String, String> body = new HashMap<>();
-		body.put("message", ex.getMessage());
-		return ResponseEntity.badRequest().body(body);
+	public ResponseEntity<?> handleRuntime(RuntimeException ex) {
+		return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 }

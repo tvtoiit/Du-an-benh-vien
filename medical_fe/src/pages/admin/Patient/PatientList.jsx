@@ -111,7 +111,7 @@ const PatientList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã BN</TableCell>
+                            {/* <TableCell>Mã BN</TableCell> */}
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Ngày khám</TableCell>
                             <TableCell>Địa chỉ</TableCell>
@@ -123,7 +123,7 @@ const PatientList = () => {
                     <TableBody>
                         {patients.map((p) => (
                             <TableRow key={p.patientId} hover>
-                                <TableCell>{p.patientId}</TableCell>
+                                {/* <TableCell>{p.patientId}</TableCell> */}
                                 <TableCell>{p.fullName}</TableCell>
                                 <TableCell>{formatDate(p.dateOfBirth)}</TableCell>
                                 <TableCell>{p.address}</TableCell>

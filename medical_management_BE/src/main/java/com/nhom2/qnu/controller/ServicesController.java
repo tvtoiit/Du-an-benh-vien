@@ -2,6 +2,7 @@ package com.nhom2.qnu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,14 +26,22 @@ public class ServicesController {
   public ResponseEntity<GetAllListServiceResponse> getAll() {
     return servicesService.getAll();
   }
-  
+
   @PostMapping("/create")
-  public ResponseEntity<CreateServicesResponse> save(@RequestBody ServiceRequest serviceRequest){
+  public ResponseEntity<CreateServicesResponse> save(@RequestBody ServiceRequest serviceRequest) {
     return servicesService.save(serviceRequest);
   }
+
   @PutMapping("/{id}")
   public ResponseEntity<UpdateServiceResponse> updateDoctor(@RequestBody ServiceRequest request,
-          @PathVariable(value = "id") String id) {
-      return servicesService.update(request, id);
+      @PathVariable(value = "id") String id) {
+    return servicesService.update(request, id);
   }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> deleteService(@PathVariable("id") String id) {
+    servicesService.delete(id);
+    return ResponseEntity.ok("Xóa dịch vụ thành công");
+  }
+
 }

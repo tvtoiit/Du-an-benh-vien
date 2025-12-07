@@ -3,7 +3,7 @@ import medicineService from "../../../services/medicinesService";
 import RegisterMedicineModal from "./RegisterMedicineModal";
 import EditMedicineModal from "./EditMedicineModal";
 import DetailModal from "../../../components/DetailModal";
-
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
     Box,
@@ -69,6 +69,20 @@ const MedicineList = () => {
         setDetailOpen(true);
     };
 
+    const handleDelete = async (medicine) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa thuốc "${medicine.name}"?`)) return;
+
+        try {
+            await medicineService.delete(medicine.medicineId);
+            toast.success("Xóa thuốc thành công!");
+            loadMedicines();
+        } catch (err) {
+            console.error("Lỗi xóa thuốc:", err);
+            toast.error("Không thể xóa thuốc. Thuốc có thể đang được sử dụng!");
+        }
+    };
+
+
 
     const handleEdit = (m) => {
         setEditingMedicine(m);
@@ -126,6 +140,11 @@ const MedicineList = () => {
                                         <Tooltip title="Sửa thông tin">
                                             <IconButton color="warning" onClick={() => handleEdit(m)}>
                                                 <EditIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Xóa thuốc">
+                                            <IconButton color="error" onClick={() => handleDelete(m)}>
+                                                <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
                                     </Stack>

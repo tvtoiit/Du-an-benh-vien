@@ -13,4 +13,6 @@ public interface AppointmentServiceRepository extends JpaRepository<AppointmentS
     List<AppointmentServiceItem> findByAppointment(AppointmentSchedules appointment);
 
     List<AppointmentServiceItem> findByAppointment_AppointmentScheduleId(String appointmentId);
+
+    boolean existsByService_ServiceId(String serviceId);
 }

@@ -7,6 +7,7 @@ const serviceService = {
     update: (id, data) => api.put(`/patients/${id}`, data),
     createDichVu: (data) => api.post("/services/create", data),
     updateDichVu: (id, data) => api.put(`/services/${id}`, data),
+    delete: (id) => api.delete(`/services/${id}`)
 };
 
 export default serviceService;

@@ -121,7 +121,7 @@ const DepartmentList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã khoa</TableCell>
+                            {/* <TableCell>Mã khoa</TableCell> */}
                             <TableCell>Tên khoa</TableCell>
                             <TableCell>Mô tả</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -131,7 +131,7 @@ const DepartmentList = () => {
                     <TableBody>
                         {filteredDepartments.map((d) => (
                             <TableRow key={d.departmentId} hover>
-                                <TableCell>{d.departmentId}</TableCell>
+                                {/* <TableCell>{d.departmentId}</TableCell> */}
                                 <TableCell>{d.name}</TableCell>
                                 <TableCell>{d.description}</TableCell>
 

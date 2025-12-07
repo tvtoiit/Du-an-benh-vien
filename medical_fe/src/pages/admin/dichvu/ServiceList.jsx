@@ -4,6 +4,8 @@ import RegisterServiceModal from "./RegisterServiceModal";
 import EditServiceModal from "./EditServiceModal";
 import { toast } from "react-toastify";
 import DetailModal from "../../../components/DetailModal";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 
 
 import {
@@ -67,6 +69,19 @@ const ServiceList = () => {
         setDetailOpen(true);
     };
 
+    const handleDelete = async (service) => {
+        if (!window.confirm(`Bạn có chắc muốn xóa dịch vụ "${service.serviceName}"?`)) return;
+
+        try {
+            await serviceService.delete(service.serviceId);
+            toast.success("Xóa dịch vụ thành công!");
+            loadServices();
+        } catch (err) {
+            toast.error(err?.response?.data?.message || "Không thể xóa dịch vụ!");
+        }
+    };
+
+
     const handleEdit = (s) => {
         setEditingService(s);
     };
@@ -94,7 +109,7 @@ const ServiceList = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            <TableCell>Mã DV</TableCell>
+                            {/* <TableCell>Mã DV</TableCell> */}
                             <TableCell>Tên dịch vụ</TableCell>
                             <TableCell>Giá</TableCell>
                             <TableCell>Mô tả</TableCell>
@@ -105,7 +120,7 @@ const ServiceList = () => {
                     <TableBody>
                         {services.map((s) => (
                             <TableRow key={s.serviceId} hover>
-                                <TableCell>{s.serviceId}</TableCell>
+                                {/* <TableCell>{s.serviceId}</TableCell> */}
                                 <TableCell>{s.serviceName}</TableCell>
                                 <TableCell>{s.price}</TableCell>
                                 <TableCell>{s.description}</TableCell>
@@ -121,6 +136,11 @@ const ServiceList = () => {
                                         <Tooltip title="Sửa thông tin">
                                             <IconButton color="warning" onClick={() => handleEdit(s)}>
                                                 <EditIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Xóa dịch vụ">
+                                            <IconButton color="error" onClick={() => handleDelete(s)}>
+                                                <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
                                     </Stack>
