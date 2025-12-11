@@ -19,31 +19,30 @@ const DsBenhNhanThanhToan = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                setLoading(true);
-                const res = await paymentService.getWaitingList();
-                const list = Array.isArray(res) ? res : res.data ?? [];
-                setPatients(list);
-            } catch (error) {
-                console.error("Error fetching waiting payments:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchPatients = async () => {
+        try {
+            setLoading(true);
+            const res = await paymentService.getWaitingList();
+            const list = Array.isArray(res) ? res : res.data ?? [];
+            setPatients(list);
+        } catch (error) {
+            console.error("Error fetching waiting payments:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchPatients();
     }, []);
 
-    // Khi click thanh toán → mở PaymentForm
     if (selectedPatient) {
         return (
             <PaymentForm
                 patient={selectedPatient}
                 onBack={() => {
                     setSelectedPatient(null);
-                    fetchPatients();
+                    fetchPatients(); //Bây giờ gọi được
                 }}
             />
         );

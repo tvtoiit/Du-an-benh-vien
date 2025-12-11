@@ -79,7 +79,7 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
         PatientResponse patient = new PatientResponse();
         patient.setPatientId(record.getPatient().getPatientId());
         patient.setFullName(record.getPatient().getUser().getFullName());
-        patient.setDateOfBirth(record.getPatient().getDateOfBirth());
+        patient.setDateOfBirth(record.getPatient().getUser().getDateOfBirth());
         patient.setContactNumber(record.getPatient().getUser().getPhoneNumber());
         patient.setAddress(record.getPatient().getUser().getAddress());
         patient.setEmail(record.getPatient().getUser().getEmail());

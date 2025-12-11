@@ -1,5 +1,7 @@
 package com.nhom2.qnu.payload.request.login_signup;
 
+import java.util.Date;
+
 import lombok.*;
 
 @NoArgsConstructor
@@ -16,6 +18,10 @@ public class UserRequest {
     private String email;
 
     private String address;
+
+    private String gender;
+
+    private Date dateOfBirth;
 
     private Boolean status;
 

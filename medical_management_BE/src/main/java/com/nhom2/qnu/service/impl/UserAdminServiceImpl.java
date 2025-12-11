@@ -70,6 +70,8 @@ public class UserAdminServiceImpl implements UserAdminService {
           .fullName(user.getFullName())
           .status(user.getStatus())
           .phoneNumber(user.getPhoneNumber())
+          .gender(user.getGender())
+          .dateOfBirth(user.getDateOfBirth())
           .role(user.getAccount().getRole().getName())
           .build();
       response.add(respon);
@@ -155,6 +157,8 @@ public class UserAdminServiceImpl implements UserAdminService {
         .fullName(request.getFullName())
         .status(true)
         .phoneNumber(request.getPhoneNumber())
+        .gender(request.getGender())
+        .dateOfBirth(request.getDateOfBirth())
         .build();
 
     // 5. Lưu user
@@ -166,6 +170,8 @@ public class UserAdminServiceImpl implements UserAdminService {
         .fullName(userCreate.getFullName())
         .email(userCreate.getEmail())
         .phoneNumber(userCreate.getPhoneNumber())
+        .gender(userCreate.getGender())
+        .dateOfBirth(userCreate.getDateOfBirth())
         .address(userCreate.getAddress())
         .status(userCreate.getStatus())
         .role(userCreate.getAccount().getRole().getName())

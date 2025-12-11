@@ -29,6 +29,10 @@ public class UserAdminResponse {
 
   private String accountId;
 
+  private String gender;
+
+  private Date dateOfBirth;
+
   private String role;
 
   private String doctorId;

@@ -1,5 +1,8 @@
 package com.nhom2.qnu.payload.request;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +20,10 @@ public class UserAdminRequest {
   private String email;
 
   private String address;
+
+  private String gender;
+
+  private Date dateOfBirth;
 
   private String roleName;
 }

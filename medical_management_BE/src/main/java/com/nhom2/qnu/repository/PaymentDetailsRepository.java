@@ -32,13 +32,13 @@ public interface PaymentDetailsRepository extends JpaRepository<PaymentDetails, 
                 p.patientId,
                 u.fullName,
                 u.phoneNumber,
-                p.dateOfBirth,
+                u.dateOfBirth,
                 a.status
             )
             FROM AppointmentSchedules a
             JOIN a.patients p
             JOIN p.user u
-            WHERE a.status IN ('Đã kết luận', 'Đã kê đơn')
+            WHERE a.status IN ('Đã kết luận', 'Đã kê đơn', 'Đã thanh toán')
             """)
     List<PatientPaymentResponse> findPatientsReadyForPayment();
 

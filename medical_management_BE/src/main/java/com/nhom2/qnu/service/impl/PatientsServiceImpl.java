@@ -68,7 +68,7 @@ public class PatientsServiceImpl implements PatientsService {
         .orElseThrow(() -> new AccessDeniedException(
             new ApiResponse(false, "You can't update patient!")));
 
-    patients.setDateOfBirth(newPatients.getDateOfBirth());
+    // patients.setDateOfBirth(newPatients.getDateOfBirth());
     patients.setOtherInfo(newPatients.getOtherInfo());
 
     Patients updatedPatient = patientsRepository.save(patients);
@@ -79,7 +79,7 @@ public class PatientsServiceImpl implements PatientsService {
         .address(updatedPatient.getUser().getAddress())
         .contactNumber(updatedPatient.getUser().getPhoneNumber())
         .email(updatedPatient.getUser().getEmail())
-        .dateOfBirth(updatedPatient.getDateOfBirth())
+        .dateOfBirth(updatedPatient.getUser().getDateOfBirth())
         .otherInfo(updatedPatient.getOtherInfo())
         .build();
   }
@@ -100,7 +100,7 @@ public class PatientsServiceImpl implements PatientsService {
           .address(p.getUser().getAddress())
           .contactNumber(p.getUser().getPhoneNumber())
           .email(p.getUser().getEmail())
-          .dateOfBirth(p.getDateOfBirth())
+          .dateOfBirth(p.getUser().getDateOfBirth())
           .otherInfo(p.getOtherInfo())
           .build());
     }
@@ -123,7 +123,7 @@ public class PatientsServiceImpl implements PatientsService {
         .address(p.getUser().getAddress())
         .contactNumber(p.getUser().getPhoneNumber())
         .email(p.getUser().getEmail())
-        .dateOfBirth(p.getDateOfBirth())
+        .dateOfBirth(p.getUser().getDateOfBirth())
         .otherInfo(p.getOtherInfo())
         .build();
   }
@@ -152,7 +152,7 @@ public class PatientsServiceImpl implements PatientsService {
       userRepository.save(user);
     }
 
-    p.setDateOfBirth(req.getDateOfBirth());
+    // p.setDateOfBirth(req.getDateOfBirth());
     p.setOtherInfo(req.getOtherInfo());
 
     Patients newPatient = patientsRepository.save(p);
@@ -182,7 +182,7 @@ public class PatientsServiceImpl implements PatientsService {
         .address(p.getUser().getAddress())
         .contactNumber(p.getUser().getPhoneNumber())
         .email(p.getUser().getEmail())
-        .dateOfBirth(p.getDateOfBirth())
+        .dateOfBirth(p.getUser().getDateOfBirth())
         .otherInfo(p.getOtherInfo())
         .build();
   }

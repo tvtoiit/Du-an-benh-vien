@@ -110,11 +110,14 @@ public class AuthServiceImpl implements AuthService {
             account.setRole(role);
             accountRepository.save(account);
             User user = new User();
-            user.setAccount(accountRepository.findById(account.getAccountId()).get());
+            user.setAccount(account);
             user.setFullName(signupRequest.getUser().getFullName());
             user.setPhoneNumber(signupRequest.getUser().getPhoneNumber());
             user.setEmail(signupRequest.getUser().getEmail());
             user.setAddress(signupRequest.getUser().getAddress());
+            // Bổ sung ngày sinh và gender
+            user.setDateOfBirth(signupRequest.getUser().getDateOfBirth());
+            user.setGender(signupRequest.getUser().getGender());
             user.setStatus(Boolean.TRUE);
             userRepository.save(user);
         }

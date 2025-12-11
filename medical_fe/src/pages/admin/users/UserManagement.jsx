@@ -34,7 +34,9 @@ const UserManagement = ({ currentRole }) => {
         phone_number: "",
         address: "",
         status: true,
-        roleName: ""
+        roleName: "",
+        dateOfBirth: "",
+        gender: ""   // MALE | FEMALE
     });
 
     useEffect(() => {
@@ -67,14 +69,19 @@ const UserManagement = ({ currentRole }) => {
                     phone_number: user.phoneNumber,
                     address: user.address,
                     status: user.status,
-                    roleName: user.role
-                } : {
+                    roleName: user.role,
+                    dateOfBirth: user.dateOfBirth ?? "",
+                    gender: user.gender ?? ""
+                }
+                : {
                     full_name: "",
                     email: "",
                     phone_number: "",
                     address: "",
                     status: true,
-                    roleName: defaultRole
+                    roleName: defaultRole,
+                    dateOfBirth: "",
+                    gender: ""
                 }
         );
 
@@ -112,7 +119,9 @@ const UserManagement = ({ currentRole }) => {
                     phoneNumber: formData.phone_number,
                     address: formData.address,
                     status: formData.status,
-                    roleName: formData.roleName
+                    roleName: formData.roleName,
+                    dateOfBirth: formData.dateOfBirth,
+                    gender: formData.gender
                 });
 
                 setUsers((prev) =>
@@ -138,7 +147,9 @@ const UserManagement = ({ currentRole }) => {
                     email: formData.email,
                     phoneNumber: formData.phone_number,
                     address: formData.address,
-                    roleName: formData.roleName
+                    roleName: formData.roleName,
+                    dateOfBirth: formData.dateOfBirth,
+                    gender: formData.gender
                 });
 
                 setUsers((prev) => [...prev, createdUser]);
@@ -202,6 +213,8 @@ const UserManagement = ({ currentRole }) => {
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Số điện thoại</TableCell>
+                            <TableCell>Giới tính</TableCell>
+                            <TableCell>Ngày sinh</TableCell>
                             <TableCell>Địa chỉ</TableCell>
                             <TableCell>Vai trò</TableCell>
                             <TableCell>Hành động</TableCell>
@@ -213,6 +226,14 @@ const UserManagement = ({ currentRole }) => {
                                 <TableCell>{u.fullName}</TableCell>
                                 <TableCell>{u.email}</TableCell>
                                 <TableCell>{u.phoneNumber}</TableCell>
+                                <TableCell>
+                                    {u.gender === "MALE" ? "Nam" : u.gender === "FEMALE" ? "Nữ" : ""}
+                                </TableCell>
+                                <TableCell>
+                                    {u.dateOfBirth
+                                        ? new Date(u.dateOfBirth).toLocaleDateString("vi-VN")
+                                        : ""}
+                                </TableCell>
                                 <TableCell>{u.address}</TableCell>
                                 <TableCell>{roleText[u.role] || u.role}</TableCell>
                                 <TableCell sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -287,6 +308,34 @@ const UserManagement = ({ currentRole }) => {
                         value={formData.phone_number}
                         onChange={handleChange}
                     />
+                    <TextField
+                        margin="dense"
+                        label="Ngày sinh"
+                        name="dateOfBirth"
+                        type="date"
+                        fullWidth
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        InputLabelProps={{ shrink: true }}
+                        helperText="Chọn ngày sinh theo định dạng DD/MM/YYYY"
+                        sx={{ mt: 2 }}
+                    />
+
+                    <TextField
+                        select
+                        margin="dense"
+                        label="Giới tính"
+                        name="gender"
+                        fullWidth
+                        value={formData.gender}
+                        onChange={handleChange}
+                        helperText="Vui lòng chọn giới tính"
+                        sx={{ mt: 2 }}
+                    >
+                        <MenuItem value="MALE">👨 Nam</MenuItem>
+                        <MenuItem value="FEMALE">👩 Nữ</MenuItem>
+                    </TextField>
+
                     <TextField
                         margin="dense"
                         label="Địa chỉ"

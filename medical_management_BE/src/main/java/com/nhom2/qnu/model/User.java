@@ -48,6 +48,9 @@ public class User implements Serializable {
     @Column(name = "gender", length = 10)
     private String gender;
 
+    @Column(name = "date_of_birth")
+    private Date dateOfBirth;
+
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private Date createdAt;

@@ -70,7 +70,7 @@ public class MedicalHistoriesServiceImpl implements MedicalHistoriesService {
                 .orElse(null);
 
         if (latestAppointment != null) {
-            latestAppointment.setStatus("Đang khám");
+            latestAppointment.setStatus("Đã kết luận");
             appointmentRepository.save(latestAppointment);
         }
 

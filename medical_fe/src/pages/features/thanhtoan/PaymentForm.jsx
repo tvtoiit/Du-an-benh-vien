@@ -43,19 +43,24 @@ const PaymentForm = ({ patient, onBack }) => {
         try {
             setConfirming(true);
 
-            // ❌ SAU sửa: BE yêu cầu appointmentId
-            // summary sẽ trả về appointmentId nên ta lấy từ đây
-            await paymentService.createPaymentDetails({
+            const res = await paymentService.createPaymentDetails({
                 patientId,
-                appointmentId: summary.appointmentId, // ⭐ BẮT BUỘC
+                appointmentId: summary.appointmentId,
                 prescriptionId
             });
 
-            toast.success(`Thanh toán thành công!`);
-            onBack();
+            // Nếu response tồn tại và tạo thành công
+            toast.success("Thanh toán thành công!");
+
+            setTimeout(() => onBack(), 300);
 
         } catch (error) {
-            toast.error("Thanh toán thất bại!");
+            const message =
+                error?.response?.data?.message ||
+                error?.response?.data ||
+                "Thanh toán thất bại!";
+
+            toast.error(message);
         } finally {
             setConfirming(false);
         }

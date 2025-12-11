@@ -144,7 +144,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                         result.add(PatientWithResultResponse.builder()
                                         .patientId(p.getPatientId())
                                         .fullName(p.getUser().getFullName())
-                                        .dateOfBirth(p.getDateOfBirth())
+                                        .dateOfBirth(p.getUser().getDateOfBirth())
                                         .contactNumber(p.getUser().getPhoneNumber())
                                         .status(type)
                                         .build());
@@ -206,7 +206,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                                 return PatientWithResultResponse.builder()
                                                                 .patientId(p.getPatientId())
                                                                 .fullName(p.getUser().getFullName())
-                                                                .dateOfBirth(p.getDateOfBirth())
+                                                                .dateOfBirth(p.getUser().getDateOfBirth())
                                                                 .contactNumber(p.getUser().getPhoneNumber())
                                                                 .status(status)
                                                                 .appointmentScheduleId(

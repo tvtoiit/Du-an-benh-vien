@@ -268,7 +268,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         p.setAddress(item.getPatients().getUser().getAddress());
         p.setEmail(item.getPatients().getUser().getEmail());
         p.setContactNumber(item.getPatients().getUser().getPhoneNumber());
-        p.setDateOfBirth(item.getPatients().getDateOfBirth());
+        p.setDateOfBirth(item.getPatients().getUser().getDateOfBirth());
         p.setOtherInfo(item.getPatients().getOtherInfo());
         res.setPatient(p);
 

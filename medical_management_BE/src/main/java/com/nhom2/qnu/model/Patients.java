@@ -32,8 +32,8 @@ public class Patients implements Serializable {
     @Column(name = "patient_id", length = 36, nullable = false)
     private String patientId;
 
-    @Column(name = "date_of_birth", nullable = false)
-    private Date dateOfBirth;
+    // @Column(name = "date_of_birth", nullable = false)
+    // private Date dateOfBirth;
 
     @Column(name = "other_info", nullable = false)
     private String otherInfo;

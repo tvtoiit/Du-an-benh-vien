@@ -25,6 +25,15 @@ const schema = yup.object().shape({
 
     address: yup.string().required("Địa chỉ không được bỏ trống"),
 
+    dateOfBirth: yup
+        .date()
+        .required("Ngày sinh không được bỏ trống"),
+
+    gender: yup
+        .string()
+        .oneOf(["MALE", "FEMALE"], "Giới tính không hợp lệ")
+        .required("Vui lòng chọn giới tính"),
+
     password: yup
         .string()
         .min(6, "Mật khẩu phải từ 6 ký tự")
@@ -52,13 +61,15 @@ export default function Register() {
     const onSubmit = async (data) => {
 
         const requestData = {
-            username: data.email,         // Backend lấy username = email
+            username: data.email,
             password: data.password,
             user: {
                 fullName: data.fullName,
                 phoneNumber: data.phoneNumber,
                 email: data.email,
-                address: data.address
+                address: data.address,
+                dateOfBirth: data.dateOfBirth,
+                gender: data.gender
             }
         };
 
@@ -120,6 +131,40 @@ export default function Register() {
                         {errors.email && (
                             <div className="error-box">
                                 <p className="error-text">{errors.email.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Ngày sinh */}
+                    <div className="form-group">
+                        <label>Ngày sinh</label>
+                        <input
+                            type="date"
+                            {...register("dateOfBirth")}
+                            className={errors.dateOfBirth ? "input-error" : ""}
+                        />
+                        {errors.dateOfBirth && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.dateOfBirth.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Giới tính */}
+                    <div className="form-group">
+                        <label>Giới tính</label>
+                        <select
+                            {...register("gender")}
+                            className={errors.gender ? "input-error" : ""}
+                        >
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                        </select>
+
+                        {errors.gender && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.gender.message}</p>
                             </div>
                         )}
                     </div>
