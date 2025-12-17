@@ -38,7 +38,7 @@ public interface PaymentDetailsRepository extends JpaRepository<PaymentDetails, 
             FROM AppointmentSchedules a
             JOIN a.patients p
             JOIN p.user u
-            WHERE a.status IN ('Đã kết luận', 'Đã kê đơn', 'Đã thanh toán')
+            WHERE a.status IN ('Đã kết luận', 'Đã kê đơn')
             """)
     List<PatientPaymentResponse> findPatientsReadyForPayment();
 
