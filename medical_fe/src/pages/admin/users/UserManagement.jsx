@@ -136,7 +136,9 @@ const UserManagement = ({ currentRole }) => {
                                 phoneNumber: formData.phone_number,
                                 address: formData.address,
                                 status: formData.status,
-                                role: formData.roleName
+                                role: formData.roleName,
+                                dateOfBirth: formData.dateOfBirth,
+                                gender: formData.gender
                             }
                             : u
                     )
