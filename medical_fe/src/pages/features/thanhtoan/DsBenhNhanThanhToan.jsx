@@ -96,7 +96,7 @@ const DsBenhNhanThanhToan = () => {
                                     <TableCell align="center">
                                         {p.status === "Đã thanh toán" ? (
                                             <Button variant="outlined" disabled>
-                                                Đã TT
+                                                Đã Thanh Toán
                                             </Button>
                                         ) : (
                                             <Button
