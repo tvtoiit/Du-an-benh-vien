@@ -16,7 +16,15 @@ public interface UserRepositories extends JpaRepository<User, String> {
 
   @Query(value = "SELECT u.* FROM tbl_user u WHERE u.status = 1 AND u.user_id = :id", nativeQuery = true)
   Optional<User> findUserByStatus(@Param("id") String id);
+
   Optional<User> findUserByEmail(String email);
+
   List<User> findByStatus(boolean status);
+
   Optional<User> findByAccount_Username(String userName);
+
+  Optional<User> findByPhoneNumber(String phoneNumber);
+
+  boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, String userId);
+
 }

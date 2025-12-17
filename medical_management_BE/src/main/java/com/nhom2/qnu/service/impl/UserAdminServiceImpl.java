@@ -124,6 +124,15 @@ public class UserAdminServiceImpl implements UserAdminService {
           .body(Map.of("error", "Email đã tồn tại, vui lòng nhập email khác!"));
     }
 
+    // 2. Check phoneNumber trùng
+    if (request.getPhoneNumber() != null &&
+        userRepositories.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+
+      return ResponseEntity
+          .badRequest()
+          .body(Map.of("error", "Số điện thoại đã tồn tại!"));
+    }
+
     Account existAcc = accountRepository.findByusername(request.getEmail());
     if (existAcc != null) {
       return ResponseEntity
@@ -281,6 +290,16 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     // Cập nhật phoneNumber
     if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+      boolean exists = userRepositories
+          .existsByPhoneNumberAndUserIdNot(
+              request.getPhoneNumber(),
+              user.getUserId());
+
+      if (exists) {
+        return ResponseEntity
+            .badRequest()
+            .body(Map.of("error", "Số điện thoại đã được sử dụng bởi người khác!"));
+      }
       user.setPhoneNumber(request.getPhoneNumber());
     }
 
