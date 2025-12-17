@@ -70,8 +70,10 @@ const UserManagement = ({ currentRole }) => {
                     address: user.address,
                     status: user.status,
                     roleName: user.role,
-                    dateOfBirth: user.dateOfBirth ?? "",
-                    gender: user.gender ?? ""
+                    dateOfBirth: user.dateOfBirth
+                        ? user.dateOfBirth.split("T")[0]
+                        : "",
+                    gender: user.gender?.toUpperCase() ?? ""
                 }
                 : {
                     full_name: "",
