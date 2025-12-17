@@ -1,5 +1,7 @@
 package com.nhom2.qnu.payload.request;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +21,9 @@ public class RequestUpdateUser {
   private String roleName;
 
   private Boolean status;
+
+  private String gender;
+
+  private Date dateOfBirth;
 
 }

@@ -284,6 +284,16 @@ public class UserAdminServiceImpl implements UserAdminService {
       user.setPhoneNumber(request.getPhoneNumber());
     }
 
+    // Cập nhật dateOfBirth
+    if (request.getDateOfBirth() != null) {
+      user.setDateOfBirth(request.getDateOfBirth());
+    }
+
+    // Cập nhật gender
+    if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+      user.setGender(request.getGender());
+    }
+
     // Cập nhật address
     if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
       user.setAddress(request.getAddress());

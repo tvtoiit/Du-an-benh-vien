@@ -70,10 +70,10 @@ export default function Login() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Username */}
                     <div className="form-group">
-                        <label>Email / CCCD / SĐT</label>
+                        <label>Email</label>
                         <input
                             type="text"
-                            placeholder="Nhập Email hoặc SĐT"
+                            placeholder="Nhập Email"
                             {...register("username")}
                             className={errors.username ? "input-error" : ""}
                         />
