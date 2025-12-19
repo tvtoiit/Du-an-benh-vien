@@ -17,6 +17,8 @@ public class PatientServiceResponse {
     private String patientId;
 
     private String fullName;
+    private String gender;
+    private Date dateOfBirth;
 
     private List<ServiceResponse> services;
 
@@ -34,6 +36,8 @@ public class PatientServiceResponse {
         private String email;
 
         private Date dateOfBirth;
+
+        private String gender;
 
         private String address;
 

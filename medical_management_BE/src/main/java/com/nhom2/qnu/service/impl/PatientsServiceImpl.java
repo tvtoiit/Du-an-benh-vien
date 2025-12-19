@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientsServiceImpl implements PatientsService {
@@ -196,25 +197,29 @@ public class PatientsServiceImpl implements PatientsService {
     // chỉ lấy các lịch đang "Chờ khám"
     List<AppointmentSchedules> appointments = appointmentRepository.findAllByStatus("Chỉ định CLS");
 
-    return appointments.stream().map(app -> {
+    return appointments.stream()
+        .map(app -> {
 
-      // dịch vụ trong phiếu khám
-      var serviceResponses = app.getAppointmentServices().stream()
-          .map(as -> PatientServiceResponse.ServiceResponse.builder()
+          List<PatientServiceResponse.ServiceResponse> serviceResponses = app.getAppointmentServices().stream()
+              .map(as -> PatientServiceResponse.ServiceResponse.builder()
+                  .patientId(app.getPatients().getPatientId())
+                  .fullName(app.getPatients().getUser().getFullName())
+                  .serviceId(as.getService().getServiceId())
+                  .serviceName(as.getService().getServiceName())
+                  .build())
+              .collect(Collectors.toList());
+
+          return PatientServiceResponse.builder()
               .patientId(app.getPatients().getPatientId())
               .fullName(app.getPatients().getUser().getFullName())
-              .serviceId(as.getService().getServiceId())
-              .serviceName(as.getService().getServiceName())
-              .build())
-          .toList();
+              .gender(app.getPatients().getUser().getGender())
+              .dateOfBirth(app.getPatients().getUser().getDateOfBirth())
+              .services(serviceResponses)
+              .build();
 
-      return PatientServiceResponse.builder()
-          .patientId(app.getPatients().getPatientId())
-          .fullName(app.getPatients().getUser().getFullName())
-          .services(serviceResponses)
-          .build();
+        })
+        .collect(Collectors.toList());
 
-    }).toList();
   }
 
   @Override
