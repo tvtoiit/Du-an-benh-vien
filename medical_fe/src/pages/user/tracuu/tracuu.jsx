@@ -108,7 +108,7 @@ export default function TraCuu() {
                                 <ul className="list-box">
                                     {healthRecord.medicinesHistories.map((m, i) => (
                                         <li key={i} className="list-item">
-                                            <strong>Mã khám:</strong> {m.medicalHistoryId} <br />
+                                            {/* <strong>Mã khám:</strong> {m.medicalHistoryId} <br /> */}
                                             <strong>Ngày khám:</strong> {new Date(m.admissionDate).toLocaleDateString()} <br />
                                             <strong>Kết quả:</strong> {m.testResults || "Chưa có"} <br />
 
@@ -165,7 +165,7 @@ export default function TraCuu() {
                                 <ul className="list-box">
                                     {healthRecord.appointmentSchedules.map((a, i) => (
                                         <li key={i} className="list-item">
-                                            <strong>Mã lịch:</strong> {a.appointmentScheduleId} <br />
+                                            {/* <strong>Mã lịch:</strong> {a.appointmentScheduleId} <br /> */}
                                             <strong>Thời gian:</strong> {new Date(a.appointmentDatetime).toLocaleString()} <br />
                                             <strong>Bác sĩ:</strong> {a.doctor?.doctorName} <br />
                                             <strong>Trạng thái:</strong> {a.status}

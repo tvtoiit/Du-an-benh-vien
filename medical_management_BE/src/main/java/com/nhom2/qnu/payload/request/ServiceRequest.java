@@ -2,6 +2,7 @@ package com.nhom2.qnu.payload.request;
 
 import java.math.BigDecimal;
 
+import com.nhom2.qnu.enums.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class ServiceRequest {
-    
+
     private String serviceName;
-    private  String description;
+    private String description;
     private BigDecimal price;
+    private ServiceType serviceType;
 }

@@ -3,6 +3,8 @@ package com.nhom2.qnu.repository;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PrescriptionHistory;
 import com.nhom2.qnu.model.AppointmentSchedules;
+import com.nhom2.qnu.model.MedicalHistories;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -33,4 +35,9 @@ public interface PrescriptionHistoryRepository extends JpaRepository<Prescriptio
     // Lấy danh sách bệnh nhân đã có kê đơn
     @Query("SELECT DISTINCT ph.patient FROM PrescriptionHistory ph")
     List<Patients> findPatientsWithPrescription();
+
+    // Lấy đơn thuốc theo hồ sơ bệnh án
+    // List<PrescriptionHistory> findByMedicalHistory(MedicalHistories
+    // medicalHistory);
+
 }

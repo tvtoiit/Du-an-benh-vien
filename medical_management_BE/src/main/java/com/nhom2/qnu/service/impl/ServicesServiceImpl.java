@@ -41,13 +41,13 @@ public class ServicesServiceImpl implements ServicesService {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // ⭐ Dùng Collectors.toList() và ép kiểu rõ ràng
     List<ServiceResponse> dtoList = list.stream()
         .map((Services s) -> ServiceResponse.builder()
             .serviceId(s.getServiceId())
             .serviceName(s.getServiceName())
             .description(s.getDescription())
             .price(s.getPrice())
+            .serviceType(s.getServiceType())
             .build())
         .collect(Collectors.toList());
 
@@ -61,29 +61,85 @@ public class ServicesServiceImpl implements ServicesService {
   }
 
   @Override
-  public ResponseEntity<CreateServicesResponse> save(ServiceRequest serviceRequest) {
-    Services services = Services.builder().serviceName(serviceRequest.getServiceName())
-        .description(serviceRequest.getDescription()).price(serviceRequest.getPrice()).build();
+  public ResponseEntity<CreateServicesResponse> save(ServiceRequest req) {
+
+    if (req.getServiceName() == null || req.getServiceName().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên dịch vụ không được để trống");
+    }
+
+    if (req.getPrice() == null || req.getPrice().signum() <= 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá dịch vụ không hợp lệ");
+    }
+
+    if (req.getServiceType() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bắt buộc phải chọn loại dịch vụ");
+    }
+
+    if (servicesRepository.existsByServiceNameIgnoreCase(req.getServiceName())) {
+      throw new DataExistException("Dịch vụ đã tồn tại");
+    }
+
+    Services services = Services.builder()
+        .serviceName(req.getServiceName())
+        .description(req.getDescription())
+        .price(req.getPrice())
+        .serviceType(req.getServiceType())
+        .build();
+
     servicesRepository.save(services);
-    CreateServicesResponse response = CreateServicesResponse.builder().status("201")
-        .massage("create successfully").data(serviceRequest).build();
-    return new ResponseEntity<CreateServicesResponse>(response, HttpStatus.CREATED);
+
+    CreateServicesResponse response = CreateServicesResponse.builder()
+        .status("201")
+        .massage("create successfully")
+        .data(req)
+        .build();
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   @Override
   public ResponseEntity<UpdateServiceResponse> update(ServiceRequest request, String id) {
-    Optional<Services> services = servicesRepository.findById(id);
-    if (services.isPresent()) {
-      services.get().setServiceName(request.getServiceName());
-      services.get().setPrice(request.getPrice());
-      services.get().setDescription(request.getDescription());
-      servicesRepository.save(services.get());
 
-      UpdateServiceResponse response = UpdateServiceResponse.builder().massage("update successfully").status("200")
-          .build();
-      return new ResponseEntity<UpdateServiceResponse>(response, HttpStatus.OK);
+    Services service = servicesRepository.findById(id)
+        .orElseThrow(() -> new DataNotFoundException(
+            "Không tìm thấy dịch vụ với id: " + id));
+
+    // ===== VALIDATE =====
+    if (request.getServiceName() == null || request.getServiceName().isBlank()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Tên dịch vụ không được để trống");
     }
-    return new ResponseEntity<UpdateServiceResponse>(HttpStatus.NOT_FOUND);
+
+    if (request.getPrice() == null || request.getPrice().signum() <= 0) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Giá dịch vụ không hợp lệ");
+    }
+
+    // ===== CHECK TRÙNG TÊN (QUAN TRỌNG) =====
+    boolean isDuplicate = servicesRepository
+        .existsByServiceNameIgnoreCaseAndServiceIdNot(
+            request.getServiceName(),
+            id);
+
+    if (isDuplicate) {
+      throw new DataExistException("Tên dịch vụ đã tồn tại");
+    }
+
+    // ===== UPDATE =====
+    service.setServiceName(request.getServiceName());
+    service.setDescription(request.getDescription());
+    service.setPrice(request.getPrice());
+
+    servicesRepository.save(service);
+
+    UpdateServiceResponse response = UpdateServiceResponse.builder()
+        .status("200")
+        .massage("update successfully")
+        .build();
+
+    return ResponseEntity.ok(response);
   }
 
   @Override

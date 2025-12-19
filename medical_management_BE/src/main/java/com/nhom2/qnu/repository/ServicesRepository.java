@@ -25,4 +25,10 @@ public interface ServicesRepository extends JpaRepository<Services, String> {
                 ORDER BY COUNT(asi.id) DESC
             """)
     List<ServiceUsageReportResponse> getServiceUsageStats();
+
+    boolean existsByServiceNameIgnoreCase(String serviceName);
+
+    boolean existsByServiceNameIgnoreCaseAndServiceIdNot(
+            String serviceName,
+            String serviceId);
 }
