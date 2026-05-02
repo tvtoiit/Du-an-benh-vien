@@ -56,7 +56,6 @@ const EditServiceModal = ({ service, onClose }) => {
             await serviceService.updateDichVu(service.serviceId, form);
             onClose(true);
         } catch (err) {
-            // ⭐ BẮT LỖI BE GIỐNG REGISTER
             const msg =
                 err?.response?.data?.message ||
                 err?.response?.data ||

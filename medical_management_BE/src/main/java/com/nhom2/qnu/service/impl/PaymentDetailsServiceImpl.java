@@ -239,10 +239,11 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                         paymentStatus = rawStatus;
                 }
 
-                // 1️⃣1️⃣ Trả về response đầy đủ
+                // Trả về response đầy đủ
                 return PaymentSummaryResponse.builder()
                                 .patientId(patient.getPatientId())
                                 .fullName(patient.getUser().getFullName())
+                                .cccd(patient.getUser().getCcCongDan())
                                 .status(paymentStatus)
                                 .appointmentId(appointmentId)
 

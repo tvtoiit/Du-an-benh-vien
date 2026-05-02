@@ -70,6 +70,7 @@ public class UserAdminServiceImpl implements UserAdminService {
           .fullName(user.getFullName())
           .status(user.getStatus())
           .phoneNumber(user.getPhoneNumber())
+          .cccd(user.getCcCongDan())
           .gender(user.getGender())
           .dateOfBirth(user.getDateOfBirth())
           .role(user.getAccount().getRole().getName())
@@ -133,6 +134,31 @@ public class UserAdminServiceImpl implements UserAdminService {
           .body(Map.of("error", "Số điện thoại đã tồn tại!"));
     }
 
+    // 3. Validate CCCD
+    String cccd = request.getCccd();
+
+    if (cccd == null || cccd.trim().isEmpty()) {
+      return ResponseEntity
+          .badRequest()
+          .body(Map.of("error", "CCCD không được bỏ trống"));
+    }
+
+    cccd = cccd.trim();
+
+    // Validate
+    if (cccd.isEmpty() || !cccd.matches("\\d{12}")) {
+      return ResponseEntity
+          .badRequest()
+          .body(Map.of("error", "CCCD phải đủ 12 số"));
+    }
+
+    // Check trùng
+    if (userRepositories.existsByCcCongDan(cccd)) {
+      return ResponseEntity
+          .badRequest()
+          .body(Map.of("error", "CCCD đã tồn tại!"));
+    }
+
     Account existAcc = accountRepository.findByusername(request.getEmail());
     if (existAcc != null) {
       return ResponseEntity
@@ -168,6 +194,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         .phoneNumber(request.getPhoneNumber())
         .gender(request.getGender())
         .dateOfBirth(request.getDateOfBirth())
+        .ccCongDan(cccd)
         .build();
 
     // 5. Lưu user
@@ -184,6 +211,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         .address(userCreate.getAddress())
         .status(userCreate.getStatus())
         .role(userCreate.getAccount().getRole().getName())
+        .cccd(userCreate.getCcCongDan())
         .build();
 
     return ResponseEntity.ok(respon);
@@ -264,6 +292,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         .address(user.getAddress())
         .status(user.getStatus())
         .role(account.getRole().getName())
+        .cccd(user.getCcCongDan())
         .build();
 
     return ResponseEntity.ok(response);
@@ -301,6 +330,29 @@ public class UserAdminServiceImpl implements UserAdminService {
             .body(Map.of("error", "Số điện thoại đã được sử dụng bởi người khác!"));
       }
       user.setPhoneNumber(request.getPhoneNumber());
+    }
+
+    // Cập nhật CCCD
+    if (request.getCccd() != null && !request.getCccd().trim().isEmpty()) {
+
+      String cccd = request.getCccd().trim();
+
+      if (!cccd.matches("\\d{12}")) {
+        return ResponseEntity
+            .badRequest()
+            .body(Map.of("error", "CCCD phải đủ 12 số"));
+      }
+
+      boolean exists = userRepositories
+          .existsByCcCongDanAndUserIdNot(cccd, user.getUserId());
+
+      if (exists) {
+        return ResponseEntity
+            .badRequest()
+            .body(Map.of("error", "CCCD đã được sử dụng bởi người khác!"));
+      }
+
+      user.setCcCongDan(cccd);
     }
 
     // Cập nhật dateOfBirth

@@ -146,6 +146,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                         .fullName(p.getUser().getFullName())
                                         .dateOfBirth(p.getUser().getDateOfBirth())
                                         .contactNumber(p.getUser().getPhoneNumber())
+                                        .cccd(p.getUser().getCcCongDan())
                                         .status(type)
                                         .build());
                 }
@@ -208,6 +209,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                                                 .fullName(p.getUser().getFullName())
                                                                 .dateOfBirth(p.getUser().getDateOfBirth())
                                                                 .contactNumber(p.getUser().getPhoneNumber())
+                                                                .cccd(p.getUser().getCcCongDan())
                                                                 .status(status)
                                                                 .appointmentScheduleId(
                                                                                 latest.getAppointmentScheduleId())

@@ -20,6 +20,7 @@ import {
     IconButton,
     Tooltip,
     CircularProgress,
+    TextField
 } from "@mui/material";
 
 import { FaPlus } from "react-icons/fa";
@@ -30,6 +31,7 @@ import { toast } from "react-toastify";
 const MedicineList = () => {
     const [medicines, setMedicines] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
     // model detail
     const [detailOpen, setDetailOpen] = useState(false);
@@ -47,6 +49,14 @@ const MedicineList = () => {
             setLoading(false);
         }
     };
+
+    const keyword = search.trim().toLowerCase();
+
+    const filteredMedicines = keyword
+        ? medicines.filter((m) =>
+            m.name?.toLowerCase().includes(keyword)
+        )
+        : medicines;
 
     useEffect(() => {
         loadMedicines();
@@ -92,19 +102,38 @@ const MedicineList = () => {
 
     return (
         <Box sx={{ p: 4 }}>
-            <Paper sx={{ p: 2, mb: 3, display: "flex", justifyContent: "space-between" }}>
+
+            <Paper
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2
+                }}
+            >
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     Quản lý danh sách thuốc
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenModal}
-                    startIcon={<FaPlus />}
-                >
-                    Thêm Thuốc Mới
-                </Button>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo tên thuốc"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenModal}
+                        startIcon={<FaPlus />}
+                    >
+                        Thêm Thuốc Mới
+                    </Button>
+                </Box>
             </Paper>
 
             <TableContainer component={Paper}>
@@ -121,7 +150,7 @@ const MedicineList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {medicines.map((m) => (
+                        {filteredMedicines.map((m) => (
                             <TableRow key={m.medicineId} hover>
                                 {/* <TableCell>{m.medicineId}</TableCell> */}
                                 <TableCell>{m.name}</TableCell>
@@ -151,6 +180,13 @@ const MedicineList = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        {filteredMedicines.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    Không tìm thấy thuốc
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

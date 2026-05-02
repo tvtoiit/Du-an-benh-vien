@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
     Box, Typography, Paper, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow,
-    Button
+    Button, TextField
 } from "@mui/material";
 
 import advancePaymentService from "../../../services/advancePaymentService";
@@ -12,6 +12,7 @@ const DsBenhNhanUngTien = () => {
     const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [refresh, setRefresh] = useState(false);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         const load = async () => {
@@ -20,6 +21,12 @@ const DsBenhNhanUngTien = () => {
         };
         load();
     }, [refresh]);
+
+    const keyword = search.trim();
+
+    const filteredPatients = keyword
+        ? patients.filter((p) => p.ccCongDan?.includes(keyword))
+        : patients;
 
     if (selectedPatient) {
         return (
@@ -38,9 +45,28 @@ const DsBenhNhanUngTien = () => {
 
     return (
         <Box sx={{ p: 3 }}>
-            <Typography variant="h5" fontWeight="bold" mb={3} color="primary">
-                Bệnh nhân cần ứng tiền
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 2
+                    }}
+                >
+                    <Typography variant="h5" fontWeight="bold" color="primary">
+                        Bệnh nhân cần ứng tiền
+                    </Typography>
+
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        sx={{ width: "300px" }}
+                    />
+                </Box>
+            </Box>
 
             <TableContainer component={Paper}>
                 <Table>
@@ -48,17 +74,19 @@ const DsBenhNhanUngTien = () => {
                         <TableRow>
                             <TableCell>STT</TableCell>
                             <TableCell>Họ tên</TableCell>
+                            <TableCell>CCCD</TableCell>
                             <TableCell>Đã ứng</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
-                        {patients.map((p, idx) => (
+                        {filteredPatients.map((p, idx) => (
                             <TableRow key={p.patientId}>
                                 <TableCell>{idx + 1}</TableCell>
                                 <TableCell>{p.fullName}</TableCell>
-                                <TableCell>{p.totalAdvance} đ</TableCell>
+                                <TableCell>{p.ccCongDan}</TableCell>
+                                <TableCell>{p.totalAdvance?.toLocaleString()} đ</TableCell>
 
                                 <TableCell align="center">
                                     <Button
@@ -72,10 +100,10 @@ const DsBenhNhanUngTien = () => {
                             </TableRow>
                         ))}
 
-                        {patients.length === 0 && (
+                        {filteredPatients.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={5} align="center">
-                                    Không có bệnh nhân cần ứng tiền
+                                    Không tìm thấy bệnh nhân
                                 </TableCell>
                             </TableRow>
                         )}

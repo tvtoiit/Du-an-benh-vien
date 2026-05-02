@@ -32,6 +32,7 @@ const BacSiList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingDoctor, setEditingDoctor] = useState(null);
+    const [searchCccd, setSearchCccd] = useState("");
 
 
     // ======================== LOAD DANH SÁCH BÁC SĨ ==========================
@@ -47,6 +48,10 @@ const BacSiList = () => {
     useEffect(() => {
         fetchDoctors();
     }, []);
+
+    const filteredDoctors = doctors.filter((d) =>
+        d.cccd?.includes(searchCccd)
+    );
 
     // ======================== MODAL ==========================
     const handleOpenModal = () => setIsModalOpen(true);
@@ -70,14 +75,23 @@ const BacSiList = () => {
                     Quản lý danh sách bác sĩ
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenModal}
-                    startIcon={<FaPlus />}
-                >
-                    Thêm Bác Sĩ Mới
-                </Button>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={searchCccd}
+                        onChange={(e) => setSearchCccd(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenModal}
+                        startIcon={<FaPlus />}
+                    >
+                        Thêm Bác Sĩ Mới
+                    </Button>
+                </Box>
             </Paper>
 
             {/* TABLE */}
@@ -89,6 +103,7 @@ const BacSiList = () => {
                             <TableCell>Họ và tên</TableCell>
                             <TableCell>Kinh nghiệm</TableCell>
                             <TableCell>SĐT</TableCell>
+                            <TableCell>CCCD</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Khoa</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -96,12 +111,13 @@ const BacSiList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {doctors.map((d) => (
+                        {filteredDoctors.map((d) => (
                             <TableRow key={d.doctorId} hover>
                                 {/* <TableCell>{d.doctorId}</TableCell> */}
                                 <TableCell>{d.doctorName}</TableCell>
                                 <TableCell>{d.experience}</TableCell>
                                 <TableCell>{d.contactNumber}</TableCell>
+                                <TableCell>{d.cccd}</TableCell>
                                 <TableCell>{d.email}</TableCell>
                                 <TableCell>{d.departmentName}</TableCell>
 
@@ -117,6 +133,13 @@ const BacSiList = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        {filteredDoctors.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={7} align="center">
+                                    Không tìm thấy bác sĩ
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

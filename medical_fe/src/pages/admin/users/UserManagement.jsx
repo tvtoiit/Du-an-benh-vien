@@ -27,6 +27,7 @@ const UserManagement = ({ currentRole }) => {
     const [open, setOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [roles, setRoles] = useState([]);
+    const [searchCccd, setSearchCccd] = useState("");
 
     const [formData, setFormData] = useState({
         full_name: "",
@@ -36,7 +37,8 @@ const UserManagement = ({ currentRole }) => {
         status: true,
         roleName: "",
         dateOfBirth: "",
-        gender: ""   // MALE | FEMALE
+        gender: "",   // MALE | FEMALE
+        cccd: ""
     });
 
     useEffect(() => {
@@ -73,7 +75,8 @@ const UserManagement = ({ currentRole }) => {
                     dateOfBirth: user.dateOfBirth
                         ? user.dateOfBirth.split("T")[0]
                         : "",
-                    gender: user.gender?.toUpperCase() ?? ""
+                    gender: user.gender?.toUpperCase() ?? "",
+                    cccd: user.cccd || ""
                 }
                 : {
                     full_name: "",
@@ -83,7 +86,8 @@ const UserManagement = ({ currentRole }) => {
                     status: true,
                     roleName: defaultRole,
                     dateOfBirth: "",
-                    gender: ""
+                    gender: "",
+                    cccd: ""
                 }
         );
 
@@ -105,12 +109,25 @@ const UserManagement = ({ currentRole }) => {
         "ROLE_BENHNHAN": "Bệnh nhân"
     };
 
+    const filteredUsers = users.filter((u) =>
+        u.cccd?.includes(searchCccd)
+    );
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSave = async () => {
         try {
+            if (!formData.cccd) {
+                toast.error("CCCD không được bỏ trống");
+                return;
+            }
+
+            if (!/^\d{12}$/.test(formData.cccd)) {
+                toast.error("CCCD phải đủ 12 số");
+                return;
+            }
             if (editingUser && currentRole === "ROLE_LETAN") {
                 formData.roleName = editingUser.role;
             }
@@ -123,7 +140,8 @@ const UserManagement = ({ currentRole }) => {
                     status: formData.status,
                     roleName: formData.roleName,
                     dateOfBirth: formData.dateOfBirth,
-                    gender: formData.gender
+                    gender: formData.gender,
+                    cccd: formData.cccd
                 });
 
                 setUsers((prev) =>
@@ -138,7 +156,8 @@ const UserManagement = ({ currentRole }) => {
                                 status: formData.status,
                                 role: formData.roleName,
                                 dateOfBirth: formData.dateOfBirth,
-                                gender: formData.gender
+                                gender: formData.gender,
+                                cccd: formData.cccd
                             }
                             : u
                     )
@@ -153,7 +172,8 @@ const UserManagement = ({ currentRole }) => {
                     address: formData.address,
                     roleName: formData.roleName,
                     dateOfBirth: formData.dateOfBirth,
-                    gender: formData.gender
+                    gender: formData.gender,
+                    cccd: formData.cccd
                 });
 
                 setUsers((prev) => [...prev, createdUser]);
@@ -197,18 +217,37 @@ const UserManagement = ({ currentRole }) => {
 
     return (
         <Box>
-            <Typography variant="h6" mb={2}>
-                Danh sách người dùng
-            </Typography>
-
-            <Button
-                variant="contained"
-                startIcon={<Add />}
-                sx={{ mb: 2 }}
-                onClick={() => handleOpen()}
+            <Paper
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2
+                }}
             >
-                Thêm người dùng
-            </Button>
+                <Typography variant="h6">
+                    Danh sách người dùng
+                </Typography>
+
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={searchCccd}
+                        onChange={(e) => setSearchCccd(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => handleOpen()}
+                    >
+                        Thêm người dùng
+                    </Button>
+                </Box>
+            </Paper>
 
             <TableContainer component={Paper}>
                 <Table>
@@ -217,6 +256,7 @@ const UserManagement = ({ currentRole }) => {
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Số điện thoại</TableCell>
+                            <TableCell>CCCD</TableCell>
                             <TableCell>Giới tính</TableCell>
                             <TableCell>Ngày sinh</TableCell>
                             <TableCell>Địa chỉ</TableCell>
@@ -225,11 +265,12 @@ const UserManagement = ({ currentRole }) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {users.map((u) => (
+                        {filteredUsers.map((u) => (
                             <TableRow key={u.userId}>
                                 <TableCell>{u.fullName}</TableCell>
                                 <TableCell>{u.email}</TableCell>
                                 <TableCell>{u.phoneNumber}</TableCell>
+                                <TableCell>{u.cccd}</TableCell>
                                 <TableCell>
                                     {u.gender === "MALE" ? "Nam" : u.gender === "FEMALE" ? "Nữ" : ""}
                                 </TableCell>
@@ -269,7 +310,7 @@ const UserManagement = ({ currentRole }) => {
                             </TableRow>
                         ))}
 
-                        {users.length === 0 && (
+                        {filteredUsers.length === 0 && (
                             <TableRow key="empty">
                                 <TableCell colSpan={6} align="center">
                                     Không có người dùng nào
@@ -310,6 +351,14 @@ const UserManagement = ({ currentRole }) => {
                         name="phone_number"
                         fullWidth
                         value={formData.phone_number}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="CCCD"
+                        name="cccd"
+                        fullWidth
+                        value={formData.cccd}
                         onChange={handleChange}
                     />
                     <TextField
@@ -374,7 +423,7 @@ const UserManagement = ({ currentRole }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+        </Box >
     );
 };
 

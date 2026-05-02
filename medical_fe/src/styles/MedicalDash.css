@@ -10,7 +10,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .header-container {
@@ -66,16 +66,6 @@ body {
     overflow: hidden;
 }
 
-.sidebar-menu {
-    width: 250px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
-    overflow-y: auto;
-}
-
 .sidebar-menu h2 {
     margin-top: 0;
     font-size: 1.5rem;
@@ -97,6 +87,15 @@ body {
     border-radius: 5px;
     margin-bottom: 5px;
     transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-menu.collapsed li {
+    margin: 0;
+    border-radius: 10px;
+}
+
+.sidebar-menu.collapsed ul li.active {
+    border-radius: 10px;
 }
 
 .sidebar-menu li:hover {
@@ -158,4 +157,60 @@ body {
     /* đổi màu khi hover */
     transform: translateY(-2px);
     /* nâng nhẹ khi hover */
+}
+
+/* css thanh side bar */
+.sidebar-menu {
+    width: 250px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu ul li.active {
+    background-color: #1976d2;
+    color: white;
+}
+
+.sidebar-menu.collapsed {
+    width: 70px;
+}
+
+.sidebar-menu.collapsed ul li {
+    justify-content: center;
+}
+
+.sidebar-menu ul li {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 16px;
+    transition: all 0.3s;
+}
+
+.sidebar-menu.collapsed ul li {
+    padding: 12px 0;
+}
+
+.sidebar-menu.collapsed ul li svg {
+    margin: 0 !important;
+}
+
+.sidebar-menu ul li:hover {
+    background-color: #1976d2;
+    color: white;
+    border-radius: 8px;
+}
+
+.sidebar-menu ul li.active {
+    background-color: #1976d2;
+    color: white;
 }

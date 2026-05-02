@@ -3,6 +3,7 @@ import roomService from "../../../services/roomService";
 import RegisterRoomModal from "./RegisterRoomModal";
 import EditRoomModal from "./EditRoomModal";
 import { toast } from "react-toastify";
+import { TextField } from "@mui/material";
 
 import {
     Box, Typography, Paper, Table, TableBody, TableCell,
@@ -17,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 const RoomList = () => {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
@@ -43,6 +45,11 @@ const RoomList = () => {
         if (reload) loadRooms();
     };
 
+    const filteredRooms = rooms.filter((r) =>
+        r.roomName?.toLowerCase().includes(search.toLowerCase()) ||
+        r.department?.name?.toLowerCase().includes(search.toLowerCase())
+    );
+
     const handleEdit = (room) => setEditingRoom(room);
 
     const handleDelete = async (roomId) => {
@@ -64,14 +71,23 @@ const RoomList = () => {
                     Quản lý danh sách phòng
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenModal}
-                    startIcon={<FaPlus />}
-                >
-                    Thêm Phòng Mới
-                </Button>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo tên phòng"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenModal}
+                        startIcon={<FaPlus />}
+                    >
+                        Thêm Phòng Mới
+                    </Button>
+                </Box>
             </Paper>
 
             <TableContainer component={Paper}>
@@ -86,7 +102,7 @@ const RoomList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {rooms.map((r) => (
+                        {filteredRooms.map((r) => (
                             <TableRow key={r.roomId} hover>
                                 {/* <TableCell>{r.roomId}</TableCell> */}
                                 <TableCell>{r.roomName}</TableCell>
@@ -109,6 +125,13 @@ const RoomList = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+                        {filteredRooms.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center">
+                                    Không tìm thấy phòng nào.
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -37,6 +37,7 @@ public interface AdvancePaymentRepository extends JpaRepository<AdvancePayment, 
                     p.patientId,
                     u.fullName,
                     u.phoneNumber,
+                    u.ccCongDan,
                     u.address,
                     COALESCE(SUM(ap.amount), 0)
                 )

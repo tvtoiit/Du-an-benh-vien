@@ -13,6 +13,7 @@ public class PatientAdvanceDTO {
     private String patientId;
     private String fullName;
     private String phoneNumber;
+    private String ccCongDan;
     private String address;
     private Double totalAdvance;
 }

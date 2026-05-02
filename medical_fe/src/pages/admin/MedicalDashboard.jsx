@@ -13,12 +13,24 @@ import DepartmentList from '../admin/khoa/DepartmentList';
 import RoomList from '../admin/phong/RoomList'
 import ThongKeDashboard from './thongke/ThongKeDashboard';
 import logo from "../../assets/logo.jpg";
+import MenuIcon from '@mui/icons-material/Menu';
+import PeopleIcon from '@mui/icons-material/People';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import MedicationIcon from '@mui/icons-material/Medication';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 
 const MedicalDashboard = () => {
     const [role, setRole] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
     // Sử dụng state để quản lý vai trò đang được chọn
     const [activeRole, setActiveRole] = useState('Người dùng');
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // get token từ localstorage
     const getlocalStorage = localStorage.getItem("token");
@@ -159,6 +171,14 @@ const MedicalDashboard = () => {
     return (
         <div className="app-container">
             <header className="header-container">
+                <MenuIcon
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    style={{
+                        cursor: "pointer",
+                        marginRight: "15px",
+                        fontSize: "28px"
+                    }}
+                />
                 <div className="logo">
                     <img
                         width="200"
@@ -168,6 +188,7 @@ const MedicalDashboard = () => {
                         onClick={() => navigate("/")}
                     />
                 </div>
+
                 <nav className="header-nav">
                     <ul className="logout-list">
                         <li className="logout-btn" onClick={handleLogout}>
@@ -180,56 +201,112 @@ const MedicalDashboard = () => {
             </header>
 
             <div className="main-layout">
-                <aside className="sidebar-menu">
-                    <h2>({roleDisplayMap[role] || role})</h2>
+                <aside className={`sidebar-menu ${isSidebarOpen ? "open" : "collapsed"}`}>
+                    {isSidebarOpen && (
+                        <h2>{roleDisplayMap[role] || role}</h2>
+                    )}
                     <ul>
                         {can("quanLyUser") && (
-                            <li className={activeRole === 'Người dùng' ? 'active' : ''} onClick={() => setActiveRole('Người dùng')}>
-                                [Quản lý người dùng]
+                            <li
+                                className={activeRole === 'Người dùng' ? 'active' : ''}
+                                onClick={() => setActiveRole('Người dùng')}
+                                title="Quản lý người dùng"
+                            >
+                                <PeopleIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý người dùng"}
                             </li>
                         )}
+
                         {can("quanLyBenhNhan") && (
-                            <li className={activeRole === 'Bệnh nhân' ? 'active' : ''} onClick={() => setActiveRole('Bệnh nhân')}>
-                                [Quản lý bệnh nhân]
+                            <li
+                                className={activeRole === 'Bệnh nhân' ? 'active' : ''}
+                                onClick={() => setActiveRole('Bệnh nhân')}
+                                title="Quản lý bệnh nhân"
+                            >
+                                <LocalHospitalIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý bệnh nhân"}
                             </li>
                         )}
+
                         {can("quanLyBacSi") && (
-                            <li className={activeRole === 'Bác Sĩ' ? 'active' : ''} onClick={() => setActiveRole('Bác Sĩ')}>
-                                [Quản lý bác sĩ]
+                            <li
+                                className={activeRole === 'Bác Sĩ' ? 'active' : ''}
+                                onClick={() => setActiveRole('Bác Sĩ')}
+                                title="Quản lý bác sĩ"
+                            >
+                                <MedicalServicesIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý bác sĩ"}
                             </li>
                         )}
+
                         {(can("tiepNhan") || can("phieuKham") || can("canLamSang") || can("keDonThuoc") || can("thanhToan")) && (
-                            <li className={activeRole === 'Khám bệnh' ? 'active' : ''} onClick={() => setActiveRole('Khám bệnh')}>
-                                [Quản lý khám bệnh]
+                            <li
+                                className={activeRole === 'Khám bệnh' ? 'active' : ''}
+                                onClick={() => setActiveRole('Khám bệnh')}
+                                title="Quản lý khám bệnh"
+                            >
+                                <DashboardIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý khám bệnh"}
                             </li>
                         )}
+
                         {can("Thuoc") && (
-                            <li className={activeRole === 'Thuoc' ? 'active' : ''} onClick={() => setActiveRole('Thuoc')}>
-                                [Quản lý thuốc]
+                            <li
+                                className={activeRole === 'Thuoc' ? 'active' : ''}
+                                onClick={() => setActiveRole('Thuoc')}
+                                title="Quản lý thuốc"
+                            >
+                                <MedicationIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý thuốc"}
                             </li>
                         )}
+
                         {can("dichVu") && (
-                            <li className={activeRole === 'dichVu' ? 'active' : ''} onClick={() => setActiveRole('dichVu')}>
-                                [Quản lý dịch vụ]
+                            <li
+                                className={activeRole === 'dichVu' ? 'active' : ''}
+                                onClick={() => setActiveRole('dichVu')}
+                                title="Quản lý dịch vụ"
+                            >
+                                <MiscellaneousServicesIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý dịch vụ"}
                             </li>
                         )}
+
                         {can("Khoa") && (
-                            <li className={activeRole === 'Khoa' ? 'active' : ''} onClick={() => setActiveRole('Khoa')}>
-                                [Quản lý khoa]
+                            <li
+                                className={activeRole === 'Khoa' ? 'active' : ''}
+                                onClick={() => setActiveRole('Khoa')}
+                                title="Quản lý khoa"
+                            >
+                                <ApartmentIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý khoa"}
                             </li>
                         )}
+
                         {can("Phong") && (
-                            <li className={activeRole === 'Phong' ? 'active' : ''} onClick={() => setActiveRole('Phong')}>
-                                [Quản lý phòng]
+                            <li
+                                className={activeRole === 'Phong' ? 'active' : ''}
+                                onClick={() => setActiveRole('Phong')}
+                                title="Quản lý phòng"
+                            >
+                                <MeetingRoomIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Quản lý phòng"}
                             </li>
                         )}
+
                         {can("Thongke") && (
-                            <li className={activeRole === 'Thongke' ? 'active' : ''} onClick={() => setActiveRole('Thongke')}>
-                                [Thống kê]
+                            <li
+                                className={activeRole === 'Thongke' ? 'active' : ''}
+                                onClick={() => setActiveRole('Thongke')}
+                                title="Thống kê"
+                            >
+                                <BarChartIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Thống kê"}
                             </li>
                         )}
                     </ul>
                 </aside>
+
 
                 <main className="main-content-area">
                     {renderMainContent()}

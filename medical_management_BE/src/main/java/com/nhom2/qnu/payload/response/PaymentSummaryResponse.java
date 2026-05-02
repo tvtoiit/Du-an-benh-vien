@@ -8,6 +8,7 @@ import lombok.Data;
 public class PaymentSummaryResponse {
     private String patientId;
     private String fullName;
+    private String cccd;
     private String status;
     private String appointmentId;
 

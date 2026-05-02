@@ -25,6 +25,10 @@ public interface UserRepositories extends JpaRepository<User, String> {
 
   Optional<User> findByPhoneNumber(String phoneNumber);
 
+  boolean existsByCcCongDanAndUserIdNot(String ccCongDan, String userId);
+
+  boolean existsByCcCongDan(String ccCongDan);
+
   boolean existsByPhoneNumberAndUserIdNot(String phoneNumber, String userId);
 
 }

@@ -26,6 +26,7 @@ import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import RegisterModal from "./RegisterModal";
+import { TextField } from "@mui/material";
 
 const PatientList = () => {
     const [patients, setPatients] = useState([]);
@@ -34,6 +35,7 @@ const PatientList = () => {
     // model detail
     const [detailOpen, setDetailOpen] = useState(false);
     const [detailData, setDetailData] = useState({});
+    const [searchCccd, setSearchCccd] = useState("");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPatient, setEditingPatient] = useState(null);
@@ -70,6 +72,10 @@ const PatientList = () => {
         return isoString ? isoString.substring(0, 10) : "";
     };
 
+    const filteredPatients = patients.filter((p) =>
+        p.cccd?.includes(searchCccd)
+    );
+
     // Xem chi tiết
     const handleView = (s) => {
         setDetailData({
@@ -96,15 +102,24 @@ const PatientList = () => {
                     Quản lý danh sách bệnh nhân
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenModal}
-                    startIcon={<FaPlus />}
-                    disabled={!users || users.length === 0}
-                >
-                    Thêm Bệnh Nhân Mới
-                </Button>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={searchCccd}
+                        onChange={(e) => setSearchCccd(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenModal}
+                        startIcon={<FaPlus />}
+                        disabled={!users || users.length === 0}
+                    >
+                        Thêm Bệnh Nhân Mới
+                    </Button>
+                </Box>
             </Paper>
 
             <TableContainer component={Paper}>
@@ -114,6 +129,7 @@ const PatientList = () => {
                             {/* <TableCell>Mã BN</TableCell> */}
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Ngày khám</TableCell>
+                            <TableCell>CCCD</TableCell>
                             <TableCell>Địa chỉ</TableCell>
                             <TableCell>Triệu chứng</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -121,11 +137,12 @@ const PatientList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {patients.map((p) => (
+                        {filteredPatients.map((p) => (
                             <TableRow key={p.patientId} hover>
                                 {/* <TableCell>{p.patientId}</TableCell> */}
                                 <TableCell>{p.fullName}</TableCell>
                                 <TableCell>{formatDate(p.dateOfBirth)}</TableCell>
+                                <TableCell>{p.cccd}</TableCell>
                                 <TableCell>{p.address}</TableCell>
                                 <TableCell>{p.otherInfo}</TableCell>
 
@@ -147,6 +164,13 @@ const PatientList = () => {
 
                             </TableRow>
                         ))}
+                        {filteredPatients.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={6} align="center">
+                                    Không tìm thấy bệnh nhân
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

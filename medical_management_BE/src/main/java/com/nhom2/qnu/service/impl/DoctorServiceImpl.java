@@ -130,6 +130,7 @@ public class DoctorServiceImpl implements DoctorService {
             response.setExperience(doctor.getExperience());
             response.setContactNumber(doctor.getUser().getPhoneNumber());
             response.setEmail(doctor.getUser().getEmail());
+            response.setCccd(doctor.getUser().getCcCongDan());
 
             // Thêm tên khoa
             if (doctor.getDepartment() != null) {

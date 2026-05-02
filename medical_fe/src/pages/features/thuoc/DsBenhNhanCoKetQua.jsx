@@ -11,6 +11,7 @@ import {
     TableRow,
     Button,
     Chip,
+    TextField
 } from "@mui/material";
 import PrescriptionForm from "./KeDonForm";
 import serviceResultService from "../../../services/serviceResultService";
@@ -18,6 +19,7 @@ import serviceResultService from "../../../services/serviceResultService";
 const DsBenhNhanCoKetQua = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [patients, setPatients] = useState([]);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         const fetchPatients = async () => {
@@ -32,6 +34,11 @@ const DsBenhNhanCoKetQua = () => {
         fetchPatients();
     }, [selectedPatient]);
 
+    const keyword = search.trim();
+
+    const filteredPatients = keyword
+        ? patients.filter((p) => p.cccd?.includes(keyword))
+        : patients;
 
     // Nếu đã chọn bệnh nhân để kê đơn -> hiển thị form kê đơn
     if (selectedPatient) {
@@ -46,9 +53,28 @@ const DsBenhNhanCoKetQua = () => {
 
     return (
         <Box sx={{ p: 3 }}>
-            <Typography variant="h5" fontWeight="bold" mb={3} color="primary">
-                Danh sách bệnh nhân chờ kê đơn
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 2
+                    }}
+                >
+                    <Typography variant="h5" fontWeight="bold" color="primary">
+                        Danh sách bệnh nhân chờ kê đơn
+                    </Typography>
+
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        sx={{ width: "300px" }}
+                    />
+                </Box>
+            </Box>
 
             <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
                 <Table>
@@ -59,12 +85,13 @@ const DsBenhNhanCoKetQua = () => {
                             <TableCell><b>Giới tính</b></TableCell>
                             <TableCell><b>Ngày sinh</b></TableCell>
                             <TableCell><b>SĐT</b></TableCell>
+                            <TableCell><b>CCCD</b></TableCell>
                             <TableCell><b>Trạng thái</b></TableCell>
                             <TableCell align="center"><b>Thao tác</b></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {patients.map((p, index) => (
+                        {filteredPatients.map((p, index) => (
                             <TableRow key={p.patientId || p.id}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>{p.fullName || p.name}</TableCell>
@@ -73,6 +100,7 @@ const DsBenhNhanCoKetQua = () => {
                                     {(p.dateOfBirth || p.birth || "").toString().split("T")[0]}
                                 </TableCell>
                                 <TableCell>{p.contactNumber || p.phone || "—"}</TableCell>
+                                <TableCell>{p.cccd || "—"}</TableCell>
                                 <TableCell>
                                     <Chip
                                         label={p.status || "Đã có kết quả"}

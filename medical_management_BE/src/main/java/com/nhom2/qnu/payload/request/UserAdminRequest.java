@@ -17,6 +17,8 @@ public class UserAdminRequest {
 
   private String phoneNumber;
 
+  private String cccd;
+
   private String email;
 
   private String address;

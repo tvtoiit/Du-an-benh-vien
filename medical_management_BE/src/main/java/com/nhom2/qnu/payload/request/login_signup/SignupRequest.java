@@ -16,5 +16,4 @@ public class SignupRequest {
     private String role;
 
     private UserRequest user;
-
 }

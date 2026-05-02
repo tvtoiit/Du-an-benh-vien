@@ -36,6 +36,9 @@ public class User implements Serializable {
     @Column(name = "phone_number", length = 12)
     private String phoneNumber;
 
+    @Column(name = "cc_cong_dan", nullable = false)
+    private String ccCongDan;
+
     @Column(name = "email", length = 50, nullable = false, unique = true)
     private String email;
 

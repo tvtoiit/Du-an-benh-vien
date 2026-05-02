@@ -101,6 +101,7 @@ public class PatientsServiceImpl implements PatientsService {
           .address(p.getUser().getAddress())
           .contactNumber(p.getUser().getPhoneNumber())
           .email(p.getUser().getEmail())
+          .cccd(p.getUser().getCcCongDan())
           .dateOfBirth(p.getUser().getDateOfBirth())
           .otherInfo(p.getOtherInfo())
           .build());
@@ -214,6 +215,8 @@ public class PatientsServiceImpl implements PatientsService {
               .fullName(app.getPatients().getUser().getFullName())
               .gender(app.getPatients().getUser().getGender())
               .dateOfBirth(app.getPatients().getUser().getDateOfBirth())
+              .cccd(app.getPatients().getUser().getCcCongDan())
+              .phoneNumber(app.getPatients().getUser().getPhoneNumber())
               .services(serviceResponses)
               .build();
 
@@ -263,7 +266,8 @@ public class PatientsServiceImpl implements PatientsService {
           PatientWaitingResponse.builder()
               .patientId(p.getPatientId())
               .fullName(p.getUser().getFullName())
-              .cccd(p.getOtherInfo())
+              .cccd(p.getUser().getCcCongDan())
+              .note(p.getOtherInfo())
               .phone(p.getUser().getPhoneNumber())
               .appointmentTime(appointmentTime)
               .status(status)

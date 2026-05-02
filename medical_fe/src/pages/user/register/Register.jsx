@@ -18,6 +18,12 @@ const schema = yup.object().shape({
         .matches(/^[0-9]{10}$/, "Số điện thoại phải đủ 10 số")
         .required("Số điện thoại không được bỏ trống"),
 
+    ccCongDan: yup
+        .string()
+        .trim()
+        .matches(/^[0-9]{12}$/, "CCCD phải đủ 12 số")
+        .required("CCCD không được bỏ trống"),
+
     email: yup
         .string()
         .email("Email không hợp lệ")
@@ -26,8 +32,11 @@ const schema = yup.object().shape({
     address: yup.string().required("Địa chỉ không được bỏ trống"),
 
     dateOfBirth: yup
-        .date()
-        .required("Ngày sinh không được bỏ trống"),
+        .string()
+        .required("Ngày sinh không được bỏ trống")
+        .test("not-future", "Ngày sinh không hợp lệ", (value) => {
+            return new Date(value) <= new Date();
+        }),
 
     gender: yup
         .string()
@@ -66,6 +75,7 @@ export default function Register() {
             user: {
                 fullName: data.fullName,
                 phoneNumber: data.phoneNumber,
+                ccCongDan: data.ccCongDan,
                 email: data.email,
                 address: data.address,
                 dateOfBirth: data.dateOfBirth,
@@ -116,6 +126,21 @@ export default function Register() {
                         {errors.phoneNumber && (
                             <div className="error-box">
                                 <p className="error-text">{errors.phoneNumber.message}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label>CCCD</label>
+                        <input
+                            type="text"
+                            {...register("ccCongDan")}
+                            className={errors.ccCongDan ? "input-error" : ""}
+                        />
+
+                        {errors.ccCongDan && (
+                            <div className="error-box">
+                                <p className="error-text">{errors.ccCongDan.message}</p>
                             </div>
                         )}
                     </div>

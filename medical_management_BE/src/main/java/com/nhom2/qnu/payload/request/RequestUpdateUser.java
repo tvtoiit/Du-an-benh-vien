@@ -16,6 +16,8 @@ public class RequestUpdateUser {
 
   private String phoneNumber;
 
+  private String cccd;
+
   private String address;
 
   private String roleName;

@@ -16,6 +16,7 @@ public class DoctorResponse {
     private String doctorId;
     private String doctorName;
     private String email;
+    private String cccd;
     private String contactNumber;
 
     private int experience;

@@ -19,6 +19,8 @@ public class PatientServiceResponse {
     private String fullName;
     private String gender;
     private Date dateOfBirth;
+    private String cccd;
+    private String phoneNumber;
 
     private List<ServiceResponse> services;
 

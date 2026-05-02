@@ -13,6 +13,7 @@ public class PatientWithResultResponse {
     private String gender;
     private Date dateOfBirth;
     private String contactNumber;
+    private String cccd;
     private String status;
     private String appointmentScheduleId;
 }

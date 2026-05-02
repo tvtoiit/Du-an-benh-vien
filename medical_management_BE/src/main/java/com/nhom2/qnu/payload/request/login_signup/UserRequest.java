@@ -15,6 +15,8 @@ public class UserRequest {
 
     private String phoneNumber;
 
+    private String ccCongDan;
+
     private String email;
 
     private String address;

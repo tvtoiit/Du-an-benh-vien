@@ -12,6 +12,7 @@ import {
     Button,
 } from "@mui/material";
 import patientService from "../../../services/parentService";
+import { TextField } from "@mui/material";
 
 // Component Badge hiển thị trạng thái
 const StatusBadge = ({ status }) => {
@@ -39,6 +40,13 @@ const StatusBadge = ({ status }) => {
 const DanhSachTiepNhan = ({ onSelectPatient }) => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
+
+    const keyword = search.trim();
+
+    const filteredPatients = patients.filter((p) =>
+        p.cccd?.includes(keyword)
+    );
 
     useEffect(() => {
         const loadWaitingPatients = async () => {
@@ -59,9 +67,26 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
 
     return (
         <Box>
-            <Typography variant="h6" mb={2}>
-                Danh sách bệnh nhân chờ tiếp nhận
-            </Typography>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2,
+                }}
+            >
+                <Typography variant="h6">
+                    Danh sách bệnh nhân chờ tiếp nhận
+                </Typography>
+
+                <TextField
+                    size="small"
+                    label="Tìm theo CCCD"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{ width: "300px" }}
+                />
+            </Box>
 
             <Paper sx={{ p: 2 }}>
                 <Table>
@@ -70,6 +95,7 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                             <TableCell>STT</TableCell>
                             <TableCell>Họ tên</TableCell>
                             <TableCell>SĐT</TableCell>
+                            <TableCell>CCCD</TableCell>
                             <TableCell>ghi chu</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell align="right">Thao tác</TableCell>
@@ -79,23 +105,24 @@ const DanhSachTiepNhan = ({ onSelectPatient }) => {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} align="center">
+                                <TableCell colSpan={7} align="center">
                                     Đang tải dữ liệu...
                                 </TableCell>
                             </TableRow>
-                        ) : patients.length === 0 ? (
+                        ) : filteredPatients.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} align="center">
-                                    Không có bệnh nhân nào đang chờ tiếp nhận.
+                                <TableCell colSpan={7} align="center">
+                                    Không tìm thấy bệnh nhân
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            patients.map((p, index) => (
+                            filteredPatients.map((p, index) => (
                                 <TableRow key={p.patientId}>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>{p.fullName}</TableCell>
                                     <TableCell>{p.phone}</TableCell>
                                     <TableCell>{p.cccd}</TableCell>
+                                    <TableCell>{p.note}</TableCell>
 
                                     {/* HIỂN THỊ TRẠNG THÁI */}
                                     <TableCell>

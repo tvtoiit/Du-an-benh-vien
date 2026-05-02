@@ -4,6 +4,7 @@ import RegisterServiceModal from "./RegisterServiceModal";
 import EditServiceModal from "./EditServiceModal";
 import { toast } from "react-toastify";
 import DetailModal from "../../../components/DetailModal";
+import { TextField } from "@mui/material";
 
 import {
     Box,
@@ -31,6 +32,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 const ServiceList = () => {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [search, setSearch] = useState("");
 
     const [detailOpen, setDetailOpen] = useState(false);
     const [detailData, setDetailData] = useState({});
@@ -78,6 +81,10 @@ const ServiceList = () => {
         }
     };
 
+    const filteredServices = services.filter((s) =>
+        s.serviceName?.toLowerCase().includes(search.toLowerCase())
+    );
+
     if (loading) return <CircularProgress sx={{ m: 4 }} />;
 
     return (
@@ -88,19 +95,30 @@ const ServiceList = () => {
                     mb: 3,
                     display: "flex",
                     justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2
                 }}
             >
                 <Typography variant="subtitle1" fontWeight="bold">
                     Quản lý dịch vụ
                 </Typography>
 
-                <Button
-                    variant="contained"
-                    startIcon={<FaPlus />}
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    Thêm dịch vụ
-                </Button>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                        size="small"
+                        label="Tìm theo tên dịch vụ"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <Button
+                        variant="contained"
+                        startIcon={<FaPlus />}
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Thêm dịch vụ
+                    </Button>
+                </Box>
             </Paper>
 
             <TableContainer component={Paper}>
@@ -116,7 +134,7 @@ const ServiceList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {services.map((s) => (
+                        {filteredServices.map((s) => (
                             <TableRow key={s.serviceId} hover>
                                 <TableCell>{s.serviceName}</TableCell>
 
@@ -175,6 +193,14 @@ const ServiceList = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+
+                        {filteredServices.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center">
+                                    Không tìm thấy dịch vụ nào.
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

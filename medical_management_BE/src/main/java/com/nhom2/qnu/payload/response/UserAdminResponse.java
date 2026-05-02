@@ -16,6 +16,7 @@ public class UserAdminResponse {
   private String fullName;
 
   private String phoneNumber;
+  private String cccd;
 
   private String email;
 

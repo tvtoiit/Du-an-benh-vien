@@ -16,10 +16,12 @@ import ConclusionForm from "./ConclusionForm";
 import serviceResultService from "../../../services/serviceResultService";
 import appointmentService from "../../../services/appointmentService";
 import MedicalExamForm from "./MedicalExamForm";
+import { TextField } from "@mui/material";
 
 const DsBenhNhanCoKetQua = () => {
     const [patients, setPatients] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
+    const [search, setSearch] = useState("");
 
     const handleBack = (needRefresh) => {
         setSelectedPatient(null);
@@ -28,6 +30,12 @@ const DsBenhNhanCoKetQua = () => {
             fetchData();
         };
     };
+
+    const keyword = search.trim();
+
+    const filteredPatients = keyword
+        ? patients.filter((p) => p.cccd?.includes(keyword))
+        : patients;
 
     const fetchData = async () => {
         try {
@@ -76,9 +84,28 @@ const DsBenhNhanCoKetQua = () => {
 
     return (
         <Box sx={{ p: 3 }}>
-            <Typography variant="h5" fontWeight="bold" mb={3} color="primary">
-                Danh sách bệnh nhân tiếp nhận & đã có kết quả
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 2
+                    }}
+                >
+                    <Typography variant="h5" fontWeight="bold" color="primary">
+                        Danh sách bệnh nhân tiếp nhận & đã có kết quả
+                    </Typography>
+
+                    <TextField
+                        size="small"
+                        label="Tìm theo CCCD"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        sx={{ width: "300px" }}
+                    />
+                </Box>
+            </Box>
 
             <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
                 <Table>
@@ -88,6 +115,7 @@ const DsBenhNhanCoKetQua = () => {
                             <TableCell sx={{ fontWeight: "bold" }}>Họ và tên</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>Ngày khám</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>SĐT</TableCell>
+                            <TableCell sx={{ fontWeight: "bold" }}>CCCD</TableCell>
                             <TableCell sx={{ fontWeight: "bold" }}>Trạng thái</TableCell>
                             <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>
                                 Thao tác
@@ -96,7 +124,7 @@ const DsBenhNhanCoKetQua = () => {
                     </TableHead>
 
                     <TableBody>
-                        {patients.map((p, index) => (
+                        {filteredPatients.map((p, index) => (
                             <TableRow key={p.patientId} hover>
                                 <TableCell>{index + 1}</TableCell>
 
@@ -108,6 +136,7 @@ const DsBenhNhanCoKetQua = () => {
 
                                 {/* Contact number */}
                                 <TableCell>{p.contactNumber ?? "—"}</TableCell>
+                                <TableCell>{p.cccd}</TableCell>
 
                                 {/* Status */}
                                 <TableCell>
@@ -147,6 +176,14 @@ const DsBenhNhanCoKetQua = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
+
+                        {filteredPatients.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={7} align="center">
+                                    Không tìm thấy bệnh nhân
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

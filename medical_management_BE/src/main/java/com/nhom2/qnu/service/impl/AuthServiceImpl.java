@@ -13,6 +13,7 @@ import com.nhom2.qnu.payload.request.login_signup.SignupRequest;
 import com.nhom2.qnu.payload.response.ApiResponse;
 import com.nhom2.qnu.payload.response.JwtResponse;
 import com.nhom2.qnu.repository.AccountRepository;
+import com.nhom2.qnu.repository.PatientsRepository;
 import com.nhom2.qnu.repository.RoleRepository;
 import com.nhom2.qnu.repository.TokenRepository;
 import com.nhom2.qnu.repository.UserRepository;
@@ -62,6 +63,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private PatientsRepository patientsRepository;
+
     @Override
     public Object signin(LoginRequest loginRequest) {
 
@@ -100,27 +104,27 @@ public class AuthServiceImpl implements AuthService {
         String username = signupRequest.getUsername();
         if (accountRepository.existsByusername(username)) {
             throw new DataExistException("Tài khoản này đã tồn tại");
-        } else {
-            Account account = new Account();
-            account.setUsername(signupRequest.getUsername());
-            account.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-            Role role = roleRepository.findByName(NameRoleEnum.ROLE_USER.name())
-                    .orElseThrow(() -> new DataNotFoundException("Không tìm thấy vai trò người dùng"));
-
-            account.setRole(role);
-            accountRepository.save(account);
-            User user = new User();
-            user.setAccount(account);
-            user.setFullName(signupRequest.getUser().getFullName());
-            user.setPhoneNumber(signupRequest.getUser().getPhoneNumber());
-            user.setEmail(signupRequest.getUser().getEmail());
-            user.setAddress(signupRequest.getUser().getAddress());
-            // Bổ sung ngày sinh và gender
-            user.setDateOfBirth(signupRequest.getUser().getDateOfBirth());
-            user.setGender(signupRequest.getUser().getGender());
-            user.setStatus(Boolean.TRUE);
-            userRepository.save(user);
         }
+        Account account = new Account();
+        account.setUsername(signupRequest.getUsername());
+        account.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+        Role role = roleRepository.findByName(NameRoleEnum.ROLE_USER.name())
+                .orElseThrow(() -> new DataNotFoundException("Không tìm thấy vai trò người dùng"));
+
+        account.setRole(role);
+        accountRepository.save(account);
+        User user = new User();
+        user.setAccount(account);
+        user.setFullName(signupRequest.getUser().getFullName());
+        user.setPhoneNumber(signupRequest.getUser().getPhoneNumber());
+        user.setEmail(signupRequest.getUser().getEmail());
+        user.setAddress(signupRequest.getUser().getAddress());
+        user.setCcCongDan(signupRequest.getUser().getCcCongDan());
+        // Bổ sung ngày sinh và gender
+        user.setDateOfBirth(signupRequest.getUser().getDateOfBirth());
+        user.setGender(signupRequest.getUser().getGender());
+        user.setStatus(Boolean.TRUE);
+        userRepository.save(user);
 
         return new ApiResponse("Tạo thành công", HttpStatus.CREATED);
     }
