@@ -28,6 +28,7 @@ const UserManagement = ({ currentRole }) => {
     const [editingUser, setEditingUser] = useState(null);
     const [roles, setRoles] = useState([]);
     const [searchCccd, setSearchCccd] = useState("");
+    const [searchRole, setSearchRole] = useState("");
 
     const [formData, setFormData] = useState({
         full_name: "",
@@ -109,9 +110,14 @@ const UserManagement = ({ currentRole }) => {
         "ROLE_BENHNHAN": "Bệnh nhân"
     };
 
-    const filteredUsers = users.filter((u) =>
-        u.cccd?.includes(searchCccd)
-    );
+    const filteredUsers = users.filter((u) => {
+        const matchCccd = u.cccd?.includes(searchCccd);
+
+        const matchRole =
+            searchRole === "" || u.role === searchRole;
+
+        return matchCccd && matchRole;
+    });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -232,12 +238,33 @@ const UserManagement = ({ currentRole }) => {
                 </Typography>
 
                 <Box sx={{ display: "flex", gap: 2 }}>
+
                     <TextField
                         size="small"
                         label="Tìm theo CCCD"
                         value={searchCccd}
                         onChange={(e) => setSearchCccd(e.target.value)}
                     />
+
+                    <TextField
+                        select
+                        size="small"
+                        label="Lọc vai trò"
+                        value={searchRole}
+                        onChange={(e) => setSearchRole(e.target.value)}
+                        sx={{ minWidth: 180 }}
+                    >
+                        <MenuItem value="">Tất cả</MenuItem>
+
+                        {roles.map((r) => (
+                            <MenuItem
+                                key={r.roleId}
+                                value={r.roleName}
+                            >
+                                {roleText[r.roleName] || r.roleName}
+                            </MenuItem>
+                        ))}
+                    </TextField>
 
                     <Button
                         variant="contained"
@@ -246,6 +273,7 @@ const UserManagement = ({ currentRole }) => {
                     >
                         Thêm người dùng
                     </Button>
+
                 </Box>
             </Paper>
 
