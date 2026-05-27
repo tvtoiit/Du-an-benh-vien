@@ -36,13 +36,21 @@ const features = [
         key: "tiepNhan",
     },
     {
-        id: 2,
-        title: "Ứng tiền",
-        icon: <FaDollarSign size={36} color="#2e7d32" />,
+        id: 6,
+        title: "Thanh toán & hoàn tất",
+        icon: <FaCashRegister size={36} color="#c2185b" />,
         description:
-            "Thực hiện tạo và quản lý khoản tạm ứng viện phí cho bệnh nhân trước khi điều trị.",
-        key: "ungTien",
+            "Thực hiện thanh toán và kết thúc quy trình khám bệnh.",
+        key: "thanhToan",
     },
+    // {
+    //     id: 2,
+    //     title: "Ứng tiền",
+    //     icon: <FaDollarSign size={36} color="#2e7d32" />,
+    //     description:
+    //         "Thực hiện tạo và quản lý khoản tạm ứng viện phí cho bệnh nhân trước khi điều trị.",
+    //     key: "ungTien",
+    // },
     {
         id: 3,
         title: "Khám bệnh (phiếu khám)",
@@ -66,15 +74,7 @@ const features = [
         description:
             "Tạo đơn thuốc cho bệnh nhân sau khi có kết quả khám.",
         key: "keDonThuoc",
-    },
-    {
-        id: 6,
-        title: "Thanh toán & hoàn tất",
-        icon: <FaCashRegister size={36} color="#c2185b" />,
-        description:
-            "Thực hiện thanh toán và kết thúc quy trình khám bệnh.",
-        key: "thanhToan",
-    },
+    }
 ];
 
 // map giữa feature và key quyền trong permissions

@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +28,11 @@ public class Doctor implements Serializable {
     @Column(name = "doctor_id", length = 36, nullable = false)
     private String doctorId;
 
-    @Column(name = "experience", nullable = false)
-    private int experience;
+    @Column(name = "degree", length = 100)
+    private String degree;
+
+    @Column(name = "consultation_fee")
+    private BigDecimal consultationFee;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -41,6 +45,6 @@ public class Doctor implements Serializable {
     private Set<EHealthRecords> eHealthRecords = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id")
-    private Department department;
+    @JoinColumn(name = "room_group_id")
+    private RoomGroup roomGroup;
 }

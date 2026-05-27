@@ -22,6 +22,6 @@ public class Room implements Serializable {
     private String roomName;
 
     @ManyToOne
-    @JoinColumn(name = "department_id", nullable = false)
-    private Department department;
+    @JoinColumn(name = "room_group_id")
+    private RoomGroup roomGroup;
 }

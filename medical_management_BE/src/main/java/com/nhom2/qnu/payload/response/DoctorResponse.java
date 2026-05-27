@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -18,10 +19,7 @@ public class DoctorResponse {
     private String email;
     private String cccd;
     private String contactNumber;
-
-    private int experience;
-
-    private String departmentName;
-
+    private String degree;
+    private BigDecimal consultationFee;
     private List<String> roomNames;
 }

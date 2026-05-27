@@ -273,11 +273,24 @@ public class AppointmentServiceImpl implements AppointmentService {
         res.setPatient(p);
 
         DoctorResponse d = new DoctorResponse();
+
         d.setDoctorId(item.getDoctor().getDoctorId());
-        d.setDoctorName(item.getDoctor().getUser().getFullName());
-        d.setExperience(item.getDoctor().getExperience());
-        d.setEmail(item.getDoctor().getUser().getEmail());
-        d.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
+
+        d.setDoctorName(
+                item.getDoctor().getUser().getFullName());
+
+        d.setDegree(
+                item.getDoctor().getDegree());
+
+        d.setConsultationFee(
+                item.getDoctor().getConsultationFee());
+
+        d.setEmail(
+                item.getDoctor().getUser().getEmail());
+
+        d.setContactNumber(
+                item.getDoctor().getUser().getPhoneNumber());
+
         res.setDoctor(d);
 
         return res;

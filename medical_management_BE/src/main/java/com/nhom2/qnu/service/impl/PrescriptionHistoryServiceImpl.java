@@ -1,10 +1,17 @@
 package com.nhom2.qnu.service.impl;
 
-import com.nhom2.qnu.model.*;
+import com.nhom2.qnu.model.AppointmentSchedules;
+import com.nhom2.qnu.model.Medicines;
+import com.nhom2.qnu.model.Patients;
+import com.nhom2.qnu.model.PrescriptionDetail;
+import com.nhom2.qnu.model.PrescriptionHistory;
 import com.nhom2.qnu.payload.request.PrescriptionHistoryRequest;
 import com.nhom2.qnu.payload.response.prescriptionhistory.CreatePrescriptionHistoryResponse;
 import com.nhom2.qnu.payload.response.prescriptionhistory.UpdatePrescriptionHistoryResponse;
-import com.nhom2.qnu.repository.*;
+import com.nhom2.qnu.repository.AppointmentRepository;
+import com.nhom2.qnu.repository.MedicinesRepository;
+import com.nhom2.qnu.repository.PatientsRepository;
+import com.nhom2.qnu.repository.PrescriptionHistoryRepository;
 import com.nhom2.qnu.service.PrescriptionHistoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,127 +22,140 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class PrescriptionHistoryServiceImpl implements PrescriptionHistoryService {
+public class PrescriptionHistoryServiceImpl
+        implements PrescriptionHistoryService {
 
-  @Autowired
-  private PatientsRepository patientsRepository;
+    @Autowired
+    private PatientsRepository patientsRepository;
 
-  @Autowired
-  private AppointmentRepository appointmentRepository;
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
-  @Autowired
-  private PrescriptionHistoryRepository prescriptionHistoryRepository;
+    @Autowired
+    private PrescriptionHistoryRepository prescriptionHistoryRepository;
 
-  @Autowired
-  private MedicinesRepository medicinesRepository;
+    @Autowired
+    private MedicinesRepository medicinesRepository;
 
-  @Override
-  @Transactional
-  public ResponseEntity<CreatePrescriptionHistoryResponse> save(PrescriptionHistoryRequest req) {
+    // =========================================================
+    // CREATE PRESCRIPTION
+    // =========================================================
+    @Override
+    @Transactional
+    public ResponseEntity<CreatePrescriptionHistoryResponse> save(
+            PrescriptionHistoryRequest req) {
 
-    // 1. Lấy bệnh nhân
-    Patients patient = patientsRepository.findById(req.getPatientId())
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Patient not found"));
+        // 1. Lấy bệnh nhân
+        Patients patient = patientsRepository
+                .findById(req.getPatientId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Patient not found"));
 
-    // 2. Lấy lần khám
-    AppointmentSchedules appointment = appointmentRepository.findById(req.getAppointmentId())
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Appointment not found"));
+        // 2. Lấy lịch khám
+        AppointmentSchedules appointment = appointmentRepository
+                .findById(req.getAppointmentId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Appointment not found"));
 
-    // 3. Tạo đơn thuốc (header)
-    PrescriptionHistory prescription = PrescriptionHistory.builder()
-        .patient(patient)
-        .appointment(appointment)
-        .note(req.getNote())
-        .build();
+        // 3. Tạo đơn thuốc
+        PrescriptionHistory prescription = PrescriptionHistory.builder()
+                .patient(patient)
+                .appointment(appointment)
+                .note(req.getNote())
+                .build();
 
-    // lưu header trước
-    prescriptionHistoryRepository.save(prescription);
+        // save trước để có id
+        prescriptionHistoryRepository.save(prescription);
 
-    // 4. Lưu từng thuốc
-    for (PrescriptionHistoryRequest.Detail d : req.getDetails()) {
+        // 4. Tạo chi tiết thuốc
+        for (PrescriptionHistoryRequest.Detail d : req.getDetails()) {
 
-      Medicines med = medicinesRepository.findById(d.getMedicineId())
-          .orElseThrow(() -> new RuntimeException("Medicine not found"));
+            Medicines medicine = medicinesRepository.findById(
+                    d.getMedicineId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Medicine not found"));
 
-      // Kiểm tra tồn kho
-      if (med.getQuantity() < d.getQuantity()) {
-        throw new RuntimeException("Not enough stock for: " + med.getName());
-      }
+            PrescriptionDetail detail = PrescriptionDetail.builder()
+                    .prescriptionHistory(
+                            prescription)
+                    .medicine(medicine)
+                    .quantity(d.getQuantity())
+                    .dosage(d.getDosage())
+                    .duration(d.getDuration())
+                    .build();
 
-      // Trừ kho
-      med.setQuantity(med.getQuantity() - d.getQuantity());
-      medicinesRepository.save(med);
+            prescription.getDetails().add(detail);
+        }
 
-      // Tạo detail
-      PrescriptionDetail detail = PrescriptionDetail.builder()
-          .prescriptionHistory(prescription)
-          .medicine(med)
-          .quantity(d.getQuantity())
-          .dosage(d.getDosage())
-          .duration(d.getDuration())
-          .build();
+        // 5. Save lại
+        prescriptionHistoryRepository.save(prescription);
 
-      prescription.getDetails().add(detail);
+        // 6. Update trạng thái khám
+        appointment.setStatus("Đã kê đơn");
+
+        appointmentRepository.save(appointment);
+
+        // 7. Response
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        new CreatePrescriptionHistoryResponse(
+                                "201",
+                                "Created successfully",
+                                prescription.getPrescriptionId()));
     }
 
-    // 5. Save lại đơn có detail (cascade)
-    prescriptionHistoryRepository.save(prescription);
+    // =========================================================
+    // UPDATE PRESCRIPTION
+    // =========================================================
+    @Override
+    @Transactional
+    public ResponseEntity<UpdatePrescriptionHistoryResponse> update(
+            PrescriptionHistoryRequest req,
+            String id) {
 
-    // 6. Cập nhật trạng thái lần khám
-    appointment.setStatus("Đã kê đơn");
-    appointmentRepository.save(appointment);
+        // 1. Tìm đơn thuốc
+        PrescriptionHistory prescription = prescriptionHistoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Prescription not found"));
 
-    // 7. Trả về response
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new CreatePrescriptionHistoryResponse(
-            "201",
-            "Created successfully",
-            prescription.getPrescriptionId()));
-  }
+        // 2. Xóa toàn bộ detail cũ
+        prescription.getDetails().clear();
 
-  @Override
-  @Transactional
-  public ResponseEntity<UpdatePrescriptionHistoryResponse> update(
-      PrescriptionHistoryRequest req, String id) {
+        // 3. Update note
+        prescription.setNote(req.getNote());
 
-    // 1) Lấy đơn thuốc
-    PrescriptionHistory prescription = prescriptionHistoryRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Prescription not found"));
+        // 4. Add detail mới
+        for (PrescriptionHistoryRequest.Detail d : req.getDetails()) {
 
-    // 2) Xóa toàn bộ chi tiết cũ (vì đơn thuốc thay đổi)
-    prescription.getDetails().clear();
+            Medicines medicine = medicinesRepository.findById(
+                    d.getMedicineId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Medicine not found"));
 
-    // 3) Cập nhật ghi chú
-    prescription.setNote(req.getNote());
+            PrescriptionDetail detail = PrescriptionDetail.builder()
+                    .prescriptionHistory(
+                            prescription)
+                    .medicine(medicine)
+                    .quantity(d.getQuantity())
+                    .dosage(d.getDosage())
+                    .duration(d.getDuration())
+                    .build();
 
-    // 4) Lưu lại detail mới
-    for (PrescriptionHistoryRequest.Detail d : req.getDetails()) {
+            prescription.getDetails().add(detail);
+        }
 
-      Medicines med = medicinesRepository.findById(d.getMedicineId())
-          .orElseThrow(() -> new RuntimeException("Medicine not found"));
+        // 5. Save update
+        prescriptionHistoryRepository.save(prescription);
 
-      // Không trừ kho khi update (tùy nhu cầu — nếu cần tôi viết thêm)
-      PrescriptionDetail detail = PrescriptionDetail.builder()
-          .prescriptionHistory(prescription)
-          .medicine(med)
-          .quantity(d.getQuantity())
-          .dosage(d.getDosage())
-          .duration(d.getDuration())
-          .build();
-
-      prescription.getDetails().add(detail);
+        // 6. Response
+        return ResponseEntity.ok(
+                UpdatePrescriptionHistoryResponse
+                        .builder()
+                        .status("200")
+                        .massage("Updated successfully")
+                        .build());
     }
-
-    prescriptionHistoryRepository.save(prescription);
-
-    return ResponseEntity.ok(
-        UpdatePrescriptionHistoryResponse.builder()
-            .status("200")
-            .massage("Updated successfully")
-            .build());
-  }
-
 }

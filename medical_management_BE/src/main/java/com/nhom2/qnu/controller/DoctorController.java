@@ -5,13 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.nhom2.qnu.payload.request.DoctorRequest;
 import com.nhom2.qnu.payload.response.DoctorResponse;
@@ -20,32 +14,52 @@ import com.nhom2.qnu.service.DoctorService;
 @RestController
 @RequestMapping("/api/v1/doctors")
 public class DoctorController {
+
     @Autowired
     private DoctorService doctorService;
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateDoctor(@RequestBody DoctorRequest request,
-            @PathVariable(value = "id") String id) {
-        return new ResponseEntity<>(doctorService.updateDoctors(id, request), HttpStatus.CREATED);
-    }
-
+    // ==========================================
+    // CREATE DOCTOR
+    // ==========================================
     @PostMapping("/create")
-    public ResponseEntity<?> createDoctors(@RequestBody DoctorRequest request) {
-        return new ResponseEntity<>(doctorService.createDoctors(request), HttpStatus.CREATED);
+    public ResponseEntity<?> createDoctors(
+            @RequestBody DoctorRequest request) {
+
+        return new ResponseEntity<>(
+                doctorService.createDoctors(request),
+                HttpStatus.CREATED);
     }
 
+    // ==========================================
+    // UPDATE DOCTOR
+    // ==========================================
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDoctor(
+            @RequestBody DoctorRequest request,
+            @PathVariable("id") String id) {
+
+        return new ResponseEntity<>(
+                doctorService.updateDoctors(id, request),
+                HttpStatus.OK);
+    }
+
+    // ==========================================
+    // GET ONE DOCTOR
+    // ==========================================
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPatient(@PathVariable(value = "id") String id) {
-        return ResponseEntity.ok(doctorService.findDoctorServiceImpl(id));
+    public ResponseEntity<?> getDoctor(
+            @PathVariable("id") String id) {
+
+        return ResponseEntity.ok(
+                doctorService.findDoctorServiceImpl(id));
     }
 
+    // ==========================================
+    // GET ALL DOCTORS
+    // ==========================================
     @GetMapping("/get_All")
-    public List<DoctorResponse> getAllPatients() {
-        return doctorService.findAllDoctors();
-    }
+    public List<DoctorResponse> getAllDoctors() {
 
-    @GetMapping("/by-department/{departmentId}")
-    public List<DoctorResponse> getDoctorsByDepartment(@PathVariable String departmentId) {
-        return doctorService.findByDepartmentId(departmentId);
+        return doctorService.findAllDoctors();
     }
 }

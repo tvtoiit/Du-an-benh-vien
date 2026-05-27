@@ -25,21 +25,21 @@ public class MedicinesServiceImpl implements MedicinesService {
         private PrescriptionDetailRepository prescriptionDetailRepository;
 
         // ============================================
-        // CREATE – thêm thuốc mới vào kho
+        // CREATE
         // ============================================
         @Override
         public MedicinesResponse createMedicins(MedicinesRequest request) {
 
-                // Kiểm tra trùng tên thuốc
+                // kiểm tra trùng tên
                 if (medicinesRepository.existsByName(request.getName())) {
-                        throw new RuntimeException("Thuốc đã tồn tại trong kho!");
+                        throw new RuntimeException("Thuốc đã tồn tại!");
                 }
 
                 Medicines med = new Medicines();
+
                 med.setName(request.getName());
                 med.setUnit(request.getUnit());
-                med.setPrice(request.getPrice());
-                med.setQuantity(request.getQuantity()); // tồn kho ban đầu
+                med.setDescription(request.getDescription());
 
                 Medicines saved = medicinesRepository.save(med);
 
@@ -47,12 +47,11 @@ public class MedicinesServiceImpl implements MedicinesService {
                                 saved.getMedicineId(),
                                 saved.getName(),
                                 saved.getUnit(),
-                                saved.getQuantity(),
-                                saved.getPrice());
+                                saved.getDescription());
         }
 
         // ============================================
-        // UPDATE – nhập thêm thuốc vào kho
+        // UPDATE
         // ============================================
         @Override
         public MedicinesResponse updateMedicines(MedicinesRequest request, String id) {
@@ -61,14 +60,9 @@ public class MedicinesServiceImpl implements MedicinesService {
                                 .orElseThrow(() -> new AccessDeniedException(
                                                 new ApiResponse(false, "Thuốc không tồn tại!")));
 
-                // cập nhật thông tin thuốc
                 med.setName(request.getName());
                 med.setUnit(request.getUnit());
-                med.setPrice(request.getPrice());
-
-                // Tăng tồn kho → không ghi đè số lượng cũ!
-                int newQuantity = med.getQuantity() + request.getQuantity();
-                med.setQuantity(newQuantity);
+                med.setDescription(request.getDescription());
 
                 Medicines saved = medicinesRepository.save(med);
 
@@ -76,8 +70,7 @@ public class MedicinesServiceImpl implements MedicinesService {
                                 saved.getMedicineId(),
                                 saved.getName(),
                                 saved.getUnit(),
-                                saved.getQuantity(),
-                                saved.getPrice());
+                                saved.getDescription());
         }
 
         // ============================================
@@ -93,8 +86,7 @@ public class MedicinesServiceImpl implements MedicinesService {
                                 med.getMedicineId(),
                                 med.getName(),
                                 med.getUnit(),
-                                med.getQuantity(),
-                                med.getPrice());
+                                med.getDescription());
         }
 
         // ============================================
@@ -108,24 +100,26 @@ public class MedicinesServiceImpl implements MedicinesService {
                                                 m.getMedicineId(),
                                                 m.getName(),
                                                 m.getUnit(),
-                                                m.getQuantity(),
-                                                m.getPrice()))
+                                                m.getDescription()))
                                 .collect(Collectors.toList());
         }
 
+        // ============================================
+        // DELETE
+        // ============================================
         @Override
         public void deleteMedicine(String id) {
 
                 Medicines medicine = medicinesRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
 
-                // Kiểm tra xem thuốc có đang được sử dụng trong đơn thuốc nào không
                 boolean isInUse = prescriptionDetailRepository.existsByMedicine_MedicineId(id);
+
                 if (isInUse) {
-                        throw new RuntimeException("Thuốc đang được sử dụng trong đơn thuốc, không thể xóa!");
+                        throw new RuntimeException(
+                                        "Thuốc đang được sử dụng trong đơn thuốc!");
                 }
 
                 medicinesRepository.delete(medicine);
         }
-
 }

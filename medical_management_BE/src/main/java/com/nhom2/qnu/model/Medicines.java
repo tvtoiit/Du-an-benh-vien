@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tbl_medicines")
@@ -23,8 +22,14 @@ public class Medicines {
     @Column(name = "medicine_id", length = 36)
     private String medicineId;
 
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    // viên, chai, hộp,...
+    @Column(name = "unit", length = 50)
     private String unit;
-    private int quantity;
-    private BigDecimal price;
+
+    // mô tả thuốc
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 }

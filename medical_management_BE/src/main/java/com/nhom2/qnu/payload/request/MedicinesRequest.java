@@ -11,9 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class MedicinesRequest {
-    
+
     private String name;
     private String unit;
-    private int quantity;
-    private BigDecimal price;
+    private String description;
 }

@@ -106,7 +106,9 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
                     dr.setDoctorName(mh.getDoctor().getUser().getFullName());
                     dr.setEmail(mh.getDoctor().getUser().getEmail());
                     dr.setContactNumber(mh.getDoctor().getUser().getPhoneNumber());
-                    dr.setExperience(mh.getDoctor().getExperience());
+                    dr.setDegree(mh.getDoctor().getDegree());
+                    dr.setConsultationFee(
+                            mh.getDoctor().getConsultationFee());
                     mhRes.setDoctor(dr);
                 }
 
@@ -147,7 +149,9 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
                 DoctorResponse dr = new DoctorResponse();
                 dr.setDoctorId(item.getDoctorId());
                 dr.setDoctorName(item.getUser().getFullName());
-                dr.setExperience(item.getExperience());
+                dr.setDegree(item.getDegree());
+                dr.setConsultationFee(
+                        item.getConsultationFee());
                 dr.setContactNumber(item.getUser().getPhoneNumber());
                 dr.setEmail(item.getUser().getEmail());
 
@@ -173,7 +177,10 @@ public class EHealthRecordsServiceImpl implements EHealthRecordsService {
                     DoctorResponse dr = new DoctorResponse();
                     dr.setDoctorId(item.getDoctor().getDoctorId());
                     dr.setDoctorName(item.getDoctor().getUser().getFullName());
-                    dr.setExperience(item.getDoctor().getExperience());
+                    dr.setDegree(
+                            item.getDoctor().getDegree());
+                    dr.setConsultationFee(
+                            item.getDoctor().getConsultationFee());
                     dr.setContactNumber(item.getDoctor().getUser().getPhoneNumber());
                     dr.setEmail(item.getDoctor().getUser().getEmail());
 
