@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+
 import {
     Box,
     Typography,
@@ -8,219 +9,396 @@ import {
     Paper,
     Stack,
     Alert,
+    Avatar,
+    Chip,
+    Divider,
+    Card,
+    CardContent,
+    InputAdornment
 } from "@mui/material";
 
-import departmentService from "../../../services/departmentService";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import NotesIcon from "@mui/icons-material/Notes";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+
 import doctorService from "../../../services/doctorService";
 import appointmentService from "../../../services/appointmentService";
+
 import { toast } from "react-toastify";
 
-const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
+const TiepNhan = ({
+    selectedPatient,
+    onBack = () => { }
+}) => {
+
     const [formData, setFormData] = useState({
-        department: "",
         doctor: "",
         room: "",
         note: "",
     });
 
-    const [departments, setDepartments] = useState([]);
     const [doctors, setDoctors] = useState([]);
 
-    // Lịch khám gần nhất chưa hoàn tất
-    const [currentAppointment, setCurrentAppointment] = useState(null);
-    const [loadingAppointment, setLoadingAppointment] = useState(true);
+    const [currentAppointment, setCurrentAppointment] =
+        useState(null);
 
-    // ============================
-    //  VALIDATION INPUT PATIENT
-    // ============================
+    const [loadingAppointment, setLoadingAppointment] =
+        useState(true);
+
+    // ==========================================
+    // VALIDATE PATIENT
+    // ==========================================
     if (!selectedPatient) {
+
         return (
             <Box sx={{ p: 4 }}>
+
                 <Typography color="error">
-                    Vui lòng chọn bệnh nhân từ danh sách trước khi tiếp nhận.
+
+                    Vui lòng chọn bệnh nhân trước.
+
                 </Typography>
+
             </Box>
         );
     }
 
-    // ============================
-    // LOAD KHOA
-    // ============================
-    const loadDepartments = useCallback(async () => {
+    // ==========================================
+    // LOAD DOCTORS
+    // ==========================================
+    const loadDoctors = useCallback(async () => {
+
         try {
-            const res = await departmentService.getAll();
+
+            const res =
+                await doctorService.getAll();
+
             const list = res.data ?? res;
-            setDepartments(list || []);
+
+            setDoctors(list || []);
+
         } catch (err) {
-            console.error("Lỗi load khoa:", err);
+
+            console.error(
+                "Lỗi load bác sĩ:",
+                err
+            );
         }
+
     }, []);
 
     useEffect(() => {
-        loadDepartments();
-    }, [loadDepartments]);
 
-    // ============================
-    // LOAD BÁC SĨ THEO KHOA
-    // ============================
-    const loadDoctors = useCallback(async () => {
-        if (!formData.department) return;
-        try {
-            const res = await doctorService.getByIdDepartment(formData.department);
-            const list = res.data ?? res;
-            setDoctors(list || []);
-        } catch (err) {
-            console.error("Lỗi load bác sĩ:", err);
-        }
-    }, [formData.department]);
-
-    useEffect(() => {
         loadDoctors();
+
     }, [loadDoctors]);
 
-    // Reset room khi đổi doctor
+    // ==========================================
+    // LOAD APPOINTMENT
+    // ==========================================
+    const loadCurrentAppointment =
+        useCallback(async () => {
+
+            try {
+
+                setLoadingAppointment(true);
+
+                const res =
+                    await appointmentService
+                        .getByPatient(
+                            selectedPatient.patientId
+                        );
+
+                const list =
+                    res.data ?? res ?? [];
+
+                const active = list
+                    .filter(
+                        (a) =>
+                            a.status !==
+                            "Đã thanh toán"
+                    )
+                    .sort(
+                        (a, b) =>
+                            new Date(
+                                b.appointmentDatetime
+                            ) -
+                            new Date(
+                                a.appointmentDatetime
+                            )
+                    )[0];
+
+                setCurrentAppointment(
+                    active || null
+                );
+
+            } catch (err) {
+
+                console.error(
+                    "Lỗi load lịch khám:",
+                    err
+                );
+
+            } finally {
+
+                setLoadingAppointment(false);
+            }
+
+        }, [selectedPatient.patientId]);
+
     useEffect(() => {
-        setFormData((prev) => ({ ...prev, room: "" }));
-    }, [formData.doctor]);
 
-    // ============================
-    // LOAD LỊCH KHÁM GẦN NHẤT
-    // ============================
-    const loadCurrentAppointment = useCallback(async () => {
-        try {
-            setLoadingAppointment(true);
-
-            const res = await appointmentService.getByPatient(
-                selectedPatient.patientId
-            );
-
-            const list = res.data ?? res ?? [];
-
-            // Lọc history → bỏ qua "Đã thanh toán" (vì đó là khám lại)
-            const active = list
-                .filter((a) => a.status !== "Đã thanh toán")
-                .sort(
-                    (a, b) =>
-                        new Date(b.appointmentDatetime) -
-                        new Date(a.appointmentDatetime)
-                )[0];
-
-            setCurrentAppointment(active || null);
-        } catch (err) {
-            console.error("Lỗi lấy lịch khám:", err);
-        } finally {
-            setLoadingAppointment(false);
-        }
-    }, [selectedPatient.patientId]);
-
-    useEffect(() => {
         loadCurrentAppointment();
+
     }, [loadCurrentAppointment]);
 
-    // ============================
-    // FORM CHANGE
-    // ============================
+    // ==========================================
+    // HANDLE CHANGE
+    // ==========================================
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+
+        const { name, value } = e.target;
+
+        // auto fill room
+        if (name === "doctor") {
+
+            const selectedDoctor =
+                doctors.find(
+                    (d) =>
+                        d.doctorId === value
+                );
+
+            setFormData({
+                ...formData,
+                doctor: value,
+                room:
+                    selectedDoctor?.roomName ?? ""
+            });
+
+            return;
+        }
+
+        setFormData({
+            ...formData,
+            [name]: value
+        });
     };
 
-    // ============================
-    // SUBMIT TẠO LỊCH KHÁM
-    // ============================
+    // ==========================================
+    // SUBMIT
+    // ==========================================
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         if (currentAppointment) {
+
             toast.warning(
-                "Bệnh nhân đang có lịch khám chưa hoàn tất, không thể tạo thêm lịch mới."
+                "Bệnh nhân đang có lịch khám chưa hoàn tất!"
             );
+
             return;
         }
 
         try {
+
             const payload = {
-                patientId: selectedPatient.patientId,
-                doctorId: formData.doctor,
-                appointmentDatetime: new Date()
-                    .toISOString()
-                    .slice(0, 19)
-                    .replace("T", " "),
-                room: formData.room,
-                note: formData.note,
+                patientId:
+                    selectedPatient.patientId,
+
+                doctorId:
+                    formData.doctor,
+
+                appointmentDatetime:
+                    new Date()
+                        .toISOString()
+                        .slice(0, 19)
+                        .replace("T", " "),
+
+                room:
+                    formData.room,
+
+                note:
+                    formData.note,
             };
 
-            await appointmentService.create(payload);
+            await appointmentService
+                .create(payload);
 
-            toast.success("Tạo lịch khám thành công!");
+            toast.success(
+                "Tiếp nhận thành công!"
+            );
+
             onBack(true);
+
         } catch (err) {
-            console.error("Lỗi tạo lịch khám:", err);
-            toast.error("Không thể tạo lịch khám!");
+
+            console.error(err);
+
+            toast.error(
+                "Không thể tiếp nhận!"
+            );
         }
     };
 
+    // ==========================================
+    // RESET
+    // ==========================================
     const handleReset = () => {
+
         setFormData({
-            department: "",
             doctor: "",
             room: "",
             note: "",
         });
     };
 
-    const disableCreate = !!currentAppointment;
+    const disableCreate =
+        !!currentAppointment;
 
-    // ============================
+    // doctor selected
+    const selectedDoctor =
+        doctors.find(
+            (d) =>
+                d.doctorId === formData.doctor
+        );
+
+    // ==========================================
     // UI
-    // ============================
+    // ==========================================
     return (
-        <Box sx={{ p: 4 }}>
-            <Typography variant="h5" fontWeight="bold" mb={3} color="primary" align="center">
-                Tiếp nhận & Chỉ định khám
-            </Typography>
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
 
-            <Typography mb={2}>
-                Bệnh nhân: <b>{selectedPatient.fullName}</b> (ID:{" "}
-                <b>{selectedPatient.patientId}</b>)
-            </Typography>
+            {/* HEADER */}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 4,
+                    background:
+                        "linear-gradient(135deg, #1976d2, #42a5f5)",
+                    color: "#fff"
+                }}
+            >
 
-            {/* cảnh báo nếu có lịch đang active */}
-            {!loadingAppointment && currentAppointment && (
-                <Alert severity="warning" sx={{ mb: 2 }}>
-                    Bệnh nhân đang có lịch khám trạng thái{" "}
-                    <b>{currentAppointment.status}</b> với bác sĩ{" "}
-                    <b>{currentAppointment.doctor?.doctorName}</b> tại phòng{" "}
-                    <b>{currentAppointment.room}</b> lúc{" "}
-                    <b>{currentAppointment.appointmentDatetime}</b>.
-                    Vui lòng xử lý lịch này trước khi tạo lịch mới.
-                </Alert>
-            )}
+                <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                >
+                    Tiếp nhận khám bệnh
+                </Typography>
 
-            <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, maxWidth: 600, mx: "auto" }}>
-                <form onSubmit={handleSubmit}>
-                    <Stack spacing={3}>
-                        {/* Chọn khoa */}
-                        <TextField
-                            select
-                            label="Khoa khám"
-                            name="department"
-                            value={formData.department}
-                            onChange={handleChange}
-                            fullWidth
-                            required
-                            disabled={disableCreate}
+                <Typography variant="body2">
+
+                    Hệ thống tiếp nhận và
+                    chỉ định khám
+
+                </Typography>
+
+            </Paper>
+
+            {/* PATIENT INFO */}
+            <Card
+                sx={{
+                    mb: 3,
+                    borderRadius: 4
+                }}
+            >
+
+                <CardContent>
+
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        alignItems="center"
+                    >
+
+                        <Avatar
+                            sx={{
+                                bgcolor: "#1976d2",
+                                width: 56,
+                                height: 56
+                            }}
                         >
-                            {departments.map((dep) => (
-                                <MenuItem key={dep.departmentId} value={dep.departmentId}>
-                                    {dep.name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                            {selectedPatient.fullName?.[0]}
+                        </Avatar>
 
-                        {/* Chọn bác sĩ */}
+                        <Box>
+
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                            >
+                                {selectedPatient.fullName}
+                            </Typography>
+
+                            <Typography
+                                color="text.secondary"
+                            >
+                                CCCD:
+                                {" "}
+                                {selectedPatient.cccd}
+                            </Typography>
+
+                        </Box>
+
+                    </Stack>
+
+                </CardContent>
+
+            </Card>
+
+            {/* WARNING */}
+            {!loadingAppointment &&
+                currentAppointment && (
+
+                    <Alert
+                        severity="warning"
+                        sx={{
+                            mb: 3,
+                            borderRadius: 3
+                        }}
+                    >
+
+                        Bệnh nhân đang có lịch khám
+                        chưa hoàn tất với bác sĩ
+                        {" "}
+                        <b>
+                            {
+                                currentAppointment
+                                    .doctor?.doctorName
+                            }
+                        </b>
+
+                    </Alert>
+                )}
+
+            {/* FORM */}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 4,
+                    borderRadius: 4,
+                    maxWidth: 700,
+                    mx: "auto"
+                }}
+            >
+
+                <form onSubmit={handleSubmit}>
+
+                    <Stack spacing={3}>
+
+                        {/* SELECT DOCTOR */}
                         <TextField
                             select
-                            label="Bác sĩ"
+                            label="Chọn bác sĩ"
                             name="doctor"
                             value={formData.doctor}
                             onChange={handleChange}
@@ -228,36 +406,125 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                             required
                             disabled={disableCreate}
                         >
+
                             {doctors.map((doc) => (
-                                <MenuItem key={doc.doctorId} value={doc.doctorId}>
+
+                                <MenuItem
+                                    key={doc.doctorId}
+                                    value={doc.doctorId}
+                                >
+
                                     {doc.doctorName}
+                                    {" - "}
+                                    {doc.degree}
+
                                 </MenuItem>
+
                             ))}
+
                         </TextField>
 
-                        {/* Chọn phòng */}
-                        {formData.doctor && (
-                            <TextField
-                                select
-                                label="Phòng khám"
-                                name="room"
-                                value={formData.room}
-                                onChange={handleChange}
-                                fullWidth
-                                required
-                                disabled={disableCreate}
+                        {/* DOCTOR INFO */}
+                        {selectedDoctor && (
+
+                            <Paper
+                                variant="outlined"
+                                sx={{
+                                    p: 3,
+                                    borderRadius: 3,
+                                    background:
+                                        "#f8fafc"
+                                }}
                             >
-                                {doctors
-                                    .find((doc) => doc.doctorId === formData.doctor)
-                                    ?.roomNames.map((room) => (
-                                        <MenuItem key={room} value={room}>
-                                            {room}
-                                        </MenuItem>
-                                    ))}
-                            </TextField>
+
+                                <Stack spacing={2}>
+
+                                    <Stack
+                                        direction="row"
+                                        spacing={2}
+                                        alignItems="center"
+                                    >
+
+                                        <Avatar
+                                            sx={{
+                                                bgcolor:
+                                                    "#1976d2"
+                                            }}
+                                        >
+                                            <LocalHospitalIcon />
+                                        </Avatar>
+
+                                        <Box>
+
+                                            <Typography
+                                                fontWeight="bold"
+                                            >
+                                                {
+                                                    selectedDoctor
+                                                        .doctorName
+                                                }
+                                            </Typography>
+
+                                            <Chip
+                                                label={
+                                                    selectedDoctor
+                                                        .degree
+                                                }
+                                                color="primary"
+                                                size="small"
+                                            />
+
+                                        </Box>
+
+                                    </Stack>
+
+                                    <Divider />
+
+                                    <Typography>
+
+                                        Phòng khám:
+                                        {" "}
+                                        <b>
+                                            {
+                                                selectedDoctor
+                                                    .roomName
+                                            }
+                                        </b>
+
+                                    </Typography>
+
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        alignItems="center"
+                                    >
+
+                                        <MonetizationOnIcon
+                                            color="success"
+                                        />
+
+                                        <Typography
+                                            color="success.main"
+                                            fontWeight="bold"
+                                        >
+
+                                            {Number(
+                                                selectedDoctor
+                                                    .consultationFee
+                                            ).toLocaleString()}
+                                            {" "}
+                                            VNĐ
+
+                                        </Typography>
+
+                                    </Stack>
+
+                                </Stack>
+
+                            </Paper>
                         )}
 
-                        {/* Ghi chú */}
+                        {/* NOTE */}
                         <TextField
                             label="Ghi chú"
                             name="note"
@@ -265,30 +532,56 @@ const TiepNhan = ({ selectedPatient, onBack = () => { } }) => {
                             onChange={handleChange}
                             fullWidth
                             multiline
-                            rows={3}
+                            rows={4}
                             disabled={disableCreate}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <NotesIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
 
-                        {/* Nút */}
-                        <Box display="flex" justifyContent="flex-end" gap={2}>
+                        {/* BUTTON */}
+                        <Box
+                            display="flex"
+                            justifyContent="flex-end"
+                            gap={2}
+                        >
+
                             <Button
                                 variant="outlined"
                                 onClick={handleReset}
                                 disabled={disableCreate}
+                                sx={{
+                                    borderRadius: 2,
+                                    px: 3
+                                }}
                             >
                                 Làm mới
                             </Button>
+
                             <Button
                                 type="submit"
                                 variant="contained"
                                 disabled={disableCreate}
+                                sx={{
+                                    borderRadius: 2,
+                                    px: 3
+                                }}
                             >
-                                Tạo chỉ định khám
+                                Tiếp nhận khám
                             </Button>
+
                         </Box>
+
                     </Stack>
+
                 </form>
+
             </Paper>
+
         </Box>
     );
 };

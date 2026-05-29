@@ -1,5 +1,5 @@
-// src/pages/features/Appointments/DanhSachTiepNhan.jsx
 import React, { useEffect, useState } from "react";
+
 import {
     Box,
     Typography,
@@ -10,140 +10,440 @@ import {
     TableCell,
     TableBody,
     Button,
+    TextField,
+    CircularProgress,
+    Avatar,
+    Stack,
+    Chip,
+    InputAdornment
 } from "@mui/material";
-import patientService from "../../../services/parentService";
-import { TextField } from "@mui/material";
 
-// Component Badge hiển thị trạng thái
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+
+import patientService from "../../../services/parentService";
+
+// ==========================================
+// STATUS CHIP
+// ==========================================
 const StatusBadge = ({ status }) => {
-    const colors = {
-        "Khám lại": "#0d6efd",
-        "Chờ khám": "#ffc107"
+
+    const config = {
+
+        "Khám lại": {
+            color: "primary",
+            label: "Khám lại"
+        },
+
+        "Chờ khám": {
+            color: "warning",
+            label: "Chờ khám"
+        },
+
+        "Đang khám": {
+            color: "success",
+            label: "Đang khám"
+        }
     };
 
+    const item =
+        config[status] || {
+            color: "default",
+            label: status
+        };
+
     return (
-        <span
-            style={{
-                padding: "4px 8px",
-                borderRadius: "6px",
-                color: "white",
-                backgroundColor: colors[status] || "#6c757d",
-                fontSize: "0.85rem",
-                fontWeight: 500,
-            }}
-        >
-            {status}
-        </span>
+        <Chip
+            label={item.label}
+            color={item.color}
+            size="small"
+        />
     );
 };
 
-const DanhSachTiepNhan = ({ onSelectPatient }) => {
-    const [patients, setPatients] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState("");
+const DanhSachTiepNhan = ({
+    onSelectPatient
+}) => {
 
+    const [patients, setPatients] =
+        useState([]);
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [search, setSearch] =
+        useState("");
+
+    // ==========================================
+    // FILTER
+    // ==========================================
     const keyword = search.trim();
 
-    const filteredPatients = patients.filter((p) =>
-        p.cccd?.includes(keyword)
-    );
+    const filteredPatients =
+        patients.filter((p) =>
+            p.cccd?.includes(keyword)
+        );
 
+    // ==========================================
+    // LOAD DATA
+    // ==========================================
     useEffect(() => {
-        const loadWaitingPatients = async () => {
-            try {
-                setLoading(true);
-                const res = await patientService.getWaitingPatients1();
-                const list = res.data ?? res;
-                setPatients(Array.isArray(list) ? list : []);
-            } catch (error) {
-                console.error("Lỗi load danh sách bệnh nhân chờ tiếp nhận:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+
+        const loadWaitingPatients =
+            async () => {
+
+                try {
+
+                    setLoading(true);
+
+                    const res =
+                        await patientService
+                            .getWaitingPatients1();
+
+                    const list =
+                        res.data ?? res;
+
+                    setPatients(
+                        Array.isArray(list)
+                            ? list
+                            : []
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Lỗi load danh sách bệnh nhân:",
+                        error
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
+            };
 
         loadWaitingPatients();
+
     }, []);
 
+    // ==========================================
+    // UI
+    // ==========================================
     return (
-        <Box>
-            <Box
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
+
+            {/* HEADER */}
+            <Paper
+                elevation={0}
                 sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 2,
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 4,
+                    background:
+                        "linear-gradient(135deg, #1976d2, #42a5f5)",
+                    color: "#fff"
                 }}
             >
-                <Typography variant="h6">
-                    Danh sách bệnh nhân chờ tiếp nhận
-                </Typography>
+
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                >
+
+                    <Box>
+
+                        <Typography
+                            variant="h5"
+                            fontWeight="bold"
+                        >
+                            Danh sách tiếp nhận
+                        </Typography>
+
+                        <Typography
+                            variant="body2"
+                        >
+
+                            Quản lý bệnh nhân
+                            chờ khám
+
+                        </Typography>
+
+                    </Box>
+
+                    <Avatar
+                        sx={{
+                            bgcolor: "#fff",
+                            color: "#1976d2",
+                            width: 56,
+                            height: 56
+                        }}
+                    >
+
+                        <MedicalServicesIcon />
+
+                    </Avatar>
+
+                </Stack>
+
+            </Paper>
+
+            {/* SEARCH */}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    borderRadius: 4
+                }}
+            >
 
                 <TextField
+                    fullWidth
                     size="small"
-                    label="Tìm theo CCCD"
+                    placeholder="Tìm kiếm theo CCCD..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ width: "300px" }}
-                />
-            </Box>
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
 
-            <Paper sx={{ p: 2 }}>
+                                <SearchIcon />
+
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+
+            </Paper>
+
+            {/* TABLE */}
+            <Paper
+                elevation={0}
+                sx={{
+                    borderRadius: 4,
+                    overflow: "hidden"
+                }}
+            >
+
                 <Table>
+
                     <TableHead>
-                        <TableRow>
-                            <TableCell>STT</TableCell>
-                            <TableCell>Họ tên</TableCell>
-                            <TableCell>SĐT</TableCell>
-                            <TableCell>CCCD</TableCell>
-                            <TableCell>ghi chu</TableCell>
-                            <TableCell>Trạng thái</TableCell>
-                            <TableCell align="right">Thao tác</TableCell>
+
+                        <TableRow
+                            sx={{
+                                background:
+                                    "#f1f5f9"
+                            }}
+                        >
+
+                            <TableCell>
+                                <strong>#</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Bệnh nhân</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>SĐT</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>CCCD</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Ghi chú</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Trạng thái</strong>
+                            </TableCell>
+
+                            <TableCell align="center">
+                                <strong>Thao tác</strong>
+                            </TableCell>
+
                         </TableRow>
+
                     </TableHead>
 
                     <TableBody>
+
+                        {/* LOADING */}
                         {loading ? (
+
                             <TableRow>
-                                <TableCell colSpan={7} align="center">
-                                    Đang tải dữ liệu...
+
+                                <TableCell
+                                    colSpan={7}
+                                    align="center"
+                                >
+
+                                    <Box py={4}>
+
+                                        <CircularProgress />
+
+                                    </Box>
+
                                 </TableCell>
+
                             </TableRow>
+
                         ) : filteredPatients.length === 0 ? (
+
+                            // EMPTY
                             <TableRow>
-                                <TableCell colSpan={7} align="center">
-                                    Không tìm thấy bệnh nhân
+
+                                <TableCell
+                                    colSpan={7}
+                                    align="center"
+                                >
+
+                                    <Typography
+                                        py={4}
+                                        color="text.secondary"
+                                    >
+
+                                        Không tìm thấy bệnh nhân
+
+                                    </Typography>
+
                                 </TableCell>
+
                             </TableRow>
+
                         ) : (
-                            filteredPatients.map((p, index) => (
-                                <TableRow key={p.patientId}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell>{p.fullName}</TableCell>
-                                    <TableCell>{p.phone}</TableCell>
-                                    <TableCell>{p.cccd}</TableCell>
-                                    <TableCell>{p.note}</TableCell>
 
-                                    {/* HIỂN THỊ TRẠNG THÁI */}
-                                    <TableCell>
-                                        <StatusBadge status={p.status} />
-                                    </TableCell>
+                            // DATA
+                            filteredPatients.map(
+                                (p, index) => (
 
-                                    <TableCell align="right">
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            onClick={() => onSelectPatient(p)}
+                                    <TableRow
+                                        key={p.patientId}
+                                        hover
+                                    >
+
+                                        {/* STT */}
+                                        <TableCell>
+                                            {index + 1}
+                                        </TableCell>
+
+                                        {/* PATIENT */}
+                                        <TableCell>
+
+                                            <Stack
+                                                direction="row"
+                                                spacing={2}
+                                                alignItems="center"
+                                            >
+
+                                                <Avatar
+                                                    sx={{
+                                                        bgcolor:
+                                                            "#1976d2"
+                                                    }}
+                                                >
+
+                                                    <PersonIcon />
+
+                                                </Avatar>
+
+                                                <Box>
+
+                                                    <Typography
+                                                        fontWeight="bold"
+                                                    >
+                                                        {p.fullName}
+                                                    </Typography>
+
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+
+                                                        ID:
+                                                        {" "}
+                                                        {p.patientId}
+
+                                                    </Typography>
+
+                                                </Box>
+
+                                            </Stack>
+
+                                        </TableCell>
+
+                                        {/* PHONE */}
+                                        <TableCell>
+                                            {p.phone}
+                                        </TableCell>
+
+                                        {/* CCCD */}
+                                        <TableCell>
+                                            {p.cccd}
+                                        </TableCell>
+
+                                        {/* NOTE */}
+                                        <TableCell>
+                                            {p.note || "-"}
+                                        </TableCell>
+
+                                        {/* STATUS */}
+                                        <TableCell>
+
+                                            <StatusBadge
+                                                status={p.status}
+                                            />
+
+                                        </TableCell>
+
+                                        {/* ACTION */}
+                                        <TableCell
+                                            align="center"
                                         >
-                                            Tiếp nhận
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={() =>
+                                                    onSelectPatient(p)
+                                                }
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform:
+                                                        "none",
+                                                    px: 2
+                                                }}
+                                            >
+
+                                                Tiếp nhận
+
+                                            </Button>
+
+                                        </TableCell>
+
+                                    </TableRow>
+                                )
+                            )
                         )}
+
                     </TableBody>
+
                 </Table>
+
             </Paper>
+
         </Box>
     );
 };

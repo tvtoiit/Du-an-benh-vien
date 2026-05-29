@@ -9,12 +9,24 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class DoctorRequest {
+
+    // user sẽ trở thành bác sĩ
     private String userId;
-    private String doctorName;
-    private String contactNumber;
-    private String email;
+
+    // trình độ
+    // ví dụ:
+    // Bác sĩ
+    // Thạc sĩ
+    // Tiến sĩ
     private String degree;
+
+    // phí khám
     private BigDecimal consultationFee;
+
+    // phòng khám
+    // ví dụ:
+    // 101
+    // 102
+    private String roomId;
 }

@@ -1,7 +1,11 @@
 package com.nhom2.qnu.service.impl;
 
 import com.nhom2.qnu.model.Room;
+import com.nhom2.qnu.model.RoomGroup;
+
 import com.nhom2.qnu.repository.RoomRepository;
+import com.nhom2.qnu.repository.RoomGroupRepository;
+
 import com.nhom2.qnu.service.RoomService;
 
 import lombok.RequiredArgsConstructor;
@@ -9,12 +13,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RoomServiceImpl implements RoomService {
+public class RoomServiceImpl
+        implements RoomService {
 
     private final RoomRepository roomRepository;
+
+    private final RoomGroupRepository roomGroupRepository;
 
     // ==========================================
     // CREATE ROOM
@@ -22,16 +30,42 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room create(Room request) {
 
-        // check trùng tên phòng
-        if (roomRepository.existsByRoomName(
-                request.getRoomName())) {
+        // check room group
+        RoomGroup roomGroup = roomGroupRepository
+                .findById(
+                        request
+                                .getRoomGroup()
+                                .getRoomGroupId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Khu phòng không tồn tại!"));
+
+        // check trùng phòng trong cùng khu
+        boolean exists = roomRepository
+                .existsByRoomNameAndRoomGroup_RoomGroupId(
+
+                        request.getRoomName(),
+
+                        roomGroup.getRoomGroupId());
+
+        if (exists) {
 
             throw new RuntimeException(
-                    "Tên phòng đã tồn tại!");
+                    "Phòng đã tồn tại trong khu này!");
         }
 
         Room room = new Room();
-        room.setRoomName(request.getRoomName());
+
+        room.setRoomId(
+                UUID.randomUUID().toString());
+
+        room.setRoomName(
+                request.getRoomName());
+
+        room.setStatus(
+                request.getStatus());
+
+        room.setRoomGroup(
+                roomGroup);
 
         return roomRepository.save(room);
     }
@@ -40,24 +74,48 @@ public class RoomServiceImpl implements RoomService {
     // UPDATE ROOM
     // ==========================================
     @Override
-    public Room update(String roomId, Room request) {
+    public Room update(
+            String roomId,
+            Room request) {
 
-        Room existing = roomRepository.findById(roomId)
+        Room existing = roomRepository
+                .findById(roomId)
                 .orElseThrow(() -> new RuntimeException(
                         "Room not found"));
 
-        // check trùng tên
+        // check room group
+        RoomGroup roomGroup = roomGroupRepository
+                .findById(
+                        request
+                                .getRoomGroup()
+                                .getRoomGroupId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Khu phòng không tồn tại!"));
+
+        // check trùng
         boolean exists = roomRepository
-                .existsByRoomNameAndRoomIdNot(
+                .existsByRoomNameAndRoomGroup_RoomGroupIdAndRoomIdNot(
+
                         request.getRoomName(),
+
+                        roomGroup.getRoomGroupId(),
+
                         roomId);
 
         if (exists) {
+
             throw new RuntimeException(
-                    "Tên phòng đã tồn tại!");
+                    "Phòng đã tồn tại trong khu này!");
         }
 
-        existing.setRoomName(request.getRoomName());
+        existing.setRoomName(
+                request.getRoomName());
+
+        existing.setStatus(
+                request.getStatus());
+
+        existing.setRoomGroup(
+                roomGroup);
 
         return roomRepository.save(existing);
     }
@@ -68,7 +126,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void delete(String roomId) {
 
-        roomRepository.deleteById(roomId);
+        roomRepository.deleteById(
+                roomId);
     }
 
     // ==========================================

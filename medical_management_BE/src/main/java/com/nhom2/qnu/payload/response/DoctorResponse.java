@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,11 +14,24 @@ import java.util.List;
 public class DoctorResponse {
 
     private String doctorId;
+
     private String doctorName;
+
     private String email;
+
     private String cccd;
+
     private String contactNumber;
+
+    // trình độ
     private String degree;
+
+    // phí khám
     private BigDecimal consultationFee;
-    private List<String> roomNames;
+
+    // số phòng
+    private String roomName;
+
+    // khu phòng
+    private String roomGroupName;
 }
