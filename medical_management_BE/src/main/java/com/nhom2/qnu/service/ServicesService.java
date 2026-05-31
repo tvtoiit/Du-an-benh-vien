@@ -17,4 +17,7 @@ public interface ServicesService {
 
   void delete(String id);
 
+  ResponseEntity<?> getDoctorServices(
+      String roomGroupId);
+
 }

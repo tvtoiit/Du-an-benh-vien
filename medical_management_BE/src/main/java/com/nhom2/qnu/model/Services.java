@@ -7,9 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
@@ -51,6 +54,10 @@ public class Services implements Serializable {
   @Enumerated(EnumType.STRING)
   @Column(name = "service_type", nullable = false)
   private ServiceType serviceType;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "room_group_id")
+  private RoomGroup roomGroup;
 
   @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
   private java.util.List<AppointmentServiceItem> appointmentAppointments = new java.util.ArrayList<>();

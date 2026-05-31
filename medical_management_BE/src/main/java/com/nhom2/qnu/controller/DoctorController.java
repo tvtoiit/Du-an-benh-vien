@@ -62,4 +62,14 @@ public class DoctorController {
 
         return doctorService.findAllDoctors();
     }
+
+    @GetMapping("/by-room-group/{roomGroupId}")
+    public ResponseEntity<?> getDoctorsByRoomGroup(
+            @PathVariable String roomGroupId) {
+
+        return ResponseEntity.ok(
+                doctorService
+                        .getDoctorsByRoomGroup(
+                                roomGroupId));
+    }
 }

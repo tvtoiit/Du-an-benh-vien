@@ -7,7 +7,11 @@ const doctorService = {
     update: (id, data) => api.put(`/doctors/${id}`, data),
     delete: (id) => api.delete(`/doctors/${id}`),
     getByIdDepartment: (idDepartment) => api.get(`/doctors/by-department/${idDepartment}`),
-    getByIdRoom: (idRoom) => api.get(`/doctors/by-room/${idRoom}`)
+    getByIdRoom: (idRoom) => api.get(`/doctors/by-room/${idRoom}`),
+    getByRoomGroup: (roomGroupId) =>
+        api.get(
+            `/doctors/by-room-group/${roomGroupId}`
+        ),
 
 };
 

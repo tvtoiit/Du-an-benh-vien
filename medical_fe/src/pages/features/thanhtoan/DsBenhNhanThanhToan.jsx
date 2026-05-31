@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
     Box,
     Typography,
@@ -10,144 +11,446 @@ import {
     TableBody,
     Button,
     TableContainer,
-    TextField
+    TextField,
+    Chip,
+    CircularProgress,
+    InputAdornment,
+    Avatar,
+    Stack
 } from "@mui/material";
+
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+
 import PaymentForm from "./PaymentForm";
 import paymentService from "../../../services/paymentService";
 
 const DsBenhNhanThanhToan = () => {
-    const [selectedPatient, setSelectedPatient] = useState(null);
-    const [patients, setPatients] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState("");
+
+    const [selectedPatient, setSelectedPatient] =
+        useState(null);
+
+    const [patients, setPatients] =
+        useState([]);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [search, setSearch] =
+        useState("");
+
+    // ======================================
+    // LOAD DATA
+    // ======================================
 
     const fetchPatients = async () => {
+
         try {
-            setLoading(true);
-            const res = await paymentService.getWaitingList();
-            const list = Array.isArray(res) ? res : res.data ?? [];
+
+            const res =
+                await paymentService.getWaitingList();
+
+            const list =
+                Array.isArray(res)
+                    ? res
+                    : res.data ?? [];
+
             setPatients(list);
+
         } catch (error) {
-            console.error("Error fetching waiting payments:", error);
+
+            console.error(error);
+
         } finally {
+
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPatients();
-    }, []);
-    const keyword = search.trim();
 
-    const filteredPatients = keyword
-        ? patients.filter((p) => p.cccd?.includes(keyword))
-        : patients;
+        fetchPatients();
+
+    }, []);
+
+    // ======================================
+    // FILTER
+    // ======================================
+
+    const filteredPatients =
+        patients.filter((p) =>
+            p.cccd
+                ?.toLowerCase()
+                .includes(
+                    search.toLowerCase()
+                )
+        );
+
+    // ======================================
+    // PAYMENT FORM
+    // ======================================
 
     if (selectedPatient) {
+
         return (
             <PaymentForm
                 patient={selectedPatient}
                 onBack={() => {
+
                     setSelectedPatient(null);
+
                     fetchPatients();
                 }}
             />
         );
     }
 
+    // ======================================
+    // LOADING
+    // ======================================
+
+    if (loading) {
+
+        return (
+
+            <Box
+                display="flex"
+                justifyContent="center"
+                mt={5}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
-        <Box sx={{ p: 3 }}>
-            <Box sx={{ mb: 2 }}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 2
-                    }}
-                >
-                    <Typography variant="h5" fontWeight="bold" color="primary">
+
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
+
+            {/* HEADER */}
+
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    background:
+                        "linear-gradient(135deg, #1976d2, #42a5f5)",
+                    color: "#fff"
+                }}
+            >
+
+                <Box>
+
+                    <Typography
+                        variant="h5"
+                        fontWeight="bold"
+                    >
+                        Quầy Thanh Toán
+                    </Typography>
+
+                    <Typography variant="body2">
                         Danh sách bệnh nhân chờ thanh toán
                     </Typography>
 
-                    <TextField
-                        size="small"
-                        label="Tìm theo CCCD"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        sx={{ width: "300px" }}
-                    />
                 </Box>
-            </Box>
 
-            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 3 }}>
+                <Chip
+                    label={`${filteredPatients.length} bệnh nhân`}
+                    sx={{
+                        bgcolor: "#fff",
+                        color: "#1976d2",
+                        fontWeight: "bold"
+                    }}
+                />
+
+            </Paper>
+
+            {/* SEARCH */}
+
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    borderRadius: 3
+                }}
+            >
+
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Tìm kiếm theo CCCD..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(
+                            e.target.value
+                        )
+                    }
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
+
+            </Paper>
+
+            {/* TABLE */}
+
+            <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                    borderRadius: 3
+                }}
+            >
+
                 <Table>
+
                     <TableHead>
-                        <TableRow>
-                            <TableCell><b>Tên bệnh nhân</b></TableCell>
-                            <TableCell><b>CCCD</b></TableCell>
-                            <TableCell align="right"><b>Tổng tiền (VNĐ)</b></TableCell>
-                            <TableCell><b>Trạng thái</b></TableCell>
-                            <TableCell align="center"><b>Thao tác</b></TableCell>
+
+                        <TableRow
+                            sx={{
+                                backgroundColor:
+                                    "#f1f5f9"
+                            }}
+                        >
+
+                            <TableCell>
+                                <strong>
+                                    Bệnh nhân
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    CCCD
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Bác sĩ
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Phòng khám
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Tổng tiền
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Trạng thái
+                                </strong>
+                            </TableCell>
+
+                            <TableCell
+                                align="center"
+                            >
+                                <strong>
+                                    Thao tác
+                                </strong>
+                            </TableCell>
+
                         </TableRow>
+
                     </TableHead>
 
                     <TableBody>
-                        {loading && (
-                            <TableRow>
-                                <TableCell colSpan={5} align="center">Đang tải...</TableCell>
-                            </TableRow>
-                        )}
 
-                        {!loading && patients.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} align="center">
-                                    Không có bệnh nhân nào chờ thanh toán
-                                </TableCell>
-                            </TableRow>
-                        )}
+                        {filteredPatients.map(
+                            (p) => (
 
-                        {!loading &&
-                            filteredPatients.map((p) => (
-                                <TableRow key={p.patientId}>
-                                    <TableCell>{p.fullName}</TableCell>
-                                    <TableCell>{p.cccd}</TableCell>
+                                <TableRow
+                                    key={
+                                        p.patientId
+                                    }
+                                    hover
+                                >
 
-                                    <TableCell align="right">
-                                        {(p.totalCost || 0).toLocaleString()}
+                                    {/* PATIENT */}
+
+                                    <TableCell>
+
+                                        <Stack
+                                            direction="row"
+                                            spacing={2}
+                                            alignItems="center"
+                                        >
+
+                                            <Avatar
+                                                sx={{
+                                                    bgcolor:
+                                                        "#1976d2"
+                                                }}
+                                            >
+                                                <PersonIcon />
+                                            </Avatar>
+
+                                            <Box>
+
+                                                <Typography
+                                                    fontWeight="bold"
+                                                >
+                                                    {
+                                                        p.fullName
+                                                    }
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+                                                    Bệnh nhân
+                                                </Typography>
+
+                                            </Box>
+
+                                        </Stack>
+
                                     </TableCell>
 
                                     <TableCell>
-                                        {p.status || "Chưa thanh toán"}
+                                        {p.cccd}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell>
+                                        {p.doctorName || "--"}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {p.roomGroupName || "--"}
+                                        {p.roomName
+                                            ? ` - ${p.roomName}`
+                                            : ""}
+                                    </TableCell>
+
+                                    <TableCell>
+
+                                        <Typography
+                                            fontWeight="bold"
+                                            color="success.main"
+                                        >
+                                            {Number(
+                                                p.totalCost || 0
+                                            ).toLocaleString()}
+                                            {" VNĐ"}
+                                        </Typography>
+
+                                    </TableCell>
+
+                                    <TableCell>
+
                                         {p.status === "Đã thanh toán" ? (
-                                            <Button variant="outlined" disabled>
-                                                Đã Thanh Toán
-                                            </Button>
+
+                                            <Chip
+                                                label="Đã thanh toán"
+                                                color="success"
+                                                variant="outlined"
+                                            />
+
                                         ) : (
+
+                                            <Chip
+                                                label="Chưa thanh toán"
+                                                color="warning"
+                                                variant="outlined"
+                                            />
+
+                                        )}
+
+                                    </TableCell>
+
+                                    <TableCell
+                                        align="center"
+                                    >
+
+                                        {p.status === "Đã thanh toán" ? (
+
+                                            <Button
+                                                variant="outlined"
+                                                disabled
+                                            >
+                                                Đã thanh toán
+                                            </Button>
+
+                                        ) : (
+
                                             <Button
                                                 variant="contained"
-                                                color="primary"
-                                                onClick={() => setSelectedPatient(p)}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    textTransform:
+                                                        "none",
+                                                    fontWeight:
+                                                        "bold"
+                                                }}
+                                                onClick={() =>
+                                                    setSelectedPatient(
+                                                        p
+                                                    )
+                                                }
                                             >
                                                 Thanh toán
                                             </Button>
+
                                         )}
+
                                     </TableCell>
+
                                 </TableRow>
-                            ))}
-                        {!loading && filteredPatients.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} align="center">
-                                    Không tìm thấy bệnh nhân
-                                </TableCell>
-                            </TableRow>
+                            )
                         )}
+
+                        {filteredPatients.length === 0 && (
+
+                            <TableRow>
+
+                                <TableCell
+                                    colSpan={7}
+                                    align="center"
+                                >
+
+                                    <Typography
+                                        py={4}
+                                        color="text.secondary"
+                                    >
+                                        Không có bệnh nhân chờ thanh toán
+                                    </Typography>
+
+                                </TableCell>
+
+                            </TableRow>
+
+                        )}
+
                     </TableBody>
+
                 </Table>
+
             </TableContainer>
+
         </Box>
     );
 };

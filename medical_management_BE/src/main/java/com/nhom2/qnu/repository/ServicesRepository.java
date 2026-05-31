@@ -2,6 +2,7 @@ package com.nhom2.qnu.repository;
 
 import com.nhom2.qnu.model.Services;
 import com.nhom2.qnu.payload.response.ServiceUsageReportResponse;
+import com.nhom2.qnu.enums.ServiceType;
 import com.nhom2.qnu.model.AppointmentServiceItem;
 
 import java.util.List;
@@ -31,4 +32,8 @@ public interface ServicesRepository extends JpaRepository<Services, String> {
     boolean existsByServiceNameIgnoreCaseAndServiceIdNot(
             String serviceName,
             String serviceId);
+
+    List<Services> findByRoomGroup_RoomGroupIdAndServiceType(
+            String roomGroupId,
+            ServiceType serviceType);
 }

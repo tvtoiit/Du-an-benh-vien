@@ -23,6 +23,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 import doctorService from "../../../services/doctorService";
 import appointmentService from "../../../services/appointmentService";
+import serviceService from "../../../services/servicesServices";
 
 import { toast } from "react-toastify";
 
@@ -32,12 +33,19 @@ const TiepNhan = ({
 }) => {
 
     const [formData, setFormData] = useState({
+        service: "",
         doctor: "",
         room: "",
         note: "",
     });
 
     const [doctors, setDoctors] = useState([]);
+
+    const [services, setServices] = useState([]);
+
+    const [selectedService,
+        setSelectedService] =
+        useState(null);
 
     const [currentAppointment, setCurrentAppointment] =
         useState(null);
@@ -64,23 +72,35 @@ const TiepNhan = ({
     }
 
     // ==========================================
-    // LOAD DOCTORS
+    // LOAD DICH VU DOCTORS
     // ==========================================
-    const loadDoctors = useCallback(async () => {
+
+    const loadServices = useCallback(async () => {
 
         try {
 
             const res =
-                await doctorService.getAll();
+                await serviceService.getAll();
 
-            const list = res.data ?? res;
+            const list =
+                res.data?.data ??
+                res.data ??
+                [];
 
-            setDoctors(list || []);
+            const doctorServices =
+                list.filter(
+                    s =>
+                        s.serviceType === "DOCTOR"
+                );
+
+            setServices(
+                doctorServices
+            );
 
         } catch (err) {
 
             console.error(
-                "Lỗi load bác sĩ:",
+                "Lỗi load dịch vụ",
                 err
             );
         }
@@ -89,9 +109,9 @@ const TiepNhan = ({
 
     useEffect(() => {
 
-        loadDoctors();
+        loadServices();
 
-    }, [loadDoctors]);
+    }, [loadServices]);
 
     // ==========================================
     // LOAD APPOINTMENT
@@ -152,19 +172,70 @@ const TiepNhan = ({
 
     }, [loadCurrentAppointment]);
 
+
+
     // ==========================================
     // HANDLE CHANGE
     // ==========================================
-    const handleChange = (e) => {
+    const handleChange = async (e) => {
 
         const { name, value } = e.target;
 
-        // auto fill room
+        if (name === "service") {
+
+            const service =
+                services.find(
+                    s =>
+                        s.serviceId === value
+                );
+
+            if (!service) {
+                return;
+            }
+
+            setSelectedService(service);
+
+            const res =
+                await doctorService.getByRoomGroup(
+                    service.roomGroupId
+                );
+
+            try {
+
+                const res =
+                    await doctorService
+                        .getByRoomGroup(
+                            service.roomGroupId
+                        );
+
+                const doctors =
+                    res ?? [];
+
+
+                setDoctors(
+                    doctors
+                );
+
+            } catch (err) {
+
+                console.error(err);
+            }
+
+            setFormData({
+                ...formData,
+                service: value,
+                doctor: "",
+                room: ""
+            });
+
+            return;
+        }
+
         if (name === "doctor") {
 
             const selectedDoctor =
                 doctors.find(
-                    (d) =>
+                    d =>
                         d.doctorId === value
                 );
 
@@ -202,24 +273,41 @@ const TiepNhan = ({
 
         try {
 
+            if (!formData.service) {
+
+                toast.warning(
+                    "Vui lòng chọn dịch vụ"
+                );
+
+                return;
+            }
+
+            if (!formData.doctor) {
+
+                toast.warning(
+                    "Vui lòng chọn bác sĩ"
+                );
+
+                return;
+            }
+
             const payload = {
+
                 patientId:
                     selectedPatient.patientId,
 
                 doctorId:
                     formData.doctor,
 
-                appointmentDatetime:
-                    new Date()
-                        .toISOString()
-                        .slice(0, 19)
-                        .replace("T", " "),
+                serviceIds: [
+                    formData.service
+                ],
 
                 room:
                     formData.room,
 
                 note:
-                    formData.note,
+                    formData.note
             };
 
             await appointmentService
@@ -247,10 +335,15 @@ const TiepNhan = ({
     const handleReset = () => {
 
         setFormData({
+            service: "",
             doctor: "",
             room: "",
             note: "",
         });
+
+        setSelectedService(null);
+
+        setDoctors([]);
     };
 
     const disableCreate =
@@ -395,6 +488,37 @@ const TiepNhan = ({
 
                     <Stack spacing={3}>
 
+                        <TextField
+                            select
+                            label="Chọn dịch vụ khám"
+                            name="service"
+                            value={formData.service}
+                            onChange={handleChange}
+                            disabled={disableCreate}
+                            fullWidth
+                            required
+                        >
+
+                            {services.map(service => (
+
+                                <MenuItem
+                                    key={service.serviceId}
+                                    value={service.serviceId}
+                                >
+
+                                    {service.serviceName}
+                                    {" - "}
+                                    {Number(
+                                        service.price
+                                    ).toLocaleString()}
+                                    {" VNĐ"}
+
+                                </MenuItem>
+
+                            ))}
+
+                        </TextField>
+
                         {/* SELECT DOCTOR */}
                         <TextField
                             select
@@ -404,7 +528,9 @@ const TiepNhan = ({
                             onChange={handleChange}
                             fullWidth
                             required
-                            disabled={disableCreate}
+                            disabled={
+                                !formData.service
+                            }
                         >
 
                             {doctors.map((doc) => (
@@ -416,13 +542,80 @@ const TiepNhan = ({
 
                                     {doc.doctorName}
                                     {" - "}
-                                    {doc.degree}
+                                    {doc.roomGroupName}
 
                                 </MenuItem>
 
                             ))}
 
                         </TextField>
+
+                        {selectedDoctor &&
+                            selectedService && (
+
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 3
+                                    }}
+                                >
+
+                                    <Typography>
+
+                                        Dịch vụ:
+                                        {" "}
+                                        {selectedService.serviceName}
+
+                                    </Typography>
+
+                                    <Typography>
+
+                                        Giá dịch vụ:
+                                        {" "}
+                                        {Number(
+                                            selectedService.price
+                                        ).toLocaleString()}
+                                        {" VNĐ"}
+
+                                    </Typography>
+
+                                    <Typography>
+
+                                        Phí bác sĩ:
+                                        {" "}
+                                        {Number(
+                                            selectedDoctor
+                                                .consultationFee
+                                        ).toLocaleString()}
+                                        {" VNĐ"}
+
+                                    </Typography>
+
+                                    <Divider sx={{ my: 1 }} />
+
+                                    <Typography
+                                        color="primary"
+                                        fontWeight="bold"
+                                    >
+
+                                        Tổng:
+                                        {" "}
+                                        {(
+                                            Number(
+                                                selectedService.price
+                                            ) +
+                                            Number(
+                                                selectedDoctor
+                                                    .consultationFee
+                                            )
+                                        ).toLocaleString()}
+                                        {" VNĐ"}
+
+                                    </Typography>
+
+                                </Paper>
+                            )}
 
                         {/* DOCTOR INFO */}
                         {selectedDoctor && (
@@ -479,6 +672,12 @@ const TiepNhan = ({
                                     </Stack>
 
                                     <Divider />
+                                    <Typography>
+                                        Chuyên khoa:
+                                        <b>
+                                            {selectedDoctor.roomGroupName}
+                                        </b>
+                                    </Typography>
 
                                     <Typography>
 

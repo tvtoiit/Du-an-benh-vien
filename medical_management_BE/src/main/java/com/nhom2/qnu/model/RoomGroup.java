@@ -40,6 +40,10 @@ public class RoomGroup implements Serializable {
     @Column(name = "group_name", nullable = false, length = 100)
     private String groupName;
 
+    @OneToMany(mappedBy = "roomGroup", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Services> services = new HashSet<>();
+
     // danh sách phòng
     // ví dụ:
     // 101

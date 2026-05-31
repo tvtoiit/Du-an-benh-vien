@@ -216,4 +216,17 @@ public class DoctorServiceImpl
 
                 return response;
         }
+
+        @Override
+        public List<DoctorResponse> getDoctorsByRoomGroup(
+                        String roomGroupId) {
+
+                List<Doctor> doctors = doctorRepository
+                                .findByRoom_RoomGroup_RoomGroupId(
+                                                roomGroupId);
+
+                return doctors.stream()
+                                .map(this::convertToResponse)
+                                .toList();
+        }
 }

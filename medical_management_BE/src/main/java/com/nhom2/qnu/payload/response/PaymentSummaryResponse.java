@@ -6,17 +6,29 @@ import lombok.Data;
 @Data
 @Builder
 public class PaymentSummaryResponse {
+
     private String patientId;
+
     private String fullName;
+
     private String cccd;
-    private String status;
+
     private String appointmentId;
 
-    private Long examFee; // tiền khám
-    private Long serviceFee; // tiền dịch vụ CLS
-    private Long medicineFee; // tiền thuốc
+    // bác sĩ khám
+    private String doctorName;
 
-    private Long advanceTotal; // tổng tạm ứng đã thu
-    private Long totalCost; // exam + service + medicine
-    private Long amountToPay; // totalCost - advanceTotal (>= 0)
+    // phòng khám
+    private String roomName;
+
+    // chuyên khoa
+    private String roomGroupName;
+
+    private String status;
+
+    // tiền dịch vụ khám / CLS
+    private Long serviceFee;
+
+    // tổng thanh toán
+    private Long totalCost;
 }

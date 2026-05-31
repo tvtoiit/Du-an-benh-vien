@@ -26,19 +26,18 @@ public interface PaymentDetailsRepository extends JpaRepository<PaymentDetails, 
     // Kiểm tra đơn thuốc đã được thanh toán hay chưa
     boolean existsByPrescriptionHistory_PrescriptionId(String prescriptionId);
 
-    // Danh sách bệnh nhân đã khám xong (Hoàn thành) và chờ thanh toán
     @Query("""
             SELECT new com.nhom2.qnu.payload.response.PatientPaymentResponse(
-                p.patientId,
-                u.fullName,
-                u.phoneNumber,
-                u.dateOfBirth,
-                a.status
+            p.patientId,
+            u.fullName,
+            u.phoneNumber,
+            u.dateOfBirth,
+            a.status
             )
             FROM AppointmentSchedules a
             JOIN a.patients p
             JOIN p.user u
-            WHERE a.status IN ('Đã kết luận', 'Đã kê đơn')
+            WHERE a.status = 'Chờ khám'
             """)
     List<PatientPaymentResponse> findPatientsReadyForPayment();
 

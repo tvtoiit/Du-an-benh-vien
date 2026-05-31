@@ -2,8 +2,6 @@ package com.nhom2.qnu.controller;
 
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
-import com.nhom2.qnu.payload.response.PatientPaymentResponse;
-import com.nhom2.qnu.payload.response.PaymentDetailsResponse;
 import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
 import com.nhom2.qnu.service.PaymentDetailsService;
 
@@ -14,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 
 @RestController

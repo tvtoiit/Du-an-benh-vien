@@ -7,7 +7,11 @@ const serviceService = {
     update: (id, data) => api.put(`/patients/${id}`, data),
     createDichVu: (data) => api.post("/services/create", data),
     updateDichVu: (id, data) => api.put(`/services/${id}`, data),
-    delete: (id) => api.delete(`/services/${id}`)
+    delete: (id) => api.delete(`/services/${id}`),
+    getDoctorServices: (roomGroupId) =>
+        api.get(
+            `/services/doctor-services/${roomGroupId}`
+        )
 };
 
 export default serviceService;

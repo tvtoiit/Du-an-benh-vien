@@ -19,4 +19,6 @@ public class ServiceResponse {
     private String description;
     private BigDecimal price;
     private ServiceType serviceType;
+    private String roomGroupId;
+    private String roomGroupName;
 }

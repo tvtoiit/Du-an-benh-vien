@@ -156,11 +156,11 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
         private String mapStatus(String status) {
                 if (status == null)
-                        return "Đã tiếp nhận";
+                        return "Chờ khám";
 
                 switch (status) {
                         case "Chờ khám":
-                                return "Đã tiếp nhận";
+                                return "Chờ khám";
 
                         case "Đang khám":
                                 return "Đang khám";
@@ -178,7 +178,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                 return "Đã kê đơn thuốc";
 
                         default:
-                                return "Đã tiếp nhận";
+                                return "Chờ khám";
                 }
         }
 

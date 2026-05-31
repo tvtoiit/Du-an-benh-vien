@@ -28,6 +28,7 @@ const PaymentForm = ({ patient, onBack }) => {
                 // ✔ Lấy thông tin tổng hợp từ API
                 const res = await paymentService.getSummary(patientId, prescriptionId);
                 setSummary(res);
+                console.log("PAYMENT SUMMARY", res);
 
             } catch (error) {
                 console.error("Error fetching payment summary: ", error);
@@ -93,17 +94,17 @@ const PaymentForm = ({ patient, onBack }) => {
                 <Grid container spacing={1}>
                     <Grid item xs={7}>Phí khám bệnh</Grid>
                     <Grid item xs={5} textAlign="right">
-                        {examFee.toLocaleString()} đ
+                        {Number(examFee || 0).toLocaleString()} đ
                     </Grid>
 
                     <Grid item xs={7}>Phí dịch vụ</Grid>
                     <Grid item xs={5} textAlign="right">
-                        {serviceFee.toLocaleString()} đ
+                        {Number(serviceFee || 0).toLocaleString()} đ
                     </Grid>
 
                     <Grid item xs={7}>Tiền thuốc</Grid>
                     <Grid item xs={5} textAlign="right">
-                        {medicineFee.toLocaleString()} đ
+                        {Number(medicineFee || 0).toLocaleString()} đ
                     </Grid>
                 </Grid>
 
@@ -117,12 +118,12 @@ const PaymentForm = ({ patient, onBack }) => {
                 <Grid container spacing={1}>
                     <Grid item xs={7}>Tổng chi phí: </Grid>
                     <Grid item xs={5} textAlign="right">
-                        <b>{totalCost.toLocaleString()} đ</b>
+                        <b>{Number(totalCost || 0).toLocaleString()} đ</b>
                     </Grid>
 
                     <Grid item xs={7}>Đã tạm ứng: </Grid>
                     <Grid item xs={5} textAlign="right">
-                        {advanceTotal.toLocaleString()} đ
+                        {Number(advanceTotal || 0).toLocaleString()} đ
                     </Grid>
 
                     <Grid item xs={7}>
@@ -130,7 +131,7 @@ const PaymentForm = ({ patient, onBack }) => {
                     </Grid>
                     <Grid item xs={5} textAlign="right">
                         <Typography fontWeight="bold" color="error" fontSize="1.3rem">
-                            {amountToPay.toLocaleString()} đ
+                            {Number(amountToPay || 0).toLocaleString()} đ
                         </Typography>
                     </Grid>
                 </Grid>

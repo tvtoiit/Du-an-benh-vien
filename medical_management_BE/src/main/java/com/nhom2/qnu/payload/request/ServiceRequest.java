@@ -16,4 +16,5 @@ public class ServiceRequest {
     private String description;
     private BigDecimal price;
     private ServiceType serviceType;
+    private String roomGroupId;
 }

@@ -21,7 +21,7 @@ const roomGroupService = {
     update(id, data) {
 
         return api.put(
-            `/ room - groups / ${id} `,
+            `/room-groups/${id} `,
             data
         );
     },
@@ -30,7 +30,7 @@ const roomGroupService = {
     delete(id) {
 
         return api.delete(
-            `/ room - groups / ${id} `
+            `/room-groups/${id} `
         );
     }
 };

@@ -44,4 +44,13 @@ public class ServicesController {
     return ResponseEntity.ok("Xóa dịch vụ thành công");
   }
 
+  @GetMapping("/doctor-services/{roomGroupId}")
+  public ResponseEntity<?> getDoctorServices(
+      @PathVariable String roomGroupId) {
+
+    return servicesService
+        .getDoctorServices(
+            roomGroupId);
+  }
+
 }

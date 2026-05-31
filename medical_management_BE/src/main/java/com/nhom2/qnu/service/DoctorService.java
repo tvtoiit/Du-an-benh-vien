@@ -14,4 +14,7 @@ public interface DoctorService {
     DoctorResponse findDoctorServiceImpl(String id);
 
     List<DoctorResponse> findAllDoctors();
+
+    List<DoctorResponse> getDoctorsByRoomGroup(
+            String roomGroupId);
 }

@@ -14,62 +14,61 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RoomGroupServiceImpl
-        implements RoomGroupService {
+                implements RoomGroupService {
 
-    private final RoomGroupRepository roomGroupRepository;
+        private final RoomGroupRepository roomGroupRepository;
 
-    @Override
-    public RoomGroup create(
-            RoomGroup request) {
+        @Override
+        public RoomGroup create(
+                        RoomGroup request) {
 
-        // check trùng tên
-        if (roomGroupRepository
-                .existsByGroupName(
-                        request.getGroupName())) {
+                // check trùng tên
+                if (roomGroupRepository
+                                .existsByGroupName(
+                                                request.getGroupName())) {
 
-            throw new RuntimeException(
-                    "Khu phòng đã tồn tại!");
+                        throw new RuntimeException(
+                                        "Khu phòng đã tồn tại!");
+                }
+
+                RoomGroup roomGroup = new RoomGroup();
+
+                roomGroup.setRoomGroupId(
+                                UUID.randomUUID().toString());
+
+                roomGroup.setGroupName(
+                                request.getGroupName());
+
+                return roomGroupRepository
+                                .save(roomGroup);
         }
 
-        RoomGroup roomGroup = new RoomGroup();
+        @Override
+        public List<RoomGroup> getAll() {
+                return roomGroupRepository.findAll();
+        }
 
-        roomGroup.setRoomGroupId(
-                UUID.randomUUID().toString());
+        @Override
+        public RoomGroup update(
+                        String id,
+                        RoomGroup request) {
 
-        roomGroup.setGroupName(
-                request.getGroupName());
+                RoomGroup existing = roomGroupRepository
+                                .findById(id)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Không tìm thấy khu phòng!"));
 
-        return roomGroupRepository
-                .save(roomGroup);
-    }
+                existing.setGroupName(
+                                request.getGroupName());
 
-    @Override
-    public List<RoomGroup> getAll() {
+                return roomGroupRepository
+                                .save(existing);
+        }
 
-        return roomGroupRepository.findAll();
-    }
+        @Override
+        public void delete(String id) {
 
-    @Override
-    public RoomGroup update(
-            String id,
-            RoomGroup request) {
-
-        RoomGroup existing = roomGroupRepository
-                .findById(id)
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy khu phòng!"));
-
-        existing.setGroupName(
-                request.getGroupName());
-
-        return roomGroupRepository
-                .save(existing);
-    }
-
-    @Override
-    public void delete(String id) {
-
-        roomGroupRepository
-                .deleteById(id);
-    }
+                roomGroupRepository
+                                .deleteById(id);
+        }
 }

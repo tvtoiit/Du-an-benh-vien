@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.nhom2.qnu.model.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,4 +20,15 @@ public interface DoctorRepository extends JpaRepository<Doctor, String> {
 
     boolean existsByUser(User user);
 
+    @Query("""
+                SELECT d
+                FROM Doctor d
+                WHERE d.room.roomGroup.roomGroupId
+                      = :roomGroupId
+            """)
+    List<Doctor> findByRoomGroup(
+            String roomGroupId);
+
+    List<Doctor> findByRoom_RoomGroup_RoomGroupId(
+            String roomGroupId);
 }

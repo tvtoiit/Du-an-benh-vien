@@ -1,7 +1,6 @@
 package com.nhom2.qnu.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.nhom2.qnu.enums.ServiceType;
 import com.nhom2.qnu.exception.DataExistException;
 import com.nhom2.qnu.exception.DataNotFoundException;
+import com.nhom2.qnu.model.RoomGroup;
 import com.nhom2.qnu.model.Services;
 import com.nhom2.qnu.payload.request.ServiceRequest;
 import com.nhom2.qnu.payload.response.services.CreateServicesResponse;
@@ -23,6 +24,7 @@ import com.nhom2.qnu.payload.response.services.UpdateServiceResponse;
 import com.nhom2.qnu.repository.ServicesRepository;
 import com.nhom2.qnu.repository.AppointmentServiceRepository;
 import com.nhom2.qnu.service.ServicesService;
+import com.nhom2.qnu.repository.RoomGroupRepository;
 
 @Service
 public class ServicesServiceImpl implements ServicesService {
@@ -31,6 +33,9 @@ public class ServicesServiceImpl implements ServicesService {
 
   @Autowired
   AppointmentServiceRepository appointmentServiceRepository;
+
+  @Autowired
+  private RoomGroupRepository roomGroupRepository;
 
   @Override
   public ResponseEntity<GetAllListServiceResponse> getAll() {
@@ -48,6 +53,15 @@ public class ServicesServiceImpl implements ServicesService {
             .description(s.getDescription())
             .price(s.getPrice())
             .serviceType(s.getServiceType())
+            .roomGroupId(
+                s.getRoomGroup() != null
+                    ? s.getRoomGroup().getRoomGroupId()
+                    : null)
+
+            .roomGroupName(
+                s.getRoomGroup() != null
+                    ? s.getRoomGroup().getGroupName()
+                    : null)
             .build())
         .collect(Collectors.toList());
 
@@ -79,11 +93,17 @@ public class ServicesServiceImpl implements ServicesService {
       throw new DataExistException("Dịch vụ đã tồn tại");
     }
 
+    RoomGroup roomGroup = roomGroupRepository.findById(
+        req.getRoomGroupId())
+        .orElseThrow(() -> new DataNotFoundException(
+            "Không tìm thấy khoa"));
+
     Services services = Services.builder()
         .serviceName(req.getServiceName())
         .description(req.getDescription())
         .price(req.getPrice())
         .serviceType(req.getServiceType())
+        .roomGroup(roomGroup)
         .build();
 
     servicesRepository.save(services);
@@ -115,6 +135,16 @@ public class ServicesServiceImpl implements ServicesService {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           "Giá dịch vụ không hợp lệ");
+    }
+
+    if (request.getRoomGroupId() != null) {
+
+      RoomGroup roomGroup = roomGroupRepository.findById(
+          request.getRoomGroupId())
+          .orElseThrow(() -> new DataNotFoundException(
+              "Không tìm thấy khoa"));
+
+      service.setRoomGroup(roomGroup);
     }
 
     // ===== CHECK TRÙNG TÊN (QUAN TRỌNG) =====
@@ -154,6 +184,39 @@ public class ServicesServiceImpl implements ServicesService {
     }
 
     servicesRepository.delete(service);
+  }
+
+  @Override
+  public ResponseEntity<?> getDoctorServices(
+      String roomGroupId) {
+
+    List<Services> services = servicesRepository
+        .findByRoomGroup_RoomGroupIdAndServiceType(
+            roomGroupId,
+            ServiceType.DOCTOR);
+
+    List<ServiceResponse> result = services.stream()
+        .map(service -> ServiceResponse.builder()
+            .serviceId(
+                service.getServiceId())
+            .serviceName(
+                service.getServiceName())
+            .description(
+                service.getDescription())
+            .price(
+                service.getPrice())
+            .serviceType(
+                service.getServiceType())
+            .roomGroupId(
+                service.getRoomGroup()
+                    .getRoomGroupId())
+            .roomGroupName(
+                service.getRoomGroup()
+                    .getGroupName())
+            .build())
+        .toList();
+
+    return ResponseEntity.ok(result);
   }
 
 }

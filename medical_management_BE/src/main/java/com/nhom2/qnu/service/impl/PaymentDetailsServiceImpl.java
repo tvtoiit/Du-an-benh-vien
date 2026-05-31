@@ -1,6 +1,7 @@
 package com.nhom2.qnu.service.impl;
 
 import com.nhom2.qnu.model.AppointmentSchedules;
+import com.nhom2.qnu.model.Doctor;
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PrescriptionHistory;
@@ -28,8 +29,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class PaymentDetailsServiceImpl implements PaymentDetailsService {
-
-        private static final long DEFAULT_EXAM_FEE = 100_000L;
 
         @Autowired
         private PaymentDetailsRepository paymentDetailsRepository;
@@ -76,13 +75,11 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                 PrescriptionHistory prescription = prescriptionOpt.orElse(null);
 
                 // 5. Tính tiền
-                BigDecimal examFee = BigDecimal.valueOf(DEFAULT_EXAM_FEE);
-                BigDecimal serviceFee = sumServicesForAppointment(appointment.getAppointmentScheduleId());
-                BigDecimal medicineFee = (prescription != null)
-                                ? sumMedicinesForPrescription(prescription.getPrescriptionId())
-                                : BigDecimal.ZERO;
 
-                BigDecimal total = examFee.add(serviceFee).add(medicineFee);
+                BigDecimal serviceFee = sumServicesForAppointment(
+                                appointment.getAppointmentScheduleId());
+
+                BigDecimal total = serviceFee;
 
                 // 6. Tạo bill
                 PaymentDetails bill = new PaymentDetails();
@@ -140,16 +137,13 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                 }
                 existing.setPrescriptionHistory(prescription);
 
-                // Tính lại tổng tiền
-                BigDecimal examFee = BigDecimal.valueOf(DEFAULT_EXAM_FEE);
                 BigDecimal serviceFee = (appointment != null)
-                                ? sumServicesForAppointment(appointment.getAppointmentScheduleId())
-                                : BigDecimal.ZERO;
-                BigDecimal medicineFee = (prescription != null)
-                                ? sumMedicinesForPrescription(prescription.getPrescriptionId())
+                                ? sumServicesForAppointment(
+                                                appointment.getAppointmentScheduleId())
                                 : BigDecimal.ZERO;
 
-                BigDecimal total = examFee.add(serviceFee).add(medicineFee);
+                BigDecimal total = serviceFee;
+
                 existing.setTotalAmount(total);
 
                 return paymentDetailsRepository.save(existing);
@@ -163,7 +157,7 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
         public List<PaymentSummaryResponse> getWaitingPayments() {
 
                 // Tìm các lần khám "Hoàn thành"
-                List<AppointmentSchedules> finishedAppointments = appointmentRepository.findAllByStatus("Hoàn thành");
+                List<AppointmentSchedules> finishedAppointments = appointmentRepository.findAllByStatus("Chờ khám");
 
                 // Chỉ lấy những lần khám chưa có bill
                 List<AppointmentSchedules> waiting = finishedAppointments.stream()
@@ -195,10 +189,38 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "No appointment found for patient"));
 
-                String appointmentId = latestAppointment.getAppointmentScheduleId();
+                Doctor doctor = latestAppointment.getDoctor();
 
-                // 3️⃣ Tính tiền khám (cố định)
-                long examFee = DEFAULT_EXAM_FEE;
+                String doctorName = "";
+
+                String roomName = "";
+
+                String roomGroupName = "";
+
+                if (doctor != null) {
+
+                        if (doctor.getUser() != null) {
+
+                                doctorName = doctor.getUser()
+                                                .getFullName();
+                        }
+
+                        if (doctor.getRoom() != null) {
+
+                                roomName = doctor.getRoom()
+                                                .getRoomName();
+
+                                if (doctor.getRoom()
+                                                .getRoomGroup() != null) {
+
+                                        roomGroupName = doctor.getRoom()
+                                                        .getRoomGroup()
+                                                        .getGroupName();
+                                }
+                        }
+                }
+
+                String appointmentId = latestAppointment.getAppointmentScheduleId();
 
                 // 4️⃣ Tính tiền dịch vụ
                 long serviceFee = sumServicesForAppointment(appointmentId).longValue();
@@ -211,30 +233,15 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                         .orElse(null);
                 }
 
-                // 6️⃣ Tính tiền thuốc
-                long medicineFee = 0L;
-                if (prescriptionId != null) {
-                        medicineFee = sumMedicinesForPrescription(prescriptionId).longValue();
-                }
-
                 // 7️⃣ Tính tổng chi phí
-                long totalCost = examFee + serviceFee + medicineFee;
-
-                // 8️⃣ Lấy tổng số tiền tạm ứng
-                long advanceTotal = sumAdvanceForAppointment(appointmentId).longValue();
-
-                // 9️⃣ Tính tiền cần thu thêm
-                long amountToPay = Math.max(totalCost - advanceTotal, 0);
+                long totalCost = serviceFee;
 
                 // 🔟 Xác định trạng thái hiển thị
                 String rawStatus = latestAppointment.getStatus();
                 String paymentStatus;
 
-                if ("Đã kết luận".equalsIgnoreCase(rawStatus) ||
-                                "Đã kê đơn".equalsIgnoreCase(rawStatus)) {
-
-                        paymentStatus = "Chưa thanh toán";
-
+                if ("Chờ khám".equalsIgnoreCase(rawStatus)) {
+                        paymentStatus = "Chờ thanh toán";
                 } else {
                         paymentStatus = rawStatus;
                 }
@@ -247,13 +254,12 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                 .status(paymentStatus)
                                 .appointmentId(appointmentId)
 
-                                .examFee(examFee)
                                 .serviceFee(serviceFee)
-                                .medicineFee(medicineFee)
-
-                                .advanceTotal(advanceTotal)
                                 .totalCost(totalCost)
-                                .amountToPay(amountToPay)
+
+                                .doctorName(doctorName)
+                                .roomName(roomName)
+                                .roomGroupName(roomGroupName)
                                 .build();
         }
 
@@ -285,11 +291,8 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                         String rawStatus = latestAppt.getStatus();
                         String paymentStatus;
 
-                        if ("Đã kết luận".equalsIgnoreCase(rawStatus) ||
-                                        "Đã kê đơn".equalsIgnoreCase(rawStatus)) {
-
-                                paymentStatus = "Chưa thanh toán";
-
+                        if ("Chờ khám".equalsIgnoreCase(rawStatus)) {
+                                paymentStatus = "Chờ thanh toán";
                         } else {
                                 paymentStatus = rawStatus;
                         }
@@ -313,34 +316,6 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                 FROM tbl_appointment_service aps
                                 JOIN tbl_service s ON aps.service_id = s.service_id
                                 WHERE aps.appointment_id = ?
-                                """;
-
-                BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, appointmentId);
-                return (result != null) ? result : BigDecimal.ZERO;
-        }
-
-        /**
-         * SUM tiền thuốc theo prescription (theo schema hiện tại của bạn)
-         */
-        private BigDecimal sumMedicinesForPrescription(String prescriptionId) {
-
-                String sql = """
-                                    SELECT COALESCE(SUM(m.price * pd.quantity), 0)
-                                    FROM tbl_prescription_detail pd
-                                    JOIN tbl_medicines m ON pd.medicine_id = m.medicine_id
-                                    WHERE pd.prescription_id = ?
-                                """;
-
-                BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, prescriptionId);
-                return (result != null) ? result : BigDecimal.ZERO;
-        }
-
-        private BigDecimal sumAdvanceForAppointment(String appointmentId) {
-
-                String sql = """
-                                    SELECT COALESCE(SUM(ap.amount), 0)
-                                    FROM tbl_advance_payment ap
-                                    WHERE ap.appointment_id = ?
                                 """;
 
                 BigDecimal result = jdbcTemplate.queryForObject(sql, BigDecimal.class, appointmentId);
