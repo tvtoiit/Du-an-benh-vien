@@ -9,7 +9,6 @@ import loginService from "../../services/loginService";
 import { useNavigate } from "react-router-dom";
 import ListThuoc from '../admin/thuoc/ThuocList';
 import ServiceList from '../admin/dichvu/ServiceList';
-import DepartmentList from '../admin/khoa/DepartmentList';
 import RoomList from '../admin/phong/RoomList'
 import ThongKeDashboard from './thongke/ThongKeDashboard';
 import logo from "../../assets/logo.jpg";
@@ -51,12 +50,12 @@ const MedicalDashboard = () => {
                     setUserPermissions(userPermission);
 
                     // Chọn activeRole đầu tiên dựa trên quyền
-                    if (userPermission.quanLyUser) setActiveRole('Người dùng');
+                    if (userPermission.Thongke) setActiveRole('Thongke');
+                    else if (userPermission.quanLyUser) setActiveRole('Người dùng');
                     else if (userPermission.quanLyBenhNhan) setActiveRole('Bệnh nhân');
                     else if (userPermission.chiDinhKham) setActiveRole('Khám bệnh');
                     else if (userPermission.quanLyKho) setActiveRole('Cận lâm sàng');
                     else if (userPermission.thanhToan) setActiveRole('Thu ngân');
-                    else if (userPermission.Khoa) setActiveRole('Khoa');
                     else if (userPermission.Phong) setActiveRole('Phong');
                     else setActiveRole(null);
                 }
@@ -138,14 +137,6 @@ const MedicalDashboard = () => {
                     </div>
                 );
 
-            case 'Khoa':
-                if (!can("Khoa")) return <p>Bạn không có quyền truy cập Khoa</p>;
-                return (
-                    <div className="main-content-box">
-                        <DepartmentList />
-                    </div>
-                );
-
             case 'Phong':
                 if (!can("Phong")) return <p>Bạn không có quyền truy cập Phong</p>;
                 return (
@@ -206,6 +197,17 @@ const MedicalDashboard = () => {
                         <h2>{roleDisplayMap[role] || role}</h2>
                     )}
                     <ul>
+                        {can("Thongke") && (
+                            <li
+                                className={activeRole === 'Thongke' ? 'active' : ''}
+                                onClick={() => setActiveRole('Thongke')}
+                                title="Thống kê"
+                            >
+                                <BarChartIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
+                                {isSidebarOpen && "Thống kê"}
+                            </li>
+                        )}
+
                         {can("quanLyUser") && (
                             <li
                                 className={activeRole === 'Người dùng' ? 'active' : ''}
@@ -272,17 +274,6 @@ const MedicalDashboard = () => {
                             </li>
                         )}
 
-                        {can("Khoa") && (
-                            <li
-                                className={activeRole === 'Khoa' ? 'active' : ''}
-                                onClick={() => setActiveRole('Khoa')}
-                                title="Quản lý khoa"
-                            >
-                                <ApartmentIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
-                                {isSidebarOpen && "Quản lý khoa"}
-                            </li>
-                        )}
-
                         {can("Phong") && (
                             <li
                                 className={activeRole === 'Phong' ? 'active' : ''}
@@ -291,17 +282,6 @@ const MedicalDashboard = () => {
                             >
                                 <MeetingRoomIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
                                 {isSidebarOpen && "Quản lý phòng"}
-                            </li>
-                        )}
-
-                        {can("Thongke") && (
-                            <li
-                                className={activeRole === 'Thongke' ? 'active' : ''}
-                                onClick={() => setActiveRole('Thongke')}
-                                title="Thống kê"
-                            >
-                                <BarChartIcon style={{ marginRight: isSidebarOpen ? 10 : 0 }} />
-                                {isSidebarOpen && "Thống kê"}
                             </li>
                         )}
                     </ul>
