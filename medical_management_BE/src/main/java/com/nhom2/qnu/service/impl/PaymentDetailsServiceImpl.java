@@ -96,7 +96,7 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
 
                 if ("Chờ thanh toán".equalsIgnoreCase(status)) {
 
-                        total = consultationFee;
+                        total = consultationFee.add(serviceFee);
 
                         appointment.setStatus("Chờ khám");
 
@@ -255,9 +255,8 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
 
                 if ("Chờ thanh toán".equalsIgnoreCase(status)) {
 
-                        // Chỉ thu phí khám
-                        serviceFee = 0L;
-                        totalCost = consultationFee;
+                        // Thu phí khám + dịch vụ khám ban đầu
+                        totalCost = consultationFee + serviceFee;
 
                 } else if ("Chờ thanh toán CLS".equalsIgnoreCase(status)) {
 

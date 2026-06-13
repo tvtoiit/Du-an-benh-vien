@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import serviceService from "../../../services/servicesServices";
 import RegisterServiceModal from "./RegisterServiceModal";
 import EditServiceModal from "./EditServiceModal";
-import { toast } from "react-toastify";
 import DetailModal from "../../../components/DetailModal";
 
 import {
@@ -22,14 +21,22 @@ import {
     CircularProgress,
     Chip,
     TextField,
+    Avatar,
+    InputAdornment
 } from "@mui/material";
 
 import { FaPlus } from "react-icons/fa";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from "@mui/icons-material/Search";
+import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+
+import { toast } from "react-toastify";
 
 const ServiceList = () => {
+
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -41,11 +48,12 @@ const ServiceList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingService, setEditingService] = useState(null);
 
-    // =========================
+    // =============================
     // LOAD DATA
-    // =========================
+    // =============================
     const loadServices = async () => {
         try {
+
             setLoading(true);
 
             const res = await serviceService.getAll();
@@ -60,14 +68,19 @@ const ServiceList = () => {
                     ? list
                     : []
             );
+
         } catch (err) {
+
             console.error(err);
 
             toast.error(
                 "Không thể tải danh sách dịch vụ"
             );
+
         } finally {
+
             setLoading(false);
+
         }
     };
 
@@ -75,10 +88,11 @@ const ServiceList = () => {
         loadServices();
     }, []);
 
-    // =========================
+    // =============================
     // XEM CHI TIẾT
-    // =========================
+    // =============================
     const handleView = (s) => {
+
         setDetailData({
             "Tên dịch vụ": s.serviceName,
 
@@ -93,30 +107,33 @@ const ServiceList = () => {
             "Giá":
                 Number(
                     s.price || 0
-                ).toLocaleString() + " VNĐ",
+                ).toLocaleString()
+                + " VNĐ",
 
             "Mô tả":
-                s.description || "-",
+                s.description || "-"
         });
 
         setDetailOpen(true);
     };
 
-    // =========================
+    // =============================
     // XÓA
-    // =========================
-    const handleDelete = async (s) => {
+    // =============================
+    const handleDelete = async (service) => {
+
         if (
             !window.confirm(
-                `Bạn có chắc muốn xóa dịch vụ "${s.serviceName}"?`
+                `Bạn có chắc muốn xóa dịch vụ "${service.serviceName}" ? `
             )
         ) {
             return;
         }
 
         try {
+
             await serviceService.delete(
-                s.serviceId
+                service.serviceId
             );
 
             toast.success(
@@ -124,36 +141,44 @@ const ServiceList = () => {
             );
 
             loadServices();
+
         } catch (err) {
+
+            console.error(err);
+
             toast.error(
                 err?.response?.data?.message ||
                 "Không thể xóa dịch vụ!"
             );
+
         }
     };
 
-    // =========================
+    // =============================
     // SEARCH
-    // =========================
-    const filteredServices =
-        services.filter((s) =>
-            s.serviceName
-                ?.toLowerCase()
-                .includes(
-                    search.toLowerCase()
-                )
-        );
+    // =============================
+    const keyword =
+        search.trim().toLowerCase();
 
-    // =========================
+    const filteredServices =
+        keyword
+            ? services.filter((s) =>
+                s.serviceName
+                    ?.toLowerCase()
+                    .includes(keyword)
+            )
+            : services;
+
+    // =============================
     // LOADING
-    // =========================
+    // =============================
     if (loading) {
         return (
             <Box
                 sx={{
                     display: "flex",
                     justifyContent: "center",
-                    mt: 5,
+                    mt: 5
                 }}
             >
                 <CircularProgress />
@@ -162,264 +187,328 @@ const ServiceList = () => {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
+
             {/* HEADER */}
+
             <Paper
+                elevation={0}
                 sx={{
-                    p: 2,
+                    p: 3,
                     mb: 3,
+                    borderRadius: 3,
                     display: "flex",
-                    justifyContent:
-                        "space-between",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    gap: 2,
+                    background:
+                        "linear-gradient(135deg, #1976d2, #42a5f5)",
+                    color: "#fff"
                 }}
             >
                 <Box>
+
                     <Typography
-                        variant="h6"
+                        variant="h5"
                         fontWeight="bold"
                     >
-                        Quản lý dịch vụ
+                        Danh mục dịch vụ
                     </Typography>
 
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                    >
-                        Danh sách dịch vụ khám
-                        và cận lâm sàng
+                    <Typography variant="body2">
+                        Danh sách dịch vụ khám và cận lâm sàng
                     </Typography>
-                </Box>
 
-                <Box
-                    sx={{
-                        display: "flex",
-                        gap: 2,
-                    }}
-                >
-                    <TextField
-                        size="small"
-                        label="Tìm theo tên dịch vụ"
-                        value={search}
-                        onChange={(e) =>
-                            setSearch(
-                                e.target.value
-                            )
-                        }
-                    />
-
-                    <Button
-                        variant="contained"
-                        startIcon={<FaPlus />}
-                        onClick={() =>
-                            setIsModalOpen(true)
-                        }
-                    >
-                        Thêm dịch vụ
-                    </Button>
                 </Box>
             </Paper>
 
+            {/* TOOLBAR */}
+
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    borderRadius: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2
+                }}
+            >
+
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Tìm kiếm theo tên dịch vụ..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(
+                            e.target.value
+                        )
+                    }
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
+
+                <Button
+                    variant="contained"
+                    startIcon={<FaPlus />}
+                    onClick={() =>
+                        setIsModalOpen(true)
+                    }
+                    sx={{
+                        borderRadius: 2,
+                        minWidth: 180
+                    }}
+                >
+                    Thêm dịch vụ
+                </Button>
+
+            </Paper>
+
             {/* TABLE */}
+
             <TableContainer
                 component={Paper}
+                elevation={0}
+                sx={{
+                    borderRadius: 3
+                }}
             >
+
                 <Table>
+
                     <TableHead>
+
                         <TableRow
                             sx={{
                                 backgroundColor:
-                                    "#e3f2fd",
+                                    "#f1f5f9"
                             }}
                         >
+
                             <TableCell>
-                                Tên dịch vụ
+                                <strong>Dịch vụ</strong>
                             </TableCell>
 
                             <TableCell>
-                                Loại dịch vụ
+                                <strong>Loại</strong>
                             </TableCell>
 
                             <TableCell>
-                                Chuyên khoa
+                                <strong>Chuyên khoa</strong>
                             </TableCell>
 
                             <TableCell>
-                                Giá
+                                <strong>Giá</strong>
                             </TableCell>
 
                             <TableCell>
-                                Mô tả
+                                <strong>Mô tả</strong>
                             </TableCell>
 
                             <TableCell align="center">
-                                Thao tác
+                                <strong>Thao tác</strong>
                             </TableCell>
+
                         </TableRow>
+
                     </TableHead>
 
                     <TableBody>
-                        {filteredServices.map(
-                            (s) => (
-                                <TableRow
-                                    key={
-                                        s.serviceId
-                                    }
-                                    hover
-                                >
-                                    <TableCell
-                                        sx={{
-                                            fontWeight:
-                                                600,
-                                        }}
+
+                        {filteredServices.map((s) => (
+
+                            <TableRow
+                                key={s.serviceId}
+                                hover
+                            >
+
+                                <TableCell>
+
+                                    <Stack
+                                        direction="row"
+                                        spacing={2}
+                                        alignItems="center"
                                     >
-                                        {
-                                            s.serviceName
-                                        }
-                                    </TableCell>
 
-                                    <TableCell>
-                                        <Chip
-                                            size="small"
-                                            label={
-                                                s.serviceType ===
-                                                    "CLINICAL"
-                                                    ? "CLS"
-                                                    : "Khám"
-                                            }
-                                            color={
-                                                s.serviceType ===
-                                                    "CLINICAL"
-                                                    ? "secondary"
-                                                    : "primary"
-                                            }
-                                        />
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {s.roomGroupName ||
-                                            "-"}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {Number(
-                                            s.price ||
-                                            0
-                                        ).toLocaleString()}
-                                        {" VNĐ"}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {s.description}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        <Stack
-                                            direction="row"
-                                            spacing={
-                                                1
-                                            }
-                                            justifyContent="center"
+                                        <Avatar
+                                            sx={{
+                                                bgcolor:
+                                                    "#1976d2"
+                                            }}
                                         >
-                                            <Tooltip title="Xem chi tiết">
-                                                <IconButton
-                                                    color="primary"
-                                                    onClick={() =>
-                                                        handleView(
-                                                            s
-                                                        )
-                                                    }
-                                                >
-                                                    <VisibilityIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            <MedicalServicesIcon />
+                                        </Avatar>
 
-                                            <Tooltip title="Sửa">
-                                                <IconButton
-                                                    color="warning"
-                                                    onClick={() =>
-                                                        setEditingService(
-                                                            s
-                                                        )
-                                                    }
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                        <Typography
+                                            fontWeight="bold"
+                                        >
+                                            {s.serviceName}
+                                        </Typography>
 
-                                            <Tooltip title="Xóa">
-                                                <IconButton
-                                                    color="error"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            s
-                                                        )
-                                                    }
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Stack>
-                                    </TableCell>
-                                </TableRow>
-                            )
+                                    </Stack>
+
+                                </TableCell>
+
+                                <TableCell>
+
+                                    <Chip
+                                        size="small"
+                                        label={
+                                            s.serviceType ===
+                                                "CLINICAL"
+                                                ? "Cận lâm sàng"
+                                                : "Khám bệnh"
+                                        }
+                                        color={
+                                            s.serviceType ===
+                                                "CLINICAL"
+                                                ? "secondary"
+                                                : "primary"
+                                        }
+                                    />
+
+                                </TableCell>
+
+                                <TableCell>
+                                    {s.roomGroupName || "-"}
+                                </TableCell>
+
+                                <TableCell>
+                                    {Number(
+                                        s.price || 0
+                                    ).toLocaleString()}
+                                    {" VNĐ"}
+                                </TableCell>
+
+                                <TableCell>
+                                    {s.description}
+                                </TableCell>
+
+                                <TableCell align="center">
+
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        justifyContent="center"
+                                    >
+
+                                        <Tooltip title="Xem chi tiết">
+                                            <IconButton
+                                                color="primary"
+                                                onClick={() =>
+                                                    handleView(s)
+                                                }
+                                            >
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Sửa">
+                                            <IconButton
+                                                color="warning"
+                                                onClick={() =>
+                                                    setEditingService(s)
+                                                }
+                                            >
+                                                <EditIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Xóa">
+                                            <IconButton
+                                                color="error"
+                                                onClick={() =>
+                                                    handleDelete(s)
+                                                }
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                    </Stack>
+
+                                </TableCell>
+
+                            </TableRow>
+
+                        ))}
+
+                        {filteredServices.length === 0 && (
+
+                            <TableRow>
+
+                                <TableCell
+                                    colSpan={6}
+                                    align="center"
+                                >
+
+                                    <Typography
+                                        py={4}
+                                        color="text.secondary"
+                                    >
+                                        Không tìm thấy dịch vụ
+                                    </Typography>
+
+                                </TableCell>
+
+                            </TableRow>
+
                         )}
 
-                        {filteredServices.length ===
-                            0 && (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={6}
-                                        align="center"
-                                    >
-                                        Không tìm thấy
-                                        dịch vụ nào
-                                    </TableCell>
-                                </TableRow>
-                            )}
                     </TableBody>
+
                 </Table>
+
             </TableContainer>
 
             {/* CREATE */}
+
             {isModalOpen && (
                 <RegisterServiceModal
-                    onClose={(
-                        reload
-                    ) => {
-                        setIsModalOpen(
-                            false
-                        );
+                    onClose={(reload) => {
+
+                        setIsModalOpen(false);
 
                         if (reload) {
                             loadServices();
                         }
+
                     }}
                 />
             )}
 
             {/* EDIT */}
+
             {editingService && (
                 <EditServiceModal
-                    service={
-                        editingService
-                    }
-                    onClose={(
-                        reload
-                    ) => {
-                        setEditingService(
-                            null
-                        );
+                    service={editingService}
+                    onClose={(reload) => {
+
+                        setEditingService(null);
 
                         if (reload) {
                             loadServices();
                         }
+
                     }}
                 />
             )}
 
             {/* DETAIL */}
+
             <DetailModal
                 open={detailOpen}
                 onClose={() =>
@@ -428,6 +517,7 @@ const ServiceList = () => {
                 title="Thông tin dịch vụ"
                 data={detailData}
             />
+
         </Box>
     );
 };

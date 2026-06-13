@@ -543,6 +543,11 @@ const TiepNhan = ({
                                     {doc.doctorName}
                                     {" - "}
                                     {doc.roomGroupName}
+                                    {" - "}
+                                    {Number(
+                                        doc.consultationFee || 0
+                                    ).toLocaleString()}
+                                    {" VNĐ"}
 
                                 </MenuItem>
 

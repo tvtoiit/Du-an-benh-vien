@@ -104,7 +104,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         // TẠO LỊCH HẸN
         // =======================================================
         @Override
-        public AppointmentSchedulesResponse createAppointmentSchedules(AppointmentSchedulesRequest request) {
+        @Transactional
+        public AppointmentSchedulesResponse createAppointmentSchedules(
+                        AppointmentSchedulesRequest request) {
 
                 Doctor doctor = doctorRepository.findById(request.getDoctorId())
                                 .orElseThrow(() -> new DataNotFoundException("Doctor not found"));
@@ -113,20 +115,43 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 .orElseThrow(() -> new DataNotFoundException("Patient not found"));
 
                 LocalDateTime appointmentTime = LocalDateTime.now();
+
                 if (checkAppointmentExists(patients, appointmentTime)) {
                         return null;
                 }
 
                 AppointmentSchedules app = new AppointmentSchedules();
-                app.setAppointmentDatetime(
-                                appointmentTime);
+                app.setAppointmentDatetime(appointmentTime);
                 app.setDoctor(doctor);
                 app.setPatients(patients);
                 app.setRoom(request.getRoom());
                 app.setNote(request.getNote());
                 app.setStatus(STATUS_WAITING);
 
-                return setupResponse(appointmentRepository.save(app));
+                // Lưu appointment trước
+                AppointmentSchedules saved = appointmentRepository.save(app);
+
+                // Lưu các dịch vụ đã chọn
+                if (request.getServiceIds() != null &&
+                                !request.getServiceIds().isEmpty()) {
+
+                        for (String serviceId : request.getServiceIds()) {
+
+                                Services service = servicesRepository
+                                                .findById(serviceId)
+                                                .orElseThrow(() -> new DataNotFoundException(
+                                                                "Service not found"));
+
+                                AppointmentServiceItem item = new AppointmentServiceItem();
+
+                                item.setAppointment(saved);
+                                item.setService(service);
+
+                                appointmentServiceItemRepository.save(item);
+                        }
+                }
+
+                return setupResponse(saved);
         }
 
         // =======================================================

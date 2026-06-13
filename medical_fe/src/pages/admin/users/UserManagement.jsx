@@ -21,6 +21,12 @@ import { Delete, Edit, Add } from "@mui/icons-material";
 import userService from "../../../services/userService";
 import roleService from "../../../services/roleService";
 import { toast } from "react-toastify";
+import Avatar from "@mui/material/Avatar";
+import InputAdornment from "@mui/material/InputAdornment";
+import Chip from "@mui/material/Chip";
+
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
 
 const UserManagement = ({ currentRole }) => {
     const [users, setUsers] = useState([]);
@@ -62,7 +68,7 @@ const UserManagement = ({ currentRole }) => {
 
         const defaultRole = currentRole === "ROLE_LETAN"
             ? "ROLE_USER"
-            : roles[0]?.name;
+            : roles[0]?.roleName;
 
         setFormData(
             user
@@ -111,7 +117,9 @@ const UserManagement = ({ currentRole }) => {
     };
 
     const filteredUsers = users.filter((u) => {
-        const matchCccd = u.cccd?.includes(searchCccd);
+        const matchCccd =
+            !searchCccd ||
+            u.cccd?.includes(searchCccd);
 
         const matchRole =
             searchRole === "" || u.role === searchRole;
@@ -222,132 +230,385 @@ const UserManagement = ({ currentRole }) => {
     };
 
     return (
-        <Box>
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
+
+            {/* HEADER */}
+
             <Paper
+                elevation={0}
                 sx={{
-                    p: 2,
+                    p: 3,
                     mb: 3,
+                    borderRadius: 3,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    gap: 2
+                    background:
+                        "linear-gradient(135deg,#1976d2,#42a5f5)",
+                    color: "#fff"
                 }}
             >
-                <Typography variant="h6">
-                    Danh sách người dùng
-                </Typography>
+                <Box>
 
-                <Box sx={{ display: "flex", gap: 2 }}>
-
-                    <TextField
-                        size="small"
-                        label="Tìm theo CCCD"
-                        value={searchCccd}
-                        onChange={(e) => setSearchCccd(e.target.value)}
-                    />
-
-                    <TextField
-                        select
-                        size="small"
-                        label="Lọc vai trò"
-                        value={searchRole}
-                        onChange={(e) => setSearchRole(e.target.value)}
-                        sx={{ minWidth: 180 }}
+                    <Typography
+                        variant="h5"
+                        fontWeight="bold"
                     >
-                        <MenuItem value="">Tất cả</MenuItem>
+                        Quản lý người dùng
+                    </Typography>
 
-                        {roles.map((r) => (
-                            <MenuItem
-                                key={r.roleId}
-                                value={r.roleName}
-                            >
-                                {roleText[r.roleName] || r.roleName}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={() => handleOpen()}
-                    >
-                        Thêm người dùng
-                    </Button>
+                    <Typography variant="body2">
+                        Danh sách tài khoản trong hệ thống
+                    </Typography>
 
                 </Box>
             </Paper>
 
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
-                        <TableRow>
-                            <TableCell>Họ tên</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Số điện thoại</TableCell>
-                            <TableCell>CCCD</TableCell>
-                            <TableCell>Giới tính</TableCell>
-                            <TableCell>Ngày sinh</TableCell>
-                            <TableCell>Địa chỉ</TableCell>
-                            <TableCell>Vai trò</TableCell>
-                            <TableCell>Hành động</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredUsers.map((u) => (
-                            <TableRow key={u.userId}>
-                                <TableCell>{u.fullName}</TableCell>
-                                <TableCell>{u.email}</TableCell>
-                                <TableCell>{u.phoneNumber}</TableCell>
-                                <TableCell>{u.cccd}</TableCell>
-                                <TableCell>
-                                    {u.gender === "MALE" ? "Nam" : u.gender === "FEMALE" ? "Nữ" : ""}
-                                </TableCell>
-                                <TableCell>
-                                    {u.dateOfBirth
-                                        ? new Date(u.dateOfBirth).toLocaleDateString("vi-VN")
-                                        : ""}
-                                </TableCell>
-                                <TableCell>{u.address}</TableCell>
-                                <TableCell>{roleText[u.role] || u.role}</TableCell>
-                                <TableCell sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                    {currentRole !== "ROLE_LETAN" || u.role === "ROLE_USER" ? (
-                                        <Button
-                                            color="primary"
-                                            onClick={() => handleOpen(u)}
-                                            startIcon={<Edit />}
-                                        >
-                                            Sửa
-                                        </Button>
-                                    ) : (
-                                        <Button color="inherit" disabled startIcon={<Edit />}>
-                                            Sửa
-                                        </Button>
-                                    )}
+            {/* TOOLBAR */}
 
-                                    {currentRole !== "ROLE_LETAN" && (
-                                        <Button
-                                            color="error"
-                                            onClick={() => handleDelete(u.userId)}
-                                            startIcon={<Delete />}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: 2,
+                    mb: 3,
+                    borderRadius: 3,
+                    display: "flex",
+                    gap: 2,
+                    alignItems: "center"
+                }}
+            >
+
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Tìm theo CCCD..."
+                    value={searchCccd}
+                    onChange={(e) =>
+                        setSearchCccd(
+                            e.target.value
+                        )
+                    }
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
+
+                <TextField
+                    select
+                    size="small"
+                    label="Vai trò"
+                    value={searchRole}
+                    onChange={(e) =>
+                        setSearchRole(
+                            e.target.value
+                        )
+                    }
+                    sx={{
+                        minWidth: 220
+                    }}
+                >
+
+                    <MenuItem value="">
+                        Tất cả
+                    </MenuItem>
+
+                    {roles.map((r) => (
+
+                        <MenuItem
+                            key={r.roleId}
+                            value={r.roleName}
+                        >
+                            {roleText[r.roleName] ||
+                                r.roleName}
+                        </MenuItem>
+
+                    ))}
+
+                </TextField>
+
+                <Button
+                    variant="contained"
+                    startIcon={<Add />}
+                    onClick={() =>
+                        handleOpen()
+                    }
+                    sx={{
+                        minWidth: 220,
+                        borderRadius: 2
+                    }}
+                >
+                    Thêm người dùng
+                </Button>
+
+            </Paper>
+
+            {/* TABLE */}
+
+            <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                    borderRadius: 3
+                }}
+            >
+
+                <Table>
+
+                    <TableHead
+                        sx={{
+                            backgroundColor:
+                                "#f1f5f9"
+                        }}
+                    >
+
+                        <TableRow>
+
+                            <TableCell>
+                                <strong>Người dùng</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Email</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Điện thoại</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>CCCD</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Địa chỉ</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Giới tính</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Ngày sinh</strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>Vai trò</strong>
+                            </TableCell>
+
+                            <TableCell align="center">
+                                <strong>Thao tác</strong>
+                            </TableCell>
+
+                        </TableRow>
+
+                    </TableHead>
+
+                    <TableBody>
+
+                        {filteredUsers.map((u) => (
+
+                            <TableRow
+                                key={u.userId}
+                                hover
+                            >
+
+                                <TableCell>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 2
+                                        }}
+                                    >
+
+                                        <Avatar
+                                            sx={{
+                                                bgcolor:
+                                                    "#1976d2"
+                                            }}
                                         >
-                                            Xoá
-                                        </Button>
-                                    )}
+                                            <PersonIcon />
+                                        </Avatar>
+
+                                        <Box>
+
+                                            <Typography
+                                                fontWeight="bold"
+                                            >
+                                                {u.fullName}
+                                            </Typography>
+
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                            >
+                                                {u.email}
+                                            </Typography>
+
+                                        </Box>
+
+                                    </Box>
+
+                                </TableCell>
+
+                                <TableCell>
+                                    {u.email}
+                                </TableCell>
+
+                                <TableCell>
+                                    {u.phoneNumber}
+                                </TableCell>
+
+                                <TableCell>
+                                    {u.cccd}
+                                </TableCell>
+
+                                <TableCell
+                                    sx={{
+                                        maxWidth: 250
+                                    }}
+                                >
+                                    {u.address || "-"}
+                                </TableCell>
+
+                                <TableCell>
+
+                                    {u.gender === "MALE"
+                                        ? "Nam"
+                                        : u.gender ===
+                                            "FEMALE"
+                                            ? "Nữ"
+                                            : ""}
+
+                                </TableCell>
+
+                                <TableCell>
+
+                                    {u.dateOfBirth
+                                        ? new Date(
+                                            u.dateOfBirth
+                                        ).toLocaleDateString(
+                                            "vi-VN"
+                                        )
+                                        : ""}
+
+                                </TableCell>
+
+                                <TableCell>
+
+                                    <Chip
+                                        label={
+                                            roleText[
+                                            u.role
+                                            ] ||
+                                            u.role
+                                        }
+                                        color="primary"
+                                        size="small"
+                                    />
+
+                                </TableCell>
+
+                                <TableCell align="center">
+
+                                    <Box
+                                        sx={{
+                                            display:
+                                                "flex",
+                                            justifyContent:
+                                                "center",
+                                            gap: 1
+                                        }}
+                                    >
+
+                                        {(currentRole !==
+                                            "ROLE_LETAN" ||
+                                            u.role ===
+                                            "ROLE_USER") && (
+
+                                                <Button
+                                                    size="small"
+                                                    color="warning"
+                                                    startIcon={
+                                                        <Edit />
+                                                    }
+                                                    onClick={() =>
+                                                        handleOpen(
+                                                            u
+                                                        )
+                                                    }
+                                                >
+                                                    Sửa
+                                                </Button>
+
+                                            )}
+
+                                        {currentRole !==
+                                            "ROLE_LETAN" && (
+
+                                                <Button
+                                                    size="small"
+                                                    color="error"
+                                                    startIcon={
+                                                        <Delete />
+                                                    }
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            u.userId
+                                                        )
+                                                    }
+                                                >
+                                                    Xóa
+                                                </Button>
+
+                                            )}
+
+                                    </Box>
+
                                 </TableCell>
 
                             </TableRow>
+
                         ))}
 
-                        {filteredUsers.length === 0 && (
-                            <TableRow key="empty">
-                                <TableCell colSpan={6} align="center">
-                                    Không có người dùng nào
-                                </TableCell>
-                            </TableRow>
-                        )}
+                        {filteredUsers.length ===
+                            0 && (
+
+                                <TableRow>
+
+                                    <TableCell
+                                        colSpan={7}
+                                        align="center"
+                                    >
+
+                                        <Typography
+                                            py={4}
+                                            color="text.secondary"
+                                        >
+                                            Không có người dùng nào
+                                        </Typography>
+
+                                    </TableCell>
+
+                                </TableRow>
+
+                            )}
 
                     </TableBody>
+
                 </Table>
+
             </TableContainer>
 
             {/* Form thêm / sửa */}
@@ -437,8 +698,12 @@ const UserManagement = ({ currentRole }) => {
                         disabled={currentRole === "ROLE_LETAN"}
                     >
                         {roles.map(r => (
-                            <MenuItem key={r.roleId} value={r.roleName}>
-                                {r.roleName}
+                            <MenuItem
+                                key={r.roleId}
+                                value={r.roleName}
+                            >
+                                {roleText[r.roleName] ||
+                                    r.roleName}
                             </MenuItem>
                         ))}
                     </TextField>
