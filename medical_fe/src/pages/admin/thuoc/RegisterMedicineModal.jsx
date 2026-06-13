@@ -17,9 +17,8 @@ const units = ["viên", "hộp", "chai", "gói", "ống"];
 const RegisterMedicineModal = ({ onClose }) => {
     const [form, setForm] = useState({
         name: "",
-        quantity: "",
         unit: "",
-        price: "",
+        description: ""
     });
 
     const handleChange = (e) => {
@@ -29,10 +28,6 @@ const RegisterMedicineModal = ({ onClose }) => {
     const handleSubmit = async () => {
         if (!form.name.trim()) return toast.error("Tên thuốc không được để trống");
         if (!form.unit.trim()) return toast.error("Vui lòng chọn đơn vị");
-        if (isNaN(form.quantity) || form.quantity <= 0)
-            return toast.error("Số lượng phải là số > 0");
-        if (isNaN(form.price) || form.price <= 0)
-            return toast.error("Giá phải là số > 0");
 
         try {
             await medicineService.create(form);
@@ -59,15 +54,6 @@ const RegisterMedicineModal = ({ onClose }) => {
                     />
 
                     <TextField
-                        label="Số lượng"
-                        name="quantity"
-                        type="number"
-                        fullWidth
-                        value={form.quantity}
-                        onChange={handleChange}
-                    />
-
-                    <TextField
                         select
                         label="Đơn vị"
                         name="unit"
@@ -81,13 +67,13 @@ const RegisterMedicineModal = ({ onClose }) => {
                             </MenuItem>
                         ))}
                     </TextField>
-
                     <TextField
-                        label="Giá (VNĐ)"
-                        name="price"
-                        type="number"
+                        label="Mô tả thuốc"
+                        name="description"
+                        multiline
+                        rows={3}
                         fullWidth
-                        value={form.price}
+                        value={form.description}
                         onChange={handleChange}
                     />
                 </Stack>

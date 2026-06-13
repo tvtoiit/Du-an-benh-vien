@@ -16,6 +16,8 @@ public class PatientServiceResponse {
 
     private String patientId;
 
+    private String appointmentId;
+
     private String fullName;
     private String gender;
     private Date dateOfBirth;

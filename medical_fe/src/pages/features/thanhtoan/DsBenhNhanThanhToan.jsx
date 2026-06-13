@@ -160,7 +160,7 @@ const DsBenhNhanThanhToan = () => {
                     </Typography>
 
                     <Typography variant="body2">
-                        Danh sách bệnh nhân chờ thanh toán
+                        Danh sách bệnh nhân chờ thanh toán khám và cận lâm sàng
                     </Typography>
 
                 </Box>
@@ -284,7 +284,7 @@ const DsBenhNhanThanhToan = () => {
 
                                 <TableRow
                                     key={
-                                        p.patientId
+                                        p.appointmentId
                                     }
                                     hover
                                 >
@@ -362,23 +362,15 @@ const DsBenhNhanThanhToan = () => {
 
                                     <TableCell>
 
-                                        {p.status === "Đã thanh toán" ? (
-
-                                            <Chip
-                                                label="Đã thanh toán"
-                                                color="success"
-                                                variant="outlined"
-                                            />
-
-                                        ) : (
-
-                                            <Chip
-                                                label="Chưa thanh toán"
-                                                color="warning"
-                                                variant="outlined"
-                                            />
-
-                                        )}
+                                        <Chip
+                                            label={p.status}
+                                            color={
+                                                p.status === "Chờ thanh toán CLS"
+                                                    ? "warning"
+                                                    : "info"
+                                            }
+                                            variant="outlined"
+                                        />
 
                                     </TableCell>
 
@@ -386,36 +378,19 @@ const DsBenhNhanThanhToan = () => {
                                         align="center"
                                     >
 
-                                        {p.status === "Đã thanh toán" ? (
-
-                                            <Button
-                                                variant="outlined"
-                                                disabled
-                                            >
-                                                Đã thanh toán
-                                            </Button>
-
-                                        ) : (
-
-                                            <Button
-                                                variant="contained"
-                                                sx={{
-                                                    borderRadius: 2,
-                                                    textTransform:
-                                                        "none",
-                                                    fontWeight:
-                                                        "bold"
-                                                }}
-                                                onClick={() =>
-                                                    setSelectedPatient(
-                                                        p
-                                                    )
-                                                }
-                                            >
-                                                Thanh toán
-                                            </Button>
-
-                                        )}
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: "none",
+                                                fontWeight: "bold"
+                                            }}
+                                            onClick={() => setSelectedPatient(p)}
+                                        >
+                                            {p.status === "Chờ thanh toán CLS"
+                                                ? "Thanh toán CLS"
+                                                : "Thanh toán"}
+                                        </Button>
 
                                     </TableCell>
 

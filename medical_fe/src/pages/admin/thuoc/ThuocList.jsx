@@ -76,9 +76,8 @@ const MedicineList = () => {
     const handleView = (s) => {
         setDetailData({
             "Tên thuốc": s.name,
-            "Số lượng": s.quantity,
             "Đơn vị": s.unit,
-            "Giá": s.price
+            "Mô tả": s.description
         });
         setDetailOpen(true);
     };
@@ -128,28 +127,14 @@ const MedicineList = () => {
                 }}
             >
                 <Box>
-                    <Typography
-                        variant="h5"
-                        fontWeight="bold"
-                    >
-                        Quản lý thuốc
+                    <Typography variant="h5" fontWeight="bold">
+                        Danh mục thuốc
                     </Typography>
 
-                    <Typography
-                        variant="body2"
-                    >
-                        Danh sách thuốc trong kho
+                    <Typography variant="body2">
+                        Danh sách thuốc sử dụng trong kê đơn
                     </Typography>
                 </Box>
-
-                <Chip
-                    label={`${filteredMedicines.length} loại thuốc`}
-                    sx={{
-                        bgcolor: "#fff",
-                        color: "#1976d2",
-                        fontWeight: "bold"
-                    }}
-                />
             </Paper>
 
             {/* TOOLBAR */}
@@ -225,19 +210,7 @@ const MedicineList = () => {
 
                             <TableCell>
                                 <strong>
-                                    Số lượng
-                                </strong>
-                            </TableCell>
-
-                            <TableCell>
-                                <strong>
                                     Đơn vị
-                                </strong>
-                            </TableCell>
-
-                            <TableCell>
-                                <strong>
-                                    Giá
                                 </strong>
                             </TableCell>
 
@@ -292,18 +265,7 @@ const MedicineList = () => {
                                     </TableCell>
 
                                     <TableCell>
-                                        {m.quantity}
-                                    </TableCell>
-
-                                    <TableCell>
                                         {m.unit}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        {Number(
-                                            m.price || 0
-                                        ).toLocaleString()}
-                                        {" "}VNĐ
                                     </TableCell>
 
                                     <TableCell
@@ -367,7 +329,7 @@ const MedicineList = () => {
                                 <TableRow>
 
                                     <TableCell
-                                        colSpan={5}
+                                        colSpan={3}
                                         align="center"
                                     >
 

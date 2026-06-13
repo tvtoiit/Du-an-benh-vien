@@ -196,7 +196,16 @@ public class MedicalHistoriesServiceImpl implements MedicalHistoriesService {
                 .orElse(null);
 
         if (appointment != null) {
-            appointment.setStatus("Đã kết luận");
+
+            if (Boolean.TRUE.equals(request.getNeedPrescription())) {
+
+                appointment.setStatus("Chờ kê đơn");
+
+            } else {
+
+                appointment.setStatus("Hoàn thành");
+            }
+
             appointmentRepository.save(appointment);
         }
 

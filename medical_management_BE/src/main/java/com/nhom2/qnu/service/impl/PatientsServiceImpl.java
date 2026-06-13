@@ -195,8 +195,8 @@ public class PatientsServiceImpl implements PatientsService {
   @Override
   public List<PatientServiceResponse> getAllPatientsWithServices() {
 
-    // chỉ lấy các lịch đang "Chờ khám"
-    List<AppointmentSchedules> appointments = appointmentRepository.findAllByStatus("Chỉ định CLS");
+    // chỉ lấy các lịch đang "Chờ CLS"
+    List<AppointmentSchedules> appointments = appointmentRepository.findAllByStatus("Chờ CLS");
 
     return appointments.stream()
         .map(app -> {
@@ -212,6 +212,7 @@ public class PatientsServiceImpl implements PatientsService {
 
           return PatientServiceResponse.builder()
               .patientId(app.getPatients().getPatientId())
+              .appointmentId(app.getAppointmentScheduleId())
               .fullName(app.getPatients().getUser().getFullName())
               .gender(app.getPatients().getUser().getGender())
               .dateOfBirth(app.getPatients().getUser().getDateOfBirth())

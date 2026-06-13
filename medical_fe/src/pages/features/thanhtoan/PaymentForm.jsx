@@ -21,7 +21,6 @@ const PaymentForm = ({ patient, onBack }) => {
     const [confirming, setConfirming] = useState(false);
 
     const patientId = patient.patientId;
-    const prescriptionId = patient.prescriptionId || null;
     const appointmentId = patient.appointmentId;
 
     useEffect(() => {
@@ -42,6 +41,7 @@ const PaymentForm = ({ patient, onBack }) => {
                     error
                 );
 
+                console.log(appointmentId);
                 toast.error(
                     "Không lấy được thông tin thanh toán"
                 );
@@ -51,7 +51,7 @@ const PaymentForm = ({ patient, onBack }) => {
         };
 
         fetchSummary();
-    }, [patientId, prescriptionId]);
+    }, [appointmentId]);
 
     const handleConfirmPayment = async () => {
         try {
@@ -60,9 +60,7 @@ const PaymentForm = ({ patient, onBack }) => {
             const res =
                 await paymentService.createPaymentDetails({
                     patientId,
-                    appointmentId:
-                        summary.appointmentId,
-                    prescriptionId
+                    appointmentId: summary.appointmentId
                 });
 
             if (!res) {

@@ -12,7 +12,6 @@ const CanLamSangForm = ({ patient, onBack }) => {
     const [formData, setFormData] = useState({
         result: "",
         note: "",
-        status: "Chưa làm",
         file: null,
     });
 
@@ -49,7 +48,6 @@ const CanLamSangForm = ({ patient, onBack }) => {
         data.append("medicalHistoryId", patient.medicalHistoryId || "");
         data.append("resultData", formData.result);
         data.append("note", formData.note);
-        data.append("status", formData.status);
 
         if (formData.file) data.append("imageFile", formData.file);
 
@@ -57,7 +55,7 @@ const CanLamSangForm = ({ patient, onBack }) => {
             const response = await serviceResult.create(data);
             toast.success("Lưu thành công: " + selectedService.serviceName);
             console.log("Kết quả lưu:", response.data);
-            setFormData({ result: "", note: "", status: "Chưa làm", file: null });
+            setFormData({ result: "", note: "", file: null });
         } catch (error) {
             console.error(error);
             toast.error("Lỗi khi lưu kết quả");
@@ -149,20 +147,6 @@ const CanLamSangForm = ({ patient, onBack }) => {
                         </Button>
 
                         {formData.file && <Typography>{formData.file.name}</Typography>}
-
-                        <TextField
-                            select
-                            label="Trạng thái"
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            fullWidth
-                            sx={{ mb: 3 }}
-                        >
-                            <MenuItem value="Chưa làm">Chưa làm</MenuItem>
-                            <MenuItem value="Đang thực hiện">Đang thực hiện</MenuItem>
-                            <MenuItem value="Hoàn thành">Hoàn thành</MenuItem>
-                        </TextField>
 
                         <Box display="flex" justifyContent="flex-end" gap={2}>
                             <Button variant="outlined" onClick={onBack}>Quay lại</Button>

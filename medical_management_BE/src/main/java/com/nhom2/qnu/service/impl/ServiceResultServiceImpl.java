@@ -87,28 +87,9 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 // 5) Lưu kết quả
                 ServiceResult saved = serviceResultRepository.save(result);
 
-                // 6) Cập nhật trạng thái lịch khám
-                String status = request.getStatus();
+                appointment.setStatus("Kết quả CLS");
+                appointmentRepository.save(appointment);
 
-                if ("Đang thực hiện".equalsIgnoreCase(status)) {
-                        appointment.setStatus("Đang cận lâm sàng");
-                        appointmentRepository.save(appointment);
-                }
-
-                if ("Hoàn thành".equalsIgnoreCase(status)) {
-                        boolean allDone = serviceResultRepository
-                                        .findAllByAppointmentSchedule_AppointmentScheduleId(
-                                                        appointment.getAppointmentScheduleId())
-                                        .stream()
-                                        .allMatch(r -> "Hoàn thành".equalsIgnoreCase(r.getStatus()));
-
-                        if (allDone) {
-                                appointment.setStatus("Đã có kết quả CLS");
-                                appointmentRepository.save(appointment);
-                        }
-                }
-
-                // "Chưa làm" → không đổi trạng thái
                 return saved;
         }
 
@@ -201,7 +182,7 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                         var latest = latestOpt.get();
                                         String status = latest.getStatus();
 
-                                        if ("Đã kết luận".equalsIgnoreCase(status)
+                                        if ("Chờ kê đơn".equalsIgnoreCase(status)
                                                         || "Đã kê đơn".equalsIgnoreCase(status)) {
 
                                                 return PatientWithResultResponse.builder()

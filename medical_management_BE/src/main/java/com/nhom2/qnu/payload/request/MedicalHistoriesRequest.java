@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MedicalHistoriesRequest {
+    private Boolean needPrescription;
 
     // Các trường từ form khám lâm sàng
     private String symptom; // Triệu chứng lâm sàng

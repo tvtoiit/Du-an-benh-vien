@@ -63,14 +63,35 @@ const KeDonForm = ({ patient, appointmentId, onBack }) => {
             const patientId = patient?.patientId;
             const apptId = appointmentId;
 
-            if (!patientId || !apptId) {
-                toast.error("Thiếu dữ liệu bệnh nhân hoặc lịch khám!");
+            if (prescriptions.some((p) => !p.medicineId)) {
+                toast.error("Vui lòng chọn thuốc cho từng dòng!");
                 return;
             }
 
-            // Validate thuốc
-            if (prescriptions.some((p) => !p.medicineId)) {
-                toast.error("Vui lòng chọn thuốc cho từng dòng!");
+            if (prescriptions.some((p) => !p.dosage?.trim())) {
+                toast.error("Vui lòng nhập liều dùng!");
+                return;
+            }
+
+            if (
+                prescriptions.some(
+                    (p) =>
+                        !p.quantity ||
+                        Number(p.quantity) <= 0
+                )
+            ) {
+                toast.error("Số lượng thuốc phải lớn hơn 0");
+                return;
+            }
+
+            if (
+                prescriptions.some(
+                    (p) =>
+                        !p.duration ||
+                        Number(p.duration) <= 0
+                )
+            ) {
+                toast.error("Số ngày sử dụng phải lớn hơn 0");
                 return;
             }
 
@@ -133,7 +154,7 @@ const KeDonForm = ({ patient, appointmentId, onBack }) => {
                             >
                                 {medicines.map((m) => (
                                     <MenuItem key={m.medicineId} value={m.medicineId}>
-                                        {m.name} — tồn: {m.quantity}
+                                        {m.name} ({m.unit})
                                     </MenuItem>
                                 ))}
                             </TextField>

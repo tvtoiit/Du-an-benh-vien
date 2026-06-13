@@ -7,6 +7,8 @@ import {
     Grid,
     TextField,
     Divider,
+    Checkbox,
+    FormControlLabel
 } from "@mui/material";
 import serviceResultService from "../../../services/serviceResultService";
 import medicalHistoryService from "../../../services/medicalHistoryService";
@@ -19,6 +21,7 @@ const ConclusionForm = ({ patient, onBack }) => {
         secondaryDiagnosis: "",
         note: "",
     });
+    const [needPrescription, setNeedPrescription] = useState(false);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -50,12 +53,17 @@ const ConclusionForm = ({ patient, onBack }) => {
             const payload = {
                 patientId: patient.patientId,
                 doctorId: doctorId,
+
                 diagnosis: formData.diagnosis,
                 secondaryDiagnosis: formData.secondaryDiagnosis,
                 note: formData.note,
+
                 testResults: formData.diagnosis,
+
                 admissionDate: new Date(),
                 dischargeDate: new Date(),
+
+                needPrescription: needPrescription
             };
 
             await medicalHistoryService.createResult(payload);
@@ -142,6 +150,17 @@ const ConclusionForm = ({ patient, onBack }) => {
                 multiline
                 rows={3}
                 sx={{ mb: 3 }}
+            />
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={needPrescription}
+                        onChange={(e) =>
+                            setNeedPrescription(e.target.checked)
+                        }
+                    />
+                }
+                label="Có kê thuốc cho bệnh nhân"
             />
 
             <Box display="flex" justifyContent="flex-end" gap={2}>

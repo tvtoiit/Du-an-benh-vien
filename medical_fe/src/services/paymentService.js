@@ -7,7 +7,7 @@ const paymentService = {
 
     // Summary cho 1 bệnh nhân (PaymentSummaryResponse)
     getSummary(appointmentId) {
-        return api.get("/payment/summary", {
+        return api.get("/payment-details/summary", {
             params: {
                 appointmentId
             }

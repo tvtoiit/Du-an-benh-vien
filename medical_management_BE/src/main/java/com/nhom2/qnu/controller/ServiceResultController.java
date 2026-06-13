@@ -28,18 +28,14 @@ public class ServiceResultController {
                         @RequestParam(value = "doctorId", required = false) String doctorId,
                         @RequestParam("resultData") String resultData,
                         @RequestParam(value = "note", required = false) String note,
-                        @RequestParam("status") String status,
                         @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) throws Exception {
 
                 ServiceResultRequest request = new ServiceResultRequest();
                 request.setPatientId(patientId);
                 request.setServiceId(serviceId);
                 request.setDoctorId(doctorId);
-                // request.setAppointmentScheduleId(appointmentScheduleId);
-                // request.setMedicalHistoryId(medicalHistoryId);
                 request.setResultData(resultData);
                 request.setNote(note);
-                request.setStatus(status);
                 request.setImageFile(imageFile);
 
                 ServiceResult saved = serviceResultService.saveServiceResult(request);

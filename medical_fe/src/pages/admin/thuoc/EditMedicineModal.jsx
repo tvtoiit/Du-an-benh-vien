@@ -40,13 +40,6 @@ const EditMedicineModal = ({ medicine, onClose }) => {
                         onChange={handleChange}
                     />
                     <TextField
-                        label="Số lượng"
-                        name="quantity"
-                        fullWidth
-                        value={form.quantity}
-                        onChange={handleChange}
-                    />
-                    <TextField
                         label="Đơn vị"
                         name="unit"
                         fullWidth
@@ -54,11 +47,12 @@ const EditMedicineModal = ({ medicine, onClose }) => {
                         onChange={handleChange}
                     />
                     <TextField
-                        label="Giá"
-                        name="price"
-                        type="number"
+                        label="Mô tả thuốc"
+                        name="description"
+                        multiline
+                        rows={3}
                         fullWidth
-                        value={form.price}
+                        value={form.description || ""}
                         onChange={handleChange}
                     />
                 </Stack>
