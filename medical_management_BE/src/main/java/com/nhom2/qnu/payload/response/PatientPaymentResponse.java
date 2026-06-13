@@ -11,8 +11,14 @@ import java.util.Date;
 @NoArgsConstructor
 public class PatientPaymentResponse {
     private String patientId;
+
+    private String appointmentId;
+
     private String fullName;
+
     private String phoneNumber;
+
     private Date dateOfBirth;
+
     private String status;
 }

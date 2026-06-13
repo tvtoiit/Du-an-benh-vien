@@ -6,10 +6,13 @@ const paymentService = {
     getWaitingList: () => api.get("/payment-details/waiting"),
 
     // Summary cho 1 bệnh nhân (PaymentSummaryResponse)
-    getSummary: (patientId, prescriptionId) =>
-        api.get("/payment-details/summary", {
-            params: { patientId, prescriptionId },
-        }),
+    getSummary(appointmentId) {
+        return api.get("/payment/summary", {
+            params: {
+                appointmentId
+            }
+        });
+    },
 
     // Tạo bản ghi PaymentDetails (xác nhận thanh toán)
     createPaymentDetails: (data) => api.post("/payment-details", data),

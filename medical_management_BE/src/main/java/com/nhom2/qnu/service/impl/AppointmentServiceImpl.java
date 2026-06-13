@@ -33,7 +33,7 @@ import java.util.List;
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
-        private static final String STATUS_WAITING = "Chờ khám";
+        private static final String STATUS_WAITING = "Chờ thanh toán";
         private static final String STATUS_FAILED = "Bỏ qua";
         private static final String STATUS_SUCCESS = "Hoàn thành";
 

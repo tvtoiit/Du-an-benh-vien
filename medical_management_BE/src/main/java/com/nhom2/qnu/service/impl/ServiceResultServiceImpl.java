@@ -133,7 +133,13 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                         AppointmentSchedules latest = latestOpt.get();
 
                         // 3. Nếu lần khám mới nhất đã thanh toán → không hiển thị nữa
-                        if ("Đã thanh toán".equalsIgnoreCase(latest.getStatus())) {
+                        String status = latest.getStatus();
+
+                        boolean isValidStatus = "Chờ khám".equalsIgnoreCase(status)
+                                        || "Chờ kết luận".equalsIgnoreCase(status)
+                                        || "Kết quả CLS".equalsIgnoreCase(status);
+
+                        if (!isValidStatus) {
                                 continue;
                         }
 
@@ -155,30 +161,24 @@ public class ServiceResultServiceImpl implements ServiceResultService {
         }
 
         private String mapStatus(String status) {
-                if (status == null)
-                        return "Chờ khám";
+
+                if (status == null) {
+                        return "";
+                }
 
                 switch (status) {
+
+                        case "Kết quả CLS":
+                                return "Kết quả CLS";
+
                         case "Chờ khám":
                                 return "Chờ khám";
 
-                        case "Đang khám":
-                                return "Đang khám";
-
-                        case "Chỉ định CLS":
-                                return "Chờ thực hiện CLS";
-
-                        case "Đã có kết quả CLS":
-                                return "Kết quả CLS";
-
-                        case "Đã kết luận":
-                                return "Đã kết luận";
-
-                        case "Đã kê đơn":
-                                return "Đã kê đơn thuốc";
+                        case "Chờ kết luận":
+                                return "Chờ kết luận";
 
                         default:
-                                return "Chờ khám";
+                                return status;
                 }
         }
 

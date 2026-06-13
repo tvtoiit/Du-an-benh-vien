@@ -2,6 +2,7 @@ package com.nhom2.qnu.controller;
 
 import com.nhom2.qnu.model.PaymentDetails;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
+import com.nhom2.qnu.payload.response.PaymentSuccessResponse;
 import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
 import com.nhom2.qnu.service.PaymentDetailsService;
 
@@ -28,9 +29,9 @@ public class PaymentDetailsController {
     }
 
     @PostMapping
-    public ResponseEntity<PaymentDetails> create(
+    public ResponseEntity<PaymentSuccessResponse> create(
             @Valid @RequestBody PaymentDetailsRequest request) {
-        PaymentDetails created = paymentDetailsService.createPaymentDetails(request);
+        PaymentSuccessResponse created = paymentDetailsService.createPaymentDetails(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -44,9 +45,10 @@ public class PaymentDetailsController {
 
     @GetMapping("/summary")
     public ResponseEntity<PaymentSummaryResponse> getSummary(
-            @RequestParam String patientId,
-            @RequestParam(required = false) String prescriptionId) {
+            @RequestParam String appointmentId) {
+
         return ResponseEntity.ok(
-                paymentDetailsService.getPaymentSummary(patientId, prescriptionId));
+                paymentDetailsService.getPaymentSummary(
+                        appointmentId));
     }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -31,6 +32,10 @@ public class MedicalHistoriesRequest {
     // Liên kết bệnh nhân / bác sĩ
     private String patientId;
     private String doctorId;
+
+    // Để check được có lấy dịch vụ nào không, nếu có thì lưu vào đây để gắn vào kết
+    // quả khám
+    private List<String> serviceIds;
 
     // (OPTIONAL) Nếu sau này bạn muốn link trực tiếp với lịch khám
     // private String appointmentScheduleId;

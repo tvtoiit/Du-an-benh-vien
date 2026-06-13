@@ -7,6 +7,7 @@ import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.PrescriptionHistory;
 import com.nhom2.qnu.payload.request.PaymentDetailsRequest;
 import com.nhom2.qnu.payload.response.PatientPaymentResponse;
+import com.nhom2.qnu.payload.response.PaymentSuccessResponse;
 import com.nhom2.qnu.payload.response.PaymentSummaryResponse;
 import com.nhom2.qnu.repository.AppointmentRepository;
 import com.nhom2.qnu.repository.PaymentDetailsRepository;
@@ -49,7 +50,7 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
          * Tạo hóa đơn cho MỘT LẦN KHÁM (appointment)
          */
         @Override
-        public PaymentDetails createPaymentDetails(PaymentDetailsRequest req) {
+        public PaymentSuccessResponse createPaymentDetails(PaymentDetailsRequest req) {
 
                 // 1. Bệnh nhân
                 Patients patient = patientsRepository.findById(req.getPatientId())
@@ -62,11 +63,13 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                                 "Appointment not found"));
 
                 // 3. Check đã có hóa đơn chưa
-                boolean exists = paymentDetailsRepository
-                                .existsByAppointment_AppointmentScheduleId(appointment.getAppointmentScheduleId());
-                if (exists) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                        "Lần khám này đã được thanh toán");
+                String status = appointment.getStatus();
+                if (!"Chờ thanh toán".equalsIgnoreCase(status)
+                                && !"Chờ thanh toán CLS".equalsIgnoreCase(status)) {
+
+                        throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Lần khám không ở trạng thái thanh toán");
                 }
 
                 // 4. Đơn thuốc (nếu có)
@@ -74,14 +77,41 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                                 .findFirstByAppointment(appointment);
                 PrescriptionHistory prescription = prescriptionOpt.orElse(null);
 
-                // 5. Tính tiền
+                // 5. Tính phí khám bác sĩ
+                BigDecimal consultationFee = BigDecimal.ZERO;
 
+                Doctor doctor = appointment.getDoctor();
+
+                if (doctor != null && doctor.getConsultationFee() != null) {
+                        consultationFee = doctor.getConsultationFee();
+                }
+
+                // 6. Tính phí dịch vụ
                 BigDecimal serviceFee = sumServicesForAppointment(
                                 appointment.getAppointmentScheduleId());
 
-                BigDecimal total = serviceFee;
+                // 7. Tổng tiền
 
-                // 6. Tạo bill
+                BigDecimal total;
+
+                if ("Chờ thanh toán".equalsIgnoreCase(status)) {
+
+                        total = consultationFee;
+
+                        appointment.setStatus("Chờ khám");
+
+                } else if ("Chờ thanh toán CLS".equalsIgnoreCase(status)) {
+
+                        total = serviceFee;
+
+                        appointment.setStatus("Chờ CLS");
+
+                } else {
+
+                        throw new RuntimeException("Trạng thái thanh toán không hợp lệ");
+                }
+
+                // 8. Tạo bill
                 PaymentDetails bill = new PaymentDetails();
                 bill.setPatient(patient);
                 bill.setAppointment(appointment);
@@ -90,11 +120,13 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
 
                 PaymentDetails saved = paymentDetailsRepository.save(bill);
 
-                // 7. Update status lần khám
-                appointment.setStatus("Đã thanh toán");
                 appointmentRepository.save(appointment);
 
-                return saved;
+                return PaymentSuccessResponse.builder()
+                                .paymentDetailId(saved.getPaymentDetailId())
+                                .totalAmount(saved.getTotalAmount())
+                                .status("SUCCESS")
+                                .build();
         }
 
         /**
@@ -156,62 +188,45 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
         @Override
         public List<PaymentSummaryResponse> getWaitingPayments() {
 
-                // Tìm các lần khám "Hoàn thành"
-                List<AppointmentSchedules> finishedAppointments = appointmentRepository.findAllByStatus("Chờ khám");
+                List<AppointmentSchedules> waitingAppointments = appointmentRepository.findAll().stream()
+                                .filter(a -> "Chờ thanh toán".equalsIgnoreCase(a.getStatus())
+                                                || "Chờ thanh toán CLS".equalsIgnoreCase(a.getStatus()))
+                                .toList();
 
-                // Chỉ lấy những lần khám chưa có bill
-                List<AppointmentSchedules> waiting = finishedAppointments.stream()
-                                .filter(a -> !paymentDetailsRepository
-                                                .existsByAppointment_AppointmentScheduleId(
-                                                                a.getAppointmentScheduleId()))
-                                .collect(Collectors.toList());
-
-                return waiting.stream()
-                                .map(a -> {
-                                        String patientId = a.getPatients().getPatientId();
-                                        // summary theo bệnh nhân + lần khám
-                                        return getPaymentSummary(patientId, null);
-                                })
+                return waitingAppointments.stream()
+                                .map(a -> getPaymentSummary(
+                                                a.getAppointmentScheduleId()))
                                 .collect(Collectors.toList());
         }
 
         @Override
-        public PaymentSummaryResponse getPaymentSummary(String patientId, String prescriptionId) {
+        public PaymentSummaryResponse getPaymentSummary(String appointmentId) {
+                // 1. Lấy lần khám
+                AppointmentSchedules appointment = appointmentRepository
+                                .findById(appointmentId)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy lần khám"));
 
-                // 1️⃣ Lấy thông tin bệnh nhân
-                Patients patient = patientsRepository.findById(patientId)
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                "Patient not found"));
+                // 2. Lấy bệnh nhân từ lần khám
+                Patients patient = appointment.getPatients();
 
-                // 2️⃣ Lấy lần khám gần nhất
-                AppointmentSchedules latestAppointment = appointmentRepository
-                                .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(patientId)
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                "No appointment found for patient"));
-
-                Doctor doctor = latestAppointment.getDoctor();
+                // 3. Lấy bác sĩ
+                Doctor doctor = appointment.getDoctor();
 
                 String doctorName = "";
-
                 String roomName = "";
-
                 String roomGroupName = "";
 
                 if (doctor != null) {
 
                         if (doctor.getUser() != null) {
-
-                                doctorName = doctor.getUser()
-                                                .getFullName();
+                                doctorName = doctor.getUser().getFullName();
                         }
 
                         if (doctor.getRoom() != null) {
 
-                                roomName = doctor.getRoom()
-                                                .getRoomName();
+                                roomName = doctor.getRoom().getRoomName();
 
-                                if (doctor.getRoom()
-                                                .getRoomGroup() != null) {
+                                if (doctor.getRoom().getRoomGroup() != null) {
 
                                         roomGroupName = doctor.getRoom()
                                                         .getRoomGroup()
@@ -220,47 +235,61 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                         }
                 }
 
-                String appointmentId = latestAppointment.getAppointmentScheduleId();
+                // 4. Tính phí CLS
+                long serviceFee = sumServicesForAppointment(
+                                appointment.getAppointmentScheduleId())
+                                .longValue();
 
-                // 4️⃣ Tính tiền dịch vụ
-                long serviceFee = sumServicesForAppointment(appointmentId).longValue();
+                // 5. Tính phí khám
+                long consultationFee = 0L;
 
-                // 5️⃣ Xác định đơn thuốc
-                if (prescriptionId == null || prescriptionId.isBlank()) {
-                        prescriptionId = prescriptionHistoryRepository
-                                        .findFirstByAppointment(latestAppointment)
-                                        .map(PrescriptionHistory::getPrescriptionId)
-                                        .orElse(null);
+                if (doctor != null && doctor.getConsultationFee() != null) {
+
+                        consultationFee = doctor.getConsultationFee().longValue();
                 }
 
-                // 7️⃣ Tính tổng chi phí
-                long totalCost = serviceFee;
+                // 6. Xử lý theo trạng thái
+                String status = appointment.getStatus();
 
-                // 🔟 Xác định trạng thái hiển thị
-                String rawStatus = latestAppointment.getStatus();
-                String paymentStatus;
+                long totalCost = 0L;
 
-                if ("Chờ khám".equalsIgnoreCase(rawStatus)) {
-                        paymentStatus = "Chờ thanh toán";
+                if ("Chờ thanh toán".equalsIgnoreCase(status)) {
+
+                        // Chỉ thu phí khám
+                        serviceFee = 0L;
+                        totalCost = consultationFee;
+
+                } else if ("Chờ thanh toán CLS".equalsIgnoreCase(status)) {
+
+                        // Chỉ thu CLS
+                        consultationFee = 0L;
+                        totalCost = serviceFee;
+
                 } else {
-                        paymentStatus = rawStatus;
+
+                        totalCost = consultationFee + serviceFee;
                 }
 
-                // Trả về response đầy đủ
+                // 7. Trả response
                 return PaymentSummaryResponse.builder()
                                 .patientId(patient.getPatientId())
+                                .appointmentId(appointment.getAppointmentScheduleId())
+
                                 .fullName(patient.getUser().getFullName())
                                 .cccd(patient.getUser().getCcCongDan())
-                                .status(paymentStatus)
-                                .appointmentId(appointmentId)
 
+                                .status(status)
+
+                                .consultationFee(consultationFee)
                                 .serviceFee(serviceFee)
                                 .totalCost(totalCost)
 
                                 .doctorName(doctorName)
                                 .roomName(roomName)
                                 .roomGroupName(roomGroupName)
+
                                 .build();
+
         }
 
         @Override
@@ -269,39 +298,10 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
                 // Lấy danh sách bệnh nhân đủ điều kiện thanh toán
                 List<PatientPaymentResponse> rawList = paymentDetailsRepository.findPatientsReadyForPayment();
 
-                return rawList.stream().map(item -> {
-
-                        // lấy appointment gần nhất
-                        AppointmentSchedules latestAppt = appointmentRepository
-                                        .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(item.getPatientId())
-                                        .orElse(null);
-
-                        if (latestAppt == null)
-                                return null;
-
-                        // lấy prescription tương ứng lần khám
-                        String prescriptionId = prescriptionHistoryRepository
-                                        .findFirstByAppointment(latestAppt)
-                                        .map(PrescriptionHistory::getPrescriptionId)
-                                        .orElse(null);
-
-                        PaymentSummaryResponse summary = getPaymentSummary(item.getPatientId(), prescriptionId);
-
-                        // xử lý trạng thái hiển thị
-                        String rawStatus = latestAppt.getStatus();
-                        String paymentStatus;
-
-                        if ("Chờ khám".equalsIgnoreCase(rawStatus)) {
-                                paymentStatus = "Chờ thanh toán";
-                        } else {
-                                paymentStatus = rawStatus;
-                        }
-
-                        summary.setStatus(paymentStatus);
-
-                        return summary;
-
-                }).filter(x -> x != null).toList();
+                return rawList.stream()
+                                .map(item -> getPaymentSummary(
+                                                item.getAppointmentId()))
+                                .toList();
         }
 
         // ================== HÀM HỖ TRỢ ==================

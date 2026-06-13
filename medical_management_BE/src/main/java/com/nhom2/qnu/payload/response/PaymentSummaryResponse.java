@@ -26,9 +26,14 @@ public class PaymentSummaryResponse {
 
     private String status;
 
+    // Tính tiền bác sĩ khám
+    private Long consultationFee;
+
     // tiền dịch vụ khám / CLS
     private Long serviceFee;
 
     // tổng thanh toán
     private Long totalCost;
+
+    private String appointmentScheduleId;
 }

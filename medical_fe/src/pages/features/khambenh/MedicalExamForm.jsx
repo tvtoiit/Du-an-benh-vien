@@ -64,13 +64,6 @@ const MedicalExamForm = ({ appointment, onBack }) => {
             (id) => formData.servicesSelected[id]
         );
 
-        if (selectedServices.length === 0) {
-            const confirmNoServices = window.confirm(
-                "Chưa chọn dịch vụ cận lâm sàng nào. Bạn vẫn muốn lưu phiếu khám?"
-            );
-            if (!confirmNoServices) return;
-        }
-
         try {
             const doctorId = localStorage.getItem("doctorId");
 
@@ -86,18 +79,23 @@ const MedicalExamForm = ({ appointment, onBack }) => {
                 diagnosis: formData.diagnosis,
                 secondaryDiagnosis: formData.secondaryDiagnosis,
                 note: formData.note,
-                // có thể để backend tự set testResults, nên không cần truyền
-                // testResults: "",
 
                 patientId: patient.patientId,
                 doctorId: doctorId,
+
+                serviceIds: selectedServices
             };
+            // 2. Gán các dịch vụ cận lâm sàng cho bệnh nhân (API của bạn)
+            const hasServices = selectedServices.length > 0;
+
+            if (hasServices) {
+                await parentService.addServicesForPatient(
+                    patient.patientId,
+                    selectedServices
+                );
+            }
 
             await medicalHistoryService.create(historyPayload);
-
-            // 2. Gán các dịch vụ cận lâm sàng cho bệnh nhân (API của bạn)
-
-            await parentService.addServicesForPatient(patient.patientId, selectedServices);
             toast.success(`Đã lưu phiếu khám cho bệnh nhân: ${patient.fullName}`);
             onBack(true);
         } catch (error) {

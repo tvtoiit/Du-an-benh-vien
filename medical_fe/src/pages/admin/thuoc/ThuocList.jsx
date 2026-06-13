@@ -27,6 +27,10 @@ import { FaPlus } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import { toast } from "react-toastify";
+import InputAdornment from "@mui/material/InputAdornment";
+import Avatar from "@mui/material/Avatar";
+import SearchIcon from "@mui/icons-material/Search";
+import MedicationIcon from "@mui/icons-material/Medication";
 
 const MedicineList = () => {
     const [medicines, setMedicines] = useState([]);
@@ -99,105 +103,309 @@ const MedicineList = () => {
     };
 
     if (loading) return <CircularProgress sx={{ m: 4 }} />;
-
     return (
-        <Box sx={{ p: 4 }}>
+        <Box
+            sx={{
+                p: 4,
+                background: "#f5f7fb",
+                minHeight: "100vh"
+            }}
+        >
+            {/* HEADER */}
 
             <Paper
+                elevation={0}
+                sx={{
+                    p: 3,
+                    mb: 3,
+                    borderRadius: 3,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    background:
+                        "linear-gradient(135deg, #1976d2, #42a5f5)",
+                    color: "#fff"
+                }}
+            >
+                <Box>
+                    <Typography
+                        variant="h5"
+                        fontWeight="bold"
+                    >
+                        Quản lý thuốc
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                    >
+                        Danh sách thuốc trong kho
+                    </Typography>
+                </Box>
+
+                <Chip
+                    label={`${filteredMedicines.length} loại thuốc`}
+                    sx={{
+                        bgcolor: "#fff",
+                        color: "#1976d2",
+                        fontWeight: "bold"
+                    }}
+                />
+            </Paper>
+
+            {/* TOOLBAR */}
+
+            <Paper
+                elevation={0}
                 sx={{
                     p: 2,
                     mb: 3,
+                    borderRadius: 3,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     gap: 2
                 }}
             >
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                    Quản lý danh sách thuốc
-                </Typography>
+                <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Tìm kiếm theo tên thuốc..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(
+                            e.target.value
+                        )
+                    }
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        )
+                    }}
+                />
 
-                <Box sx={{ display: "flex", gap: 2 }}>
-                    <TextField
-                        size="small"
-                        label="Tìm theo tên thuốc"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleOpenModal}
-                        startIcon={<FaPlus />}
-                    >
-                        Thêm Thuốc Mới
-                    </Button>
-                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<FaPlus />}
+                    onClick={handleOpenModal}
+                    sx={{
+                        borderRadius: 2,
+                        minWidth: 180
+                    }}
+                >
+                    Thêm thuốc
+                </Button>
             </Paper>
 
-            <TableContainer component={Paper}>
+            {/* TABLE */}
+
+            <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                    borderRadius: 3
+                }}
+            >
                 <Table>
+
                     <TableHead>
-                        <TableRow sx={{ backgroundColor: "#e3f2fd" }}>
-                            {/* <TableCell>Mã thuốc</TableCell> */}
-                            <TableCell>Tên thuốc</TableCell>
-                            <TableCell>Số lượng</TableCell>
-                            <TableCell>Đơn vị</TableCell>
-                            <TableCell>Giá</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
+
+                        <TableRow
+                            sx={{
+                                backgroundColor:
+                                    "#f1f5f9"
+                            }}
+                        >
+                            <TableCell>
+                                <strong>
+                                    Thuốc
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Số lượng
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Đơn vị
+                                </strong>
+                            </TableCell>
+
+                            <TableCell>
+                                <strong>
+                                    Giá
+                                </strong>
+                            </TableCell>
+
+                            <TableCell
+                                align="center"
+                            >
+                                <strong>
+                                    Thao tác
+                                </strong>
+                            </TableCell>
                         </TableRow>
+
                     </TableHead>
 
                     <TableBody>
-                        {filteredMedicines.map((m) => (
-                            <TableRow key={m.medicineId} hover>
-                                {/* <TableCell>{m.medicineId}</TableCell> */}
-                                <TableCell>{m.name}</TableCell>
-                                <TableCell>{m.quantity}</TableCell>
-                                <TableCell>{m.unit}</TableCell>
-                                <TableCell>{m.price}</TableCell>
 
-                                <TableCell align="center">
-                                    <Stack direction="row" spacing={1} justifyContent="center">
-                                        <Tooltip title="Xem chi tiết">
-                                            <IconButton color="primary" onClick={() => handleView(m)}>
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                        </Tooltip>
+                        {filteredMedicines.map(
+                            (m) => (
 
-                                        <Tooltip title="Sửa thông tin">
-                                            <IconButton color="warning" onClick={() => handleEdit(m)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Xóa thuốc">
-                                            <IconButton color="error" onClick={() => handleDelete(m)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Stack>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {filteredMedicines.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} align="center">
-                                    Không tìm thấy thuốc
-                                </TableCell>
-                            </TableRow>
+                                <TableRow
+                                    key={
+                                        m.medicineId
+                                    }
+                                    hover
+                                >
+
+                                    <TableCell>
+
+                                        <Stack
+                                            direction="row"
+                                            spacing={2}
+                                            alignItems="center"
+                                        >
+
+                                            <Avatar
+                                                sx={{
+                                                    bgcolor:
+                                                        "#1976d2"
+                                                }}
+                                            >
+                                                <MedicationIcon />
+                                            </Avatar>
+
+                                            <Typography
+                                                fontWeight="bold"
+                                            >
+                                                {m.name}
+                                            </Typography>
+
+                                        </Stack>
+
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {m.quantity}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {m.unit}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {Number(
+                                            m.price || 0
+                                        ).toLocaleString()}
+                                        {" "}VNĐ
+                                    </TableCell>
+
+                                    <TableCell
+                                        align="center"
+                                    >
+                                        <Stack
+                                            direction="row"
+                                            spacing={1}
+                                            justifyContent="center"
+                                        >
+
+                                            <Tooltip title="Xem chi tiết">
+                                                <IconButton
+                                                    color="primary"
+                                                    onClick={() =>
+                                                        handleView(
+                                                            m
+                                                        )
+                                                    }
+                                                >
+                                                    <VisibilityIcon />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                            <Tooltip title="Sửa">
+                                                <IconButton
+                                                    color="warning"
+                                                    onClick={() =>
+                                                        handleEdit(
+                                                            m
+                                                        )
+                                                    }
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                            <Tooltip title="Xóa">
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            m
+                                                        )
+                                                    }
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                        </Stack>
+                                    </TableCell>
+
+                                </TableRow>
+                            )
                         )}
+
+                        {filteredMedicines.length ===
+                            0 && (
+
+                                <TableRow>
+
+                                    <TableCell
+                                        colSpan={5}
+                                        align="center"
+                                    >
+
+                                        <Typography
+                                            py={4}
+                                            color="text.secondary"
+                                        >
+                                            Không tìm thấy thuốc
+                                        </Typography>
+
+                                    </TableCell>
+
+                                </TableRow>
+
+                            )}
+
                     </TableBody>
+
                 </Table>
             </TableContainer>
 
-            {isModalOpen && <RegisterMedicineModal onClose={handleCloseModal} />}
+            {isModalOpen && (
+                <RegisterMedicineModal
+                    onClose={
+                        handleCloseModal
+                    }
+                />
+            )}
 
             {editingMedicine && (
                 <EditMedicineModal
-                    medicine={editingMedicine}
+                    medicine={
+                        editingMedicine
+                    }
                     onClose={() => {
-                        setEditingMedicine(null);
+                        setEditingMedicine(
+                            null
+                        );
                         loadMedicines();
                     }}
                 />
@@ -205,13 +413,14 @@ const MedicineList = () => {
 
             <DetailModal
                 open={detailOpen}
-                onClose={() => setDetailOpen(false)}
+                onClose={() =>
+                    setDetailOpen(false)
+                }
                 title="Thông tin thuốc"
                 data={detailData}
             />
         </Box>
     );
-};
-
+}
 
 export default MedicineList;

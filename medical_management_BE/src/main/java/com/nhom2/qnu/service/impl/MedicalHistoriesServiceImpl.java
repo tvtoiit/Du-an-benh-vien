@@ -70,7 +70,21 @@ public class MedicalHistoriesServiceImpl implements MedicalHistoriesService {
                 .orElse(null);
 
         if (latestAppointment != null) {
-            latestAppointment.setStatus("Đã kết luận");
+
+            boolean hasServices = request.getServiceIds() != null
+                    && !request.getServiceIds().isEmpty();
+
+            if (hasServices) {
+
+                // Có chỉ định CLS
+                latestAppointment.setStatus("Chờ thanh toán CLS");
+
+            } else {
+
+                // Không có CLS -> chuyển sang màn hình kết luận
+                latestAppointment.setStatus("Chờ kết luận");
+            }
+
             appointmentRepository.save(latestAppointment);
         }
 

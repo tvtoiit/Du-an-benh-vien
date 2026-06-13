@@ -27,17 +27,21 @@ public interface PaymentDetailsRepository extends JpaRepository<PaymentDetails, 
     boolean existsByPrescriptionHistory_PrescriptionId(String prescriptionId);
 
     @Query("""
-            SELECT new com.nhom2.qnu.payload.response.PatientPaymentResponse(
-            p.patientId,
-            u.fullName,
-            u.phoneNumber,
-            u.dateOfBirth,
-            a.status
-            )
-            FROM AppointmentSchedules a
-            JOIN a.patients p
-            JOIN p.user u
-            WHERE a.status = 'Chờ khám'
+                SELECT new com.nhom2.qnu.payload.response.PatientPaymentResponse(
+                    p.patientId,
+                    a.appointmentScheduleId,
+                    u.fullName,
+                    u.phoneNumber,
+                    u.dateOfBirth,
+                    a.status
+                )
+                FROM AppointmentSchedules a
+                JOIN a.patients p
+                JOIN p.user u
+                WHERE a.status IN (
+                    'Chờ thanh toán',
+                    'Chờ thanh toán CLS'
+                )
             """)
     List<PatientPaymentResponse> findPatientsReadyForPayment();
 

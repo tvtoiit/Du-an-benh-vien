@@ -67,5 +67,4 @@ public class UserAdminController {
   public ResponseEntity<?> getMyProfile() {
     return userAdminService.getMyProfile();
   }
-
 }
