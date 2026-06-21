@@ -13,6 +13,9 @@ public interface ServiceResultService {
 
     List<ServiceResultResponse> getCompletedResultsByPatient(String patientId);
 
+    List<ServiceResultResponse> getResultsByAppointment(
+            String appointmentId);
+
     List<PatientWithResultResponse> getPatientsWithCompletedResults();
 
     List<PatientWithResultResponse> getPatientsWithCompletedResultsKeDon();

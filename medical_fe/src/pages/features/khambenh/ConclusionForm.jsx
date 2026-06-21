@@ -26,7 +26,9 @@ const ConclusionForm = ({ patient, onBack }) => {
     useEffect(() => {
         const fetchResults = async () => {
             try {
-                const res = await serviceResultService.getByPatient(patient.patientId);
+                const res = await serviceResultService.getByAppointment(
+                    patient.appointmentScheduleId
+                );
                 const list = Array.isArray(res) ? res : res.data ?? [];
                 setResults(list);
             } catch (error) {
@@ -35,7 +37,7 @@ const ConclusionForm = ({ patient, onBack }) => {
             }
         };
         fetchResults();
-    }, [patient.patientId]);
+    }, [patient.appointmentId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -52,6 +54,7 @@ const ConclusionForm = ({ patient, onBack }) => {
 
             const payload = {
                 patientId: patient.patientId,
+                appointmentId: patient.appointmentScheduleId,
                 doctorId: doctorId,
 
                 diagnosis: formData.diagnosis,

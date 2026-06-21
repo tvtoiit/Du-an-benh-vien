@@ -8,23 +8,11 @@ import serviceResult from "../../../services/serviceResult";
 import { toast } from "react-toastify";
 
 const CanLamSangForm = ({ patient, onBack }) => {
-    const [selectedTest, setSelectedTest] = useState("");
     const [formData, setFormData] = useState({
         result: "",
         note: "",
         file: null,
     });
-
-    // Chọn dịch vụ mặc định khi load form
-    // useEffect(() => {
-    //     if (patient?.services?.length > 0) {
-    //         setSelectedTest(patient.services[0].serviceId);
-    //     }
-    // }, [patient]);
-
-
-    // Lấy danh sách dịch vụ bác sĩ chỉ định
-    const labTests = patient.services;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -38,13 +26,16 @@ const CanLamSangForm = ({ patient, onBack }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const selectedService = labTests.find(s => s.serviceId === selectedTest);
+        const selectedService = {
+            serviceId: patient.serviceId,
+            serviceName: patient.serviceName
+        };
         if (!selectedService) return toast.warning("Chọn dịch vụ");
 
         const data = new FormData();
         data.append("patientId", patient.patientId);
         data.append("serviceId", selectedService.serviceId);
-        data.append("appointmentScheduleId", patient.appointmentScheduleId || "");
+        data.append("appointmentId", patient.appointmentId || "");
         data.append("medicalHistoryId", patient.medicalHistoryId || "");
         data.append("resultData", formData.result);
         data.append("note", formData.note);
@@ -85,7 +76,7 @@ const CanLamSangForm = ({ patient, onBack }) => {
                     <Grid item xs={3}>
                         <TextField
                             label="Ngày sinh"
-                            value={patient.services[0].dateOfBirth?.split("T")[0] || ""}
+                            value={patient.dateOfBirth?.split("T")[0] || ""}
                             fullWidth
                             disabled
                         />
@@ -99,24 +90,17 @@ const CanLamSangForm = ({ patient, onBack }) => {
                 </Typography>
 
                 <TextField
-                    select
-                    label="Chọn dịch vụ"
-                    value={selectedTest}
-                    onChange={(e) => setSelectedTest(e.target.value)}
+                    label="Dịch vụ thực hiện"
+                    value={patient.serviceName}
                     fullWidth
+                    disabled
                     sx={{ mb: 3 }}
-                >
-                    {labTests.map((s) => (
-                        <MenuItem key={s.serviceId} value={s.serviceId}>
-                            {s.serviceName}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                />
 
-                {selectedTest && (
+                {patient.serviceId && (
                     <>
                         <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                            Kết quả cho: {labTests.find(s => s.serviceId === selectedTest).serviceName}
+                            Kết quả cho: {patient.serviceName}
                         </Typography>
 
                         <TextField

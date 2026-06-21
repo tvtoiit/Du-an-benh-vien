@@ -60,8 +60,9 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
                 // 2) Lấy lịch khám mới nhất của bệnh nhân
                 AppointmentSchedules appointment = appointmentRepository
-                                .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(request.getPatientId())
-                                .orElseThrow(() -> new RuntimeException("No appointment found for patient"));
+                                .findById(request.getAppointmentId())
+                                .orElseThrow(
+                                                () -> new RuntimeException("Appointment not found"));
 
                 // 3) Tạo kết quả CLS
                 ServiceResult result = new ServiceResult();
@@ -87,8 +88,18 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 // 5) Lưu kết quả
                 ServiceResult saved = serviceResultRepository.save(result);
 
-                appointment.setStatus("Kết quả CLS");
-                appointmentRepository.save(appointment);
+                long totalServices = appointment.getAppointmentServices().size();
+
+                long totalResults = serviceResultRepository
+                                .countByAppointmentSchedule_AppointmentScheduleId(
+                                                appointment.getAppointmentScheduleId());
+
+                if (totalResults >= totalServices) {
+
+                        appointment.setStatus("Kết quả CLS");
+
+                        appointmentRepository.save(appointment);
+                }
 
                 return saved;
         }
@@ -130,6 +141,8 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                         // 5. Tạo response
                         result.add(PatientWithResultResponse.builder()
                                         .patientId(p.getPatientId())
+                                        .appointmentScheduleId(
+                                                        latest.getAppointmentScheduleId())
                                         .fullName(p.getUser().getFullName())
                                         .dateOfBirth(p.getUser().getDateOfBirth())
                                         .contactNumber(p.getUser().getPhoneNumber())
@@ -206,8 +219,10 @@ public class ServiceResultServiceImpl implements ServiceResultService {
 
         @Override
         public List<ServiceResultResponse> getCompletedResultsByPatient(String patientId) {
+                // List<ServiceResult> list = serviceResultRepository
+                // .findByPatient_PatientIdAndStatus(patientId, "Hoàn thành");
                 List<ServiceResult> list = serviceResultRepository
-                                .findByPatient_PatientIdAndStatus(patientId, "Hoàn thành");
+                                .findByPatient_PatientId(patientId);
 
                 return list.stream()
                                 .map(sr -> ServiceResultResponse.builder()
@@ -219,6 +234,26 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                                                 .doctorName(sr.getDoctor() != null
                                                                 ? sr.getDoctor().getUser().getFullName()
                                                                 : null)
+                                                .createdAt(sr.getCreatedAt())
+                                                .build())
+                                .toList();
+        }
+
+        @Override
+        public List<ServiceResultResponse> getResultsByAppointment(
+                        String appointmentId) {
+
+                List<ServiceResult> list = serviceResultRepository
+                                .findByAppointmentSchedule_AppointmentScheduleId(
+                                                appointmentId);
+
+                return list.stream()
+                                .map(sr -> ServiceResultResponse.builder()
+                                                .resultId(sr.getResultId())
+                                                .serviceName(sr.getService().getServiceName())
+                                                .resultData(sr.getResultData())
+                                                .note(sr.getNote())
+                                                .imageUrl(sr.getImageUrl())
                                                 .createdAt(sr.getCreatedAt())
                                                 .build())
                                 .toList();

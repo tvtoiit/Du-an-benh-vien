@@ -32,6 +32,7 @@ public class MedicalHistoriesRequest {
 
     // Liên kết bệnh nhân / bác sĩ
     private String patientId;
+    private String appointmentId; // Để link trực tiếp với lịch khám
     private String doctorId;
 
     // Để check được có lấy dịch vụ nào không, nếu có thì lưu vào đây để gắn vào kết

@@ -263,7 +263,7 @@ const DsCanLamSangList = () => {
 
                             <TableCell>
                                 <strong>
-                                    Dịch vụ chỉ định
+                                    Dịch vụ
                                 </strong>
                             </TableCell>
 
@@ -285,9 +285,7 @@ const DsCanLamSangList = () => {
                             (p) => (
 
                                 <TableRow
-                                    key={
-                                        p.patientId
-                                    }
+                                    key={`${p.patientId}-${p.serviceId}`}
                                     hover
                                 >
 
@@ -346,39 +344,9 @@ const DsCanLamSangList = () => {
                                             ?.split("T")[0] ||
                                             "--"}
                                     </TableCell>
-
                                     <TableCell>
-
-                                        <Box
-                                            display="flex"
-                                            flexWrap="wrap"
-                                            gap={1}
-                                        >
-
-                                            {p.services?.map(
-                                                (
-                                                    s
-                                                ) => (
-
-                                                    <Chip
-                                                        key={
-                                                            s.serviceId
-                                                        }
-                                                        label={
-                                                            s.serviceName
-                                                        }
-                                                        color="info"
-                                                        size="small"
-                                                        variant="outlined"
-                                                    />
-
-                                                )
-                                            )}
-
-                                        </Box>
-
+                                        {p.serviceName}
                                     </TableCell>
-
                                     <TableCell
                                         align="center"
                                     >

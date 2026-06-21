@@ -178,22 +178,27 @@ public class MedicalHistoriesServiceImpl implements MedicalHistoriesService {
         record.getDoctors().add(doctor);
 
         eHealthRecordsRepository.save(record);
+        // ---------- 4. Cập nhật trạng thái lịch khám ----------
+        AppointmentSchedules appointment = appointmentRepository.findById(
+                request.getAppointmentId())
+                .orElseThrow(() -> new DataNotFoundException("Lịch khám không tồn tại"));
 
-        // ---------- 4. Gán các dịch vụ đang thực hiện vào hồ sơ khám ----------
-        List<ServiceResult> pendingServices = serviceResultRepository.findByPatient_PatientIdAndStatus(
-                patient.getPatientId(), "Đang thực hiện");
+        // ---------- 5. Gán các dịch vụ đang thực hiện vào hồ sơ khám ----------
+        List<ServiceResult> serviceResults = serviceResultRepository
+                .findByAppointmentSchedule_AppointmentScheduleId(
+                        appointment.getAppointmentScheduleId());
 
-        for (ServiceResult sr : pendingServices) {
+        for (ServiceResult sr : serviceResults) {
+
+            if (sr.getMedicalHistory() != null) {
+                continue;
+            }
+
             sr.setMedicalHistory(savedHistory);
             sr.setDoctor(doctor);
-            sr.setStatus("Đã kết luận");
+
             serviceResultRepository.save(sr);
         }
-
-        // ---------- 5. Cập nhật trạng thái lịch khám ----------
-        AppointmentSchedules appointment = appointmentRepository
-                .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(patient.getPatientId())
-                .orElse(null);
 
         if (appointment != null) {
 

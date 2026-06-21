@@ -3,6 +3,7 @@ package com.nhom2.qnu.service.impl;
 import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.model.AppointmentSchedules;
+import com.nhom2.qnu.model.AppointmentServiceItem;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.Role;
 import com.nhom2.qnu.model.User;
@@ -195,35 +196,64 @@ public class PatientsServiceImpl implements PatientsService {
   @Override
   public List<PatientServiceResponse> getAllPatientsWithServices() {
 
-    // chỉ lấy các lịch đang "Chờ CLS"
     List<AppointmentSchedules> appointments = appointmentRepository.findAllByStatus("Chờ CLS");
 
-    return appointments.stream()
-        .map(app -> {
+    List<PatientServiceResponse> result = new ArrayList<>();
 
-          List<PatientServiceResponse.ServiceResponse> serviceResponses = app.getAppointmentServices().stream()
-              .map(as -> PatientServiceResponse.ServiceResponse.builder()
-                  .patientId(app.getPatients().getPatientId())
-                  .fullName(app.getPatients().getUser().getFullName())
-                  .serviceId(as.getService().getServiceId())
-                  .serviceName(as.getService().getServiceName())
-                  .build())
-              .collect(Collectors.toList());
+    for (AppointmentSchedules app : appointments) {
 
-          return PatientServiceResponse.builder()
-              .patientId(app.getPatients().getPatientId())
-              .appointmentId(app.getAppointmentScheduleId())
-              .fullName(app.getPatients().getUser().getFullName())
-              .gender(app.getPatients().getUser().getGender())
-              .dateOfBirth(app.getPatients().getUser().getDateOfBirth())
-              .cccd(app.getPatients().getUser().getCcCongDan())
-              .phoneNumber(app.getPatients().getUser().getPhoneNumber())
-              .services(serviceResponses)
-              .build();
+      for (AppointmentServiceItem item : app.getAppointmentServices()) {
 
-        })
-        .collect(Collectors.toList());
+        boolean done = serviceResultRepository
+            .existsByAppointmentSchedule_AppointmentScheduleIdAndService_ServiceId(
+                app.getAppointmentScheduleId(),
+                item.getService().getServiceId());
 
+        if (done) {
+          continue;
+        }
+
+        result.add(
+            PatientServiceResponse.builder()
+                .appointmentId(
+                    app.getAppointmentScheduleId())
+
+                .patientId(
+                    app.getPatients().getPatientId())
+
+                .fullName(
+                    app.getPatients()
+                        .getUser()
+                        .getFullName())
+
+                .cccd(
+                    app.getPatients()
+                        .getUser()
+                        .getCcCongDan())
+
+                .phoneNumber(
+                    app.getPatients()
+                        .getUser()
+                        .getPhoneNumber())
+
+                .dateOfBirth(
+                    app.getPatients()
+                        .getUser()
+                        .getDateOfBirth())
+
+                .serviceId(
+                    item.getService()
+                        .getServiceId())
+
+                .serviceName(
+                    item.getService()
+                        .getServiceName())
+
+                .build());
+      }
+    }
+
+    return result;
   }
 
   @Override

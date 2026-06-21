@@ -66,4 +66,5 @@ public interface AppointmentRepository extends JpaRepository<AppointmentSchedule
                         WHERE a.status = 'Đã thanh toán'
                         """)
         List<Patients> findPatientsWithPaidStatus();
+
 }

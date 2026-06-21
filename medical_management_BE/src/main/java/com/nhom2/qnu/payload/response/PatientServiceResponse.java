@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,31 +23,7 @@ public class PatientServiceResponse {
     private String cccd;
     private String phoneNumber;
 
-    private List<ServiceResponse> services;
+    private String serviceId;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class ServiceResponse {
-        private String patientId;
-
-        private String fullName;
-
-        private String contactNumber;
-
-        private String email;
-
-        private Date dateOfBirth;
-
-        private String gender;
-
-        private String address;
-
-        private String otherInfo;
-
-        private String serviceId;
-
-        private String serviceName;
-    }
+    private String serviceName;
 }

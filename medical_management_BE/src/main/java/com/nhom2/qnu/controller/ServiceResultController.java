@@ -27,6 +27,7 @@ public class ServiceResultController {
                         @RequestParam("serviceId") String serviceId,
                         @RequestParam(value = "doctorId", required = false) String doctorId,
                         @RequestParam("resultData") String resultData,
+                        @RequestParam("appointmentId") String appointmentId,
                         @RequestParam(value = "note", required = false) String note,
                         @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) throws Exception {
 
@@ -35,6 +36,7 @@ public class ServiceResultController {
                 request.setServiceId(serviceId);
                 request.setDoctorId(doctorId);
                 request.setResultData(resultData);
+                request.setAppointmentId(appointmentId);
                 request.setNote(note);
                 request.setImageFile(imageFile);
 
@@ -63,5 +65,13 @@ public class ServiceResultController {
                         @PathVariable String patientId) {
                 return ResponseEntity.ok(
                                 serviceResultService.getCompletedResultsByPatient(patientId));
+        }
+
+        @GetMapping("/appointment/{appointmentId}")
+        public ResponseEntity<List<ServiceResultResponse>> getResultsByAppointment(
+                        @PathVariable String appointmentId) {
+
+                return ResponseEntity.ok(
+                                serviceResultService.getResultsByAppointment(appointmentId));
         }
 }

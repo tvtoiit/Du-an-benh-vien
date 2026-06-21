@@ -24,7 +24,10 @@ public interface ServiceResultRepository extends JpaRepository<ServiceResult, St
   // -----------------------------------------
   // 2) Lấy kết quả theo bệnh nhân & trạng thái
   // -----------------------------------------
-  List<ServiceResult> findByPatient_PatientIdAndStatus(String patientId, String status);
+  // List<ServiceResult> findByPatient_PatientIdAndStatus(String patientId, String
+  // status);
+  List<ServiceResult> findByPatient_PatientId(
+      String patientId);
 
   // -----------------------------------------
   // 3) Lấy danh sách bệnh nhân có kết quả theo trạng thái
@@ -58,5 +61,17 @@ public interface ServiceResultRepository extends JpaRepository<ServiceResult, St
 
   boolean existsByAppointmentSchedule_AppointmentScheduleIdAndService_ServiceIdAndStatus(
       String appointmentId, String serviceId, String status);
+
+  // 7) Đếm số lượng kết quả CLS theo lịch khám (phục vụ cập nhật trạng thái
+  // Appointment)
+  long countByAppointmentSchedule_AppointmentScheduleId(
+      String appointmentId);
+
+  boolean existsByAppointmentSchedule_AppointmentScheduleIdAndService_ServiceId(
+      String appointmentId,
+      String serviceId);
+
+  List<ServiceResult> findByAppointmentSchedule_AppointmentScheduleId(
+      String appointmentScheduleId);
 
 }

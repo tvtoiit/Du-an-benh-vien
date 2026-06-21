@@ -10,7 +10,7 @@ public class ServiceResultRequest {
     private String patientId;
     private String serviceId;
     private String doctorId;
-    private String appointmentScheduleId;
+    private String appointmentId;
     private String medicalHistoryId;
     private String resultData;
     private String note;
