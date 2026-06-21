@@ -1,5 +1,6 @@
 package com.nhom2.qnu.service.impl;
 
+import com.nhom2.qnu.enums.ServiceType;
 import com.nhom2.qnu.model.AppointmentSchedules;
 import com.nhom2.qnu.model.Patients;
 import com.nhom2.qnu.model.ServiceResult;
@@ -88,13 +89,17 @@ public class ServiceResultServiceImpl implements ServiceResultService {
                 // 5) Lưu kết quả
                 ServiceResult saved = serviceResultRepository.save(result);
 
-                long totalServices = appointment.getAppointmentServices().size();
+                long totalClinicalServices = appointment.getAppointmentServices()
+                                .stream()
+                                .filter(item -> item.getService().getServiceType() == ServiceType.CLINICAL)
+                                .count();
 
                 long totalResults = serviceResultRepository
                                 .countByAppointmentSchedule_AppointmentScheduleId(
                                                 appointment.getAppointmentScheduleId());
 
-                if (totalResults >= totalServices) {
+                if (totalClinicalServices > 0
+                                && totalResults >= totalClinicalServices) {
 
                         appointment.setStatus("Kết quả CLS");
 

@@ -1,5 +1,6 @@
 package com.nhom2.qnu.service.impl;
 
+import com.nhom2.qnu.enums.ServiceType;
 import com.nhom2.qnu.exception.AccessDeniedException;
 import com.nhom2.qnu.exception.DataNotFoundException;
 import com.nhom2.qnu.model.AppointmentSchedules;
@@ -204,6 +205,11 @@ public class PatientsServiceImpl implements PatientsService {
 
       for (AppointmentServiceItem item : app.getAppointmentServices()) {
 
+        // Chỉ lấy dịch vụ CLS
+        if (item.getService().getServiceType() != ServiceType.CLINICAL) {
+          continue;
+        }
+
         boolean done = serviceResultRepository
             .existsByAppointmentSchedule_AppointmentScheduleIdAndService_ServiceId(
                 app.getAppointmentScheduleId(),
@@ -215,40 +221,14 @@ public class PatientsServiceImpl implements PatientsService {
 
         result.add(
             PatientServiceResponse.builder()
-                .appointmentId(
-                    app.getAppointmentScheduleId())
-
-                .patientId(
-                    app.getPatients().getPatientId())
-
-                .fullName(
-                    app.getPatients()
-                        .getUser()
-                        .getFullName())
-
-                .cccd(
-                    app.getPatients()
-                        .getUser()
-                        .getCcCongDan())
-
-                .phoneNumber(
-                    app.getPatients()
-                        .getUser()
-                        .getPhoneNumber())
-
-                .dateOfBirth(
-                    app.getPatients()
-                        .getUser()
-                        .getDateOfBirth())
-
-                .serviceId(
-                    item.getService()
-                        .getServiceId())
-
-                .serviceName(
-                    item.getService()
-                        .getServiceName())
-
+                .appointmentId(app.getAppointmentScheduleId())
+                .patientId(app.getPatients().getPatientId())
+                .fullName(app.getPatients().getUser().getFullName())
+                .cccd(app.getPatients().getUser().getCcCongDan())
+                .phoneNumber(app.getPatients().getUser().getPhoneNumber())
+                .dateOfBirth(app.getPatients().getUser().getDateOfBirth())
+                .serviceId(item.getService().getServiceId())
+                .serviceName(item.getService().getServiceName())
                 .build());
       }
     }
