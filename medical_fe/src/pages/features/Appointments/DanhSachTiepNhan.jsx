@@ -133,8 +133,7 @@ const DanhSachTiepNhan = ({
                             variant="body2"
                         >
 
-                            Quản lý bệnh nhân
-                            chờ khám
+                            Quản lý tiếp nhận và tái khám bệnh nhân
 
                         </Typography>
 
@@ -230,9 +229,6 @@ const DanhSachTiepNhan = ({
 
                             <TableCell>
                                 <strong>Lần khám gần nhất</strong>
-                            </TableCell>
-                            <TableCell>
-                                <strong>Trạng thái</strong>
                             </TableCell>
                             <TableCell align="center">
                                 <strong>Thao tác</strong>
@@ -373,22 +369,6 @@ const DanhSachTiepNhan = ({
 
                                         </TableCell>
 
-                                        <TableCell>
-
-                                            <Chip
-                                                label={p.status}
-                                                color={
-                                                    p.status === "Khám lại"
-                                                        ? "primary"
-                                                        : p.status === "Đang xử lý"
-                                                            ? "warning"
-                                                            : "success"
-                                                }
-                                                size="small"
-                                            />
-
-                                        </TableCell>
-
                                         {/* ACTION */}
                                         <TableCell
                                             align="center"
@@ -397,16 +377,21 @@ const DanhSachTiepNhan = ({
                                             <Button
                                                 variant="contained"
                                                 size="small"
-                                                disabled={
-                                                    p.status === "Đang xử lý"
+                                                disabled={p.status === "Đang xử lý"}
+                                                color={
+                                                    p.status === "Khám lại"
+                                                        ? "primary"
+                                                        : "success"
                                                 }
-                                                onClick={() =>
-                                                    onSelectPatient(p)
-                                                }
+                                                onClick={() => onSelectPatient(p)}
                                             >
-                                                {p.status === "Khám lại"
-                                                    ? "Khám lại"
-                                                    : "Tiếp nhận"}
+                                                {
+                                                    p.status === "Khám lại"
+                                                        ? "Khám lại"
+                                                        : p.status === "Đang xử lý"
+                                                            ? "Đang xử lý"
+                                                            : "Tiếp nhận"
+                                                }
                                             </Button>
 
                                         </TableCell>

@@ -17,7 +17,7 @@ public class RoleServicesImp implements RoleServices {
 
     @Override
     public List<RoleResponse> getRoles() {
-        List<Role> roles = roleRepositories.findAll();
+        List<Role> roles = roleRepositories.findAllForUserManagement();
         List<RoleResponse> listRoleResponses = new ArrayList<>();
 
         for (Role role : roles) {
