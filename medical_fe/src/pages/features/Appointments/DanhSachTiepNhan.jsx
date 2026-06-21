@@ -24,44 +24,6 @@ import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 
 import patientService from "../../../services/parentService";
 
-// ==========================================
-// STATUS CHIP
-// ==========================================
-const StatusBadge = ({ status }) => {
-
-    const config = {
-
-        "Khám lại": {
-            color: "primary",
-            label: "Khám lại"
-        },
-
-        "Chờ khám": {
-            color: "warning",
-            label: "Chờ khám"
-        },
-
-        "Đang khám": {
-            color: "success",
-            label: "Đang khám"
-        }
-    };
-
-    const item =
-        config[status] || {
-            color: "default",
-            label: status
-        };
-
-    return (
-        <Chip
-            label={item.label}
-            color={item.color}
-            size="small"
-        />
-    );
-};
-
 const DanhSachTiepNhan = ({
     onSelectPatient
 }) => {
@@ -267,9 +229,11 @@ const DanhSachTiepNhan = ({
                             </TableCell>
 
                             <TableCell>
+                                <strong>Lần khám gần nhất</strong>
+                            </TableCell>
+                            <TableCell>
                                 <strong>Trạng thái</strong>
                             </TableCell>
-
                             <TableCell align="center">
                                 <strong>Thao tác</strong>
                             </TableCell>
@@ -401,9 +365,26 @@ const DanhSachTiepNhan = ({
 
                                         {/* STATUS */}
                                         <TableCell>
+                                            {p.lastVisitDate
+                                                ? new Date(
+                                                    p.lastVisitDate
+                                                ).toLocaleDateString("vi-VN")
+                                                : "Chưa khám"}
 
-                                            <StatusBadge
-                                                status={p.status}
+                                        </TableCell>
+
+                                        <TableCell>
+
+                                            <Chip
+                                                label={p.status}
+                                                color={
+                                                    p.status === "Khám lại"
+                                                        ? "primary"
+                                                        : p.status === "Đang xử lý"
+                                                            ? "warning"
+                                                            : "success"
+                                                }
+                                                size="small"
                                             />
 
                                         </TableCell>
@@ -416,19 +397,16 @@ const DanhSachTiepNhan = ({
                                             <Button
                                                 variant="contained"
                                                 size="small"
+                                                disabled={
+                                                    p.status === "Đang xử lý"
+                                                }
                                                 onClick={() =>
                                                     onSelectPatient(p)
                                                 }
-                                                sx={{
-                                                    borderRadius: 2,
-                                                    textTransform:
-                                                        "none",
-                                                    px: 2
-                                                }}
                                             >
-
-                                                Tiếp nhận
-
+                                                {p.status === "Khám lại"
+                                                    ? "Khám lại"
+                                                    : "Tiếp nhận"}
                                             </Button>
 
                                         </TableCell>

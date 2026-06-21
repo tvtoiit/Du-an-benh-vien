@@ -132,11 +132,20 @@ const TiepNhan = ({
                 const list =
                     res.data ?? res ?? [];
 
+                const unfinishedStatuses = [
+                    "Chờ thanh toán",
+                    "Đã thanh toán",
+                    "Chờ khám",
+                    "Chờ thanh toán CLS",
+                    "Chờ CLS",
+                    "Chờ kết luận"
+                ];
+
                 const active = list
-                    .filter(
-                        (a) =>
-                            a.status !==
-                            "Đã thanh toán"
+                    .filter(a =>
+                        unfinishedStatuses.includes(
+                            a.status
+                        )
                     )
                     .sort(
                         (a, b) =>

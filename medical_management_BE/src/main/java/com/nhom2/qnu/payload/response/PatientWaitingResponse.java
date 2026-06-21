@@ -9,6 +9,8 @@ import lombok.Data;
 public class PatientWaitingResponse {
     private String patientId;
     private String fullName;
+    private LocalDateTime lastVisitDate;
+    private String lastAppointmentStatus;
     private String cccd;
     private String phone;
     private LocalDateTime appointmentTime;

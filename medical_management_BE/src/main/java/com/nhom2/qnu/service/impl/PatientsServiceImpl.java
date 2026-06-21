@@ -229,7 +229,8 @@ public class PatientsServiceImpl implements PatientsService {
   @Override
   public List<PatientWaitingResponse> getWaitingPatients() {
 
-    List<Patients> list = patientsRepository.findActivePatients();
+    // List<Patients> list = patientsRepository.findActivePatients();
+    List<Patients> list = patientsRepository.findAll();
     List<PatientWaitingResponse> responses = new ArrayList<>();
 
     for (Patients p : list) {
@@ -238,35 +239,44 @@ public class PatientsServiceImpl implements PatientsService {
           .findTopByPatients_PatientIdOrderByAppointmentDatetimeDesc(p.getPatientId())
           .orElse(null);
 
+      System.out.println(
+          p.getUser().getFullName()
+              + " -> "
+              + (latest != null
+                  ? latest.getStatus()
+                  : "NULL"));
+
       String status;
       LocalDateTime appointmentTime = null;
       String room = null;
       String appointmentId = null;
 
-      // Chưa có lịch khám nào → Chờ tiếp nhận
       if (latest == null) {
+
         status = "Chờ tiếp nhận";
-      }
-      // Đã thanh toán → phải hiển thị để khám lại
-      else if ("Đã thanh toán".equalsIgnoreCase(latest.getStatus())) {
+
+      } else if ("Đã kê đơn".equalsIgnoreCase(latest.getStatus())
+          || "Hoàn thành".equalsIgnoreCase(latest.getStatus())) {
+
         status = "Khám lại";
-      }
-      // Chờ khám → hiển thị
-      else if ("Chờ khám".equalsIgnoreCase(latest.getStatus())) {
-        status = "Chờ khám";
-        appointmentTime = latest.getAppointmentDatetime();
-        appointmentId = latest.getAppointmentScheduleId();
-        room = latest.getRoom();
-      }
-      // Các trạng thái khác → không hiển thị
-      else {
-        continue;
+
+      } else {
+
+        status = "Đang xử lý";
       }
 
       responses.add(
           PatientWaitingResponse.builder()
               .patientId(p.getPatientId())
               .fullName(p.getUser().getFullName())
+              .lastAppointmentStatus(
+                  latest != null
+                      ? latest.getStatus()
+                      : null)
+              .lastVisitDate(
+                  latest != null
+                      ? latest.getAppointmentDatetime()
+                      : null)
               .cccd(p.getUser().getCcCongDan())
               .note(p.getOtherInfo())
               .phone(p.getUser().getPhoneNumber())
