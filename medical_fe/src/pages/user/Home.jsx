@@ -56,7 +56,7 @@ export default function Home() {
       <div className="container">
         <section className="hero-section" id="gioithieu">
           <div className="hero-content">
-            <h1 className="hero-title">BỆNH VIỆN BÌNH ĐỊNH</h1>
+            <h1 className="hero-title">PHÒNG KHÁM ĐA KHOA HÀ NỘI</h1>
             <h2 className="hero-subtitle">KHÁM CHỮA BỆNH TOÀN DIỆN</h2>
           </div>
         </section>

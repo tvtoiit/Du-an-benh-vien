@@ -8,15 +8,15 @@ export default function Footer() {
             <div className="footer-content">
 
                 <div className="footer-section">
-                    <h3>Bệnh Viện Bình Định</h3>
+                    <h3>PHÒNG KHÁM ĐA KHOA HÀ NỘI</h3>
                     <p>Chăm sóc sức khỏe – Tận tâm – Chuyên nghiệp</p>
                 </div>
 
                 <div className="footer-section">
                     <h4>Liên Hệ</h4>
                     <p><FaPhoneAlt /> Hotline: 1900 0123</p>
-                    <p><FaEnvelope /> Email: contact@bvbinhdinh.vn</p>
-                    <p><FaMapMarkerAlt /> 01 Nguyễn Huệ, TP. Quy Nhơn, Bình Định</p>
+                    <p><FaEnvelope /> Email: phongkhamdakhoahanoi@gmail.com</p>
+                    <p><FaMapMarkerAlt /> 112 Tây Sơn, Đống Đa, Hà Nội</p>
                 </div>
 
                 <div className="footer-section">
@@ -29,7 +29,7 @@ export default function Footer() {
             </div>
 
             <div className="footer-bottom">
-                © 2025 Bệnh viện Bình Định. All rights reserved.
+                © 2026 Phòng khám đa khoa Hà Nội. All rights reserved.
             </div>
         </footer>
     );
