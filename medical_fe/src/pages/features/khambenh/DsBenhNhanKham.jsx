@@ -312,7 +312,7 @@ const DsBenhNhanCoKetQua = () => {
 
                             <TableCell>
                                 <strong>
-                                    Ngày khám
+                                    Ngày sinh
                                 </strong>
                             </TableCell>
 

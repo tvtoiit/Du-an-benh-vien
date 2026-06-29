@@ -31,7 +31,7 @@ const MedicalExamForm = ({ appointment, onBack }) => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const res = await serviceService.getAll();
+                const res = await serviceService.getAllClinicalServices();
                 const list = Array.isArray(res) ? res : res.data ?? [];
                 setServices(list);
             } catch (error) {

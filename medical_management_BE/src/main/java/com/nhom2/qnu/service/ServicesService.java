@@ -20,4 +20,6 @@ public interface ServicesService {
   ResponseEntity<?> getDoctorServices(
       String roomGroupId);
 
+  ResponseEntity<GetAllListServiceResponse> getClinicalServices();
+
 }

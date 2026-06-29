@@ -36,4 +36,6 @@ public interface ServicesRepository extends JpaRepository<Services, String> {
     List<Services> findByRoomGroup_RoomGroupIdAndServiceType(
             String roomGroupId,
             ServiceType serviceType);
+
+    List<Services> findByServiceType(ServiceType serviceType);
 }

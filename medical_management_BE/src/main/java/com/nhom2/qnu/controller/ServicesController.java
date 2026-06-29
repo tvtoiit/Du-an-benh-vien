@@ -27,6 +27,11 @@ public class ServicesController {
     return servicesService.getAll();
   }
 
+  @GetMapping("/clinical-services")
+  public ResponseEntity<GetAllListServiceResponse> getClinicalServices() {
+    return servicesService.getClinicalServices();
+  }
+
   @PostMapping("/create")
   public ResponseEntity<CreateServicesResponse> save(@RequestBody ServiceRequest serviceRequest) {
     return servicesService.save(serviceRequest);
